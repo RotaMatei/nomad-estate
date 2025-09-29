@@ -11,7 +11,7 @@ export default function ChangePasswordPage() {
     const router = useRouter();
 
     useEffect(() => {
-        const token = localStorage.getItem('refreshToken');
+        const token = localStorage.getItem('token');
         if (token) {
             const payload = JSON.parse(atob(token.split('.')[1]));
             if(payload) setUserId(payload.sub);
@@ -22,7 +22,7 @@ export default function ChangePasswordPage() {
         try {
             await api.patch("/auth/user/change-password", { userId, oldPassword, newPassword }, {
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem('refreshToken')}`,
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
             });
             localStorage.clear();
