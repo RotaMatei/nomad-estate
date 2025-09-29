@@ -3,17 +3,21 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { api } from "../../lib/api";
 
+
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const router = useRouter();
     
-    const handleLogin = async () => {
-        const payload = { email, password };
+    const handleUserLogin = async () => {
         try{
-            const res = await api.post('/auth/login', payload);
-            localStorage.setItem('token', res.data.accesToken);
+            const res = await api.post('/auth/user/login', { email, password });
+            localStorage.setItem('token', res.data.accessToken);
+            localStorage.setItem('refreshToken', res.data.refreshToken);
+            localStorage.setItem('jti', res.data.RefreshJTI);
+            const username = res.data.firstName + " " + res.data.lastName;
+            localStorage.setItem('user', username);
             router.push('/');
         } catch (err: any) {
             setError(err.response?.data?.message || 'Login failed');
@@ -35,7 +39,7 @@ export default function LoginPage() {
                 placeholder="Password"
                 type="password"
             />
-            <button onClick={handleLogin}>Login</button>
+            <button onClick={handleUserLogin}>Login</button>
             {error && <p style={{ color: 'red' }}>{error}</p>}
         </div>
     );

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { RoleEnum } from "../../enums";
 import { useRouter } from "next/navigation";
 import { api } from "../../lib/api";
+import { jwtDecode } from "jwt-decode";
 
 export default function RegisterPage() {
     const [email, setEmail] = useState('');
@@ -17,13 +18,15 @@ export default function RegisterPage() {
     const [error, setError] = useState('');
     const router = useRouter();
 
-    const handleRegister = async () => {
+    const handleUserRegister = async () => {
         const payload = { email, password, phoneNumber, firstName, lastName, role, countryId, cityId, stateId};
 
         try {
-
-            const res = await api.post('/auth/register', payload);
+            const res = await api.post('/auth/user/register', payload);
             localStorage.setItem('token', res.data.accessToken);
+            localStorage.setItem('refreshToken', res.data.refreshToken);
+            localStorage.setItem('jti', res.data.RefreshJTI);
+            localStorage.setItem('user', res.data.firstName + " " + res.data.lastName);
             router.push('/');
         } catch (err: any) {
             setError(err.response?.data?.message || 'Registration failed');
@@ -86,7 +89,7 @@ export default function RegisterPage() {
                 placeholder="City ID"
                 type="number"
             />
-            <button onClick={handleRegister}>Register</button>
+            <button onClick={handleUserRegister}>Register</button>
             {error && <p style={{ color: 'red' }}>{error}</p>}
         </div>
     );

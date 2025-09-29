@@ -2,13 +2,22 @@
 import Image from "next/image";
 import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const router = useRouter();
 
+  const [user, setUser] = useState('');
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if(storedUser) setUser(storedUser);
+  }, [])
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <h2>{user ?? ""}</h2>
         <Image
           className={styles.logo}
           src="/next.svg"
@@ -50,6 +59,8 @@ export default function Home() {
           </a>
           <button onClick={() => router.push('/login')} className={styles.secondary}> Login </button>
           <button onClick={() => router.push('/register')} className={styles.secondary}> Register </button>
+          <button onClick={() => router.push('/user/logOut')} className={styles.secondary}> Log Out </button>
+          <button onClick={() => router.push('/user/changePassword')} className={styles.secondary}> ChangePassword </button>
         </div>
       </main>
       <footer className={styles.footer}>
