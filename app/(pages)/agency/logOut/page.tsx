@@ -3,7 +3,7 @@ import  api  from "@/app/lib/api";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function UserLogOut() {
+export default function AgencyLogOut() {
     const [jti, setJti] = useState<string>();
     const [error, setError] = useState("");
     const router = useRouter();
@@ -19,7 +19,7 @@ export default function UserLogOut() {
 
     const handleLogOut = async () => {
         try {
-            await api.post("/auth/user/logout", {jti} , {
+            await api.post("/auth/agency/logout", {jti} , {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },

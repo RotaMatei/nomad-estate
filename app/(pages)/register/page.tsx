@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { RoleEnum } from "../../enums";
 import { useRouter } from "next/navigation";
-import { api } from "../../lib/api";
+import  api  from "../../lib/api";
 import { jwtDecode } from "jwt-decode";
 
 export default function RegisterPage() {

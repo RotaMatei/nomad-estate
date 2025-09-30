@@ -1,6 +1,29 @@
 import axios from "axios";
 
-export const api = axios.create({
+const api = axios.create({
     baseURL: 'http://localhost:4000',
     withCredentials: true,
 });
+
+api.interceptors.response.use(
+    response => response,
+    async error => {
+        if (error.response?.status === 401) {
+            try {
+                console.log("Refreshing Token...");
+                const {data} = await axios.post('http://localhost:4000/refresh', {
+                    refreshToken: localStorage.getItem('refreshToken')
+                }, {withCredentials: true});
+                localStorage.setItem('token', data.accessToken);
+                localStorage.setItem('refreshToken', data.refreshToken);
+                console.log(data.accessToken , data.refreshToken);
+                error.config.headers['Authorization'] = `Bearer ${data.accessToken}`;
+                return axios.request(error.config);
+            } catch (refreshError) {
+                return Promise.reject(refreshError);
+            }
+        }
+        return Promise.reject(error);
+    });
+
+export default api;

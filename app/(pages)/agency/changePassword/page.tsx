@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function ChangePasswordPage() {
-    const [userId, setUserId] = useState();
+    const [agencyId, setAgencyId] = useState();
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [error, setError] = useState('');
@@ -14,13 +14,13 @@ export default function ChangePasswordPage() {
         const token = localStorage.getItem('token');
         if (token) {
             const payload = JSON.parse(atob(token.split('.')[1]));
-            if(payload) setUserId(payload.sub);
+            if(payload) setAgencyId(payload.sub);
         }
     })
 
     const handlePasswordChange = async () => {
         try {
-            await api.patch("/auth/user/change-password", { userId, oldPassword, newPassword }, {
+            await api.patch("/auth/agency/change-password", { agencyId, oldPassword, newPassword }, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
