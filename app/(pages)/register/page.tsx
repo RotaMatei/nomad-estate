@@ -1,9 +1,10 @@
 'use client';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RoleEnum } from "../../enums";
 import { useRouter } from "next/navigation";
 import  api  from "../../lib/api";
 import { jwtDecode } from "jwt-decode";
+import { Autocomplete, TextField } from "@mui/material";
 
 export default function RegisterPage() {
     const [email, setEmail] = useState('');
@@ -16,10 +17,51 @@ export default function RegisterPage() {
     const [cityId, setCityId] = useState(1);
     const [stateId, setStateId] = useState(1);
     const [error, setError] = useState('');
+
+    const [countries, setCountries] = useState([]);
+    const [states, setStates] = useState([]);
+    const [cities, setCities] = useState([]);
+
+    type Country = { id: number; name: string; code: string; phonecode: string; currency: string; currencySymbol: string; timezones: string; emojiU: string; };
+
+    type State = { id: number; name: string; countryId: number; timezone: string; type?: string; };
+
+    type City = { id: number; name: string; stateId: number; countryId: number; };
+
+    const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
+    const [selectedState, setSelectedState] = useState<State | null>(null);
+    const [selectedCity, setSelectedCity] = useState<City | null>(null);
+
     const router = useRouter();
 
+    useEffect(() => {
+        api.get('/countries/get-all').then(response => setCountries(response.data));
+    }, []);
+
+    useEffect(() => {
+        if (selectedCountry) {
+            api.get(`/states/get-all`, { params: { countryId: selectedCountry.id } }).then(response => setStates(response.data));
+        }
+    }, [selectedCountry]);
+
+    useEffect(() => {
+        if (selectedState) {
+            api.get(`/cities/get-all-by-state`, { params: { stateId: selectedState.id } }).then(response => setCities(response.data));
+        }
+    }, [selectedState]);
+
     const handleUserRegister = async () => {
-        const payload = { email, password, phoneNumber, firstName, lastName, role, countryId, cityId, stateId};
+        const payload = { 
+            email, 
+            password, 
+            phoneNumber, 
+            firstName, 
+            lastName, 
+            role, 
+            countryId: selectedCountry?.id, 
+            cityId: selectedCity?.id, 
+            stateId: selectedState?.id
+        };
 
         try {
             const res = await api.post('/auth/user/register', payload);
@@ -71,23 +113,41 @@ export default function RegisterPage() {
                 <option value={RoleEnum.MODERATOR}>Moderator</option>
                 <option value={RoleEnum.ADMIN}>Admin</option>
             </select>
-            <input
-                value={countryId}
-                onChange={(e) => setCountryId(Number(e.target.value))}
-                placeholder="Country ID"
-                type="number"
+            <Autocomplete
+                options={countries}
+                getOptionLabel={(option) => option.name}
+                value={selectedCountry}
+                onChange={(e, value) => setSelectedCountry(value)}
+                renderInput={(params) =><TextField
+                    {...params}
+                    label="Country"
+                    variant="outlined"
+                    sx={{ backgroundColor: '#f0f4ff' }} // Light blue background
+                />}
             />
-            <input
-                value={stateId}
-                onChange={(e) => setStateId(Number(e.target.value))}
-                placeholder="State ID"
-                type="number"
+            <Autocomplete
+                options={states}
+                getOptionLabel={(option) => option.name}
+                value={selectedState}
+                onChange={(e, value) => setSelectedState(value)}
+                renderInput={(params) => <TextField 
+                    {...params} 
+                    label="State"
+                    variant="outlined"
+                    sx={{ backgroundColor: '#f0f4ff' }} 
+                    />}
             />
-            <input
-                value={cityId}
-                onChange={(e) => setCityId(Number(e.target.value))}
-                placeholder="City ID"
-                type="number"
+            <Autocomplete
+                options={cities}
+                getOptionLabel={(option) => option.name}
+                value={selectedCity}
+                onChange={(e, value) => setSelectedCity(value)}
+                renderInput={(params) => <TextField 
+                    {...params} 
+                    label="City" 
+                    variant="outlined"
+                    sx={{ backgroundColor: '#f0f4ff' }}
+                    />}
             />
             <button onClick={handleUserRegister}>Register</button>
             {error && <p style={{ color: 'red' }}>{error}</p>}
