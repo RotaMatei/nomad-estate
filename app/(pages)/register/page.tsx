@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { RoleEnum } from "../../enums";
 import { useRouter } from "next/navigation";
 import api from "../../lib/api";
@@ -83,8 +83,12 @@ export default function RegisterPage() {
       localStorage.setItem('jti', res.data.RefreshJTI);
       localStorage.setItem('user', res.data.firstName + " " + res.data.lastName);
       router.push('/');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+          setError(err.message);
+      } else {
+          setError('Registration failed');
+      }
     }
   };
 

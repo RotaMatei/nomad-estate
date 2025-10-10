@@ -26,8 +26,12 @@ export default function AgencyLogOut() {
             }); 
             localStorage.clear();
             router.push("/");
-        } catch (err: any) {
-            setError(err.response?.data?.message || "LogOut failed");
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError("LogOut failed");
+            }
         }
     }
 
