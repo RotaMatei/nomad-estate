@@ -10,9 +10,9 @@ export default function Phone() {
             sx={{
                 width: 290,
                 height: 580,
-                borderRadius: '36px',
+                borderRadius: '30px',
                 padding: 1,
-                backgroundColor: '#000',
+                backgroundColor: '#0C2239',
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',

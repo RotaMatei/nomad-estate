@@ -26,7 +26,7 @@ export default function HeroBackground({ children }: { children: React.ReactNode
     <section
       style={{
         position: 'relative',
-        height: '75vh',
+        height: '550px',
         width: '100%',
         overflow: 'hidden',
       }}
