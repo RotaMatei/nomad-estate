@@ -27,7 +27,7 @@ export default function HeroBackground({ children }: { children: React.ReactNode
       style={{
         position: 'relative',
         height: '620px',
-        width: '100%',
+        width: '100vw',
         overflow: 'hidden',
       }}
     >
@@ -38,7 +38,7 @@ export default function HeroBackground({ children }: { children: React.ReactNode
           top: 0,
           left: 0,
           zIndex: 0,
-          width: '100%',
+          width: '100vw',
           height: '100%',
         }}
       />
@@ -47,9 +47,9 @@ export default function HeroBackground({ children }: { children: React.ReactNode
           position: 'relative',
           zIndex: 1,
           height: '100%',
-          width: '100%',
+          width: '100vw',
           display: 'flex',
-          justifyContent: 'center',
+          justifyContent: 'left',
           alignItems: 'center',
         }}
       >

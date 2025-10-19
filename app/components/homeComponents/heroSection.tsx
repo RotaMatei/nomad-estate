@@ -19,21 +19,28 @@ const HeroSection = () => {
                         }}
                     >
 
-                        <Grid container>
-                            <Grid size={{ xs: 12 }} sx={{ position: 'absolute', top: 0, width: '100%', zIndex: 300,  }}>
+                        <Grid container display={{ xs: 'flex', sm: 'flex', md: 'block' }}
+                                    justifyContent={{ xs: 'center', sm: 'center', md: 'flex-start' }}
+                                    flexDirection={{ xs: 'row' }}>
+                            <Grid size={{ xs: 12 }} sx={{ position: 'absolute', top: 0, width: '100vw', zIndex: 300, }}>
                                 <Navbar />
                             </Grid>
-                            <Grid size={{ xs: 10, md: 5 }} sx={{marginTop: { xs: '70px', md: '80px' }}}>
-                                <Typography
-                                    variant="h2"
-                                    fontWeight="900"
-                                    textAlign={{ xs: 'center', md: 'left' }}
-                                    fontSize={{ xs: '35px', lg: '56px' }}
-                                    sx={{ paddingLeft: '88px', color: 'background.default' }}
-                                >
-                                    Welcome to the Future of Global Real Estate
-                                </Typography>
-                                <Grid container sx={{ paddingLeft: '70px' }}>
+                            <Grid size={{ xs: 10, md: 5 }} sx={{ marginTop: { xs: '70px', md: '80px' } }}>
+                                    <Typography
+                                        variant="h2"
+                                        fontWeight={900}
+                                        textAlign={{ xs: 'center', sm: 'center', md: 'left' }}
+                                        fontSize={{ xs: '40px', lg: '56px' }}
+                                        sx={{
+                                            paddingLeft: { md: '10vw' },
+                                            color: 'background.default',
+                                        }}
+                                    >
+                                        Welcome to the Future of Global Real Estate
+                                    </Typography>
+                           
+
+                                <Grid container sx={{ paddingLeft: { md: '9vw' } }}>
                                     <Grid
                                         size={{ md: 2 }}
                                         sx={{ paddingTop: '24px', display: { xs: 'none', md: 'block' } }}

@@ -33,7 +33,7 @@ export default function RegisterPage() {
   const router = useRouter();
 
   useEffect(() => {
-    api.get('/countries/get-all')
+    api.get('/countries/retrieve/get-all')
       .then(response => setCountries(response.data))
       .catch(() => setCountries([]))
       .finally(() => setLoadingCountries(false));
@@ -42,7 +42,7 @@ export default function RegisterPage() {
   useEffect(() => {
     if (selectedCountry) {
       setLoadingStates(true);
-      api.get('/states/get-all', { params: { countryId: selectedCountry.id } })
+      api.get(`/states/retrieve/get-all/:${selectedCountry.id}`)
         .then(response => setStates(response.data))
         .catch(() => setStates([]))
         .finally(() => setLoadingStates(false));
@@ -54,7 +54,7 @@ export default function RegisterPage() {
   useEffect(() => {
     if (selectedState) {
       setLoadingCities(true);
-      api.get('/cities/get-all-by-state', { params: { stateId: selectedState.id } })
+      api.get(`/cities/retrieve/get-all-by-state/:${selectedState.id}`)
         .then(response => setCities(response.data))
         .catch(() => setCities([]))
         .finally(() => setLoadingCities(false));

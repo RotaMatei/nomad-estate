@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: 'http://localhost:4000',
+    baseURL: 'https://api.nomadestatehub.com',
     withCredentials: true,
 });
 
@@ -11,7 +11,7 @@ api.interceptors.response.use(
         if (error.response?.status === 401) {
             try {
                 console.log("Refreshing Token...");
-                const {data} = await axios.post('http://localhost:4000/refresh', {
+                const {data} = await axios.post('https://api.nomadestatehub.com/refresh', {
                     refreshToken: localStorage.getItem('refreshToken')
                 }, {withCredentials: true});
                 localStorage.setItem('token', data.accessToken);

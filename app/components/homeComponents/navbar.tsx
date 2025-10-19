@@ -58,7 +58,7 @@ export default function Navbar() {
                 px: 4,
                 py: 0.5,
                 height: '35px',
-                width: '70%',
+                width: '30vw',
                 display: { xs: 'none', md: 'flex' },
                 justifyContent: 'left',
               }}

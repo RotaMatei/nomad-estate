@@ -1,9 +1,7 @@
 import React from "react";
 import { Box, Card, Grid, Typography, IconButton, Paper } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import BusinessIcon from '@mui/icons-material/Business';
-import HandshakeIcon from '@mui/icons-material/Handshake';
+
 
 const images = [
     "villa1.jpg",
@@ -74,8 +72,8 @@ export default function GlassPropertyGallery() {
                     {images.map((src, i) => {
                         // compute row number
                         const row = Math.floor(i / 2); // 0,1,2...
-                        const offset = row * 50;
-                        const gap = 30;
+                        const offset = row * 30;
+                        const gap = 60;
 
                         return (
                             <Box
@@ -84,7 +82,7 @@ export default function GlassPropertyGallery() {
                                 src={src}
                                 alt={`property-${i}`}
                                 sx={{
-                                    width: "90%",
+                                    width: "17vw",
                                     height: 135,
                                     objectFit: "cover",
                                     borderRadius: 3,

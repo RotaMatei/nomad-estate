@@ -43,7 +43,7 @@ export default function Phone() {
                         color: 'background.paper',
                         fontWeight: 500,
                         paddingTop: 8,
-                        
+                        cursor:'default',
                     }}
                 >
                     <span>
@@ -56,7 +56,7 @@ export default function Phone() {
                 </Typography>
 
                 <Typography
-                    sx={{ color: 'info.main', fontWeight: 'bold', position: 'relative', paddingTop: 5, fontSize: '20px' }}
+                    sx={{ color: 'info.main', fontWeight: 'bold', position: 'relative', paddingTop: 5, fontSize: '20px', cursor:'default', }}
                 >
                     Log in
                 </Typography>
@@ -75,7 +75,7 @@ export default function Phone() {
                         position: 'relative',
                         boxShadow: 'inset 0 -2px 0px 0px',
                         boxShadowColor: 'transparent',
-                        width: '15vw'
+                        width: '100%'
                     }}
                 >
                     <EmailIcon color='action' />
@@ -84,6 +84,7 @@ export default function Phone() {
                             color: '#7B7B7B',
                             fontWeight: 500,
                             fontSize: '14px',
+                            cursor:'default',
                         }}
                     >
                         Email Completed
@@ -104,7 +105,7 @@ export default function Phone() {
                         position: 'relative',
                         boxShadow: 'inset 0 -2px 0px 0px',
                         boxShadowColor: 'transparent',
-                        width: '15vw'
+                        width: '100%'
                     }}
                 >
                     <LockIcon color='action' />
@@ -113,6 +114,7 @@ export default function Phone() {
                             color: '#7B7B7B',
                             fontWeight: 500,
                             fontSize: '14px',
+                            cursor:'default',
                         }}
                     >
                         Password
@@ -126,15 +128,15 @@ export default function Phone() {
                         borderRadius: 2,
                         paddingY: 1,
                         textAlign: 'center',
-                        cursor: 'pointer',
-                        width: '5vw',
+                        width: '50%',
                         boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+                        cursor:'default',
                     }}
                 >
                     Sign in
                 </Box>
 
-                <Typography sx={{ color: 'grey.500', fontSize: '12px', fontStyle: 'italic', paddingTop: 1, justifyContent: 'center', textAlign: 'center' }}>
+                <Typography sx={{ color: 'grey.500', fontSize: '12px', fontStyle: 'italic', paddingTop: 1, justifyContent: 'center', textAlign: 'center', cursor:'default' }}>
                     {"Don't have an account?"}{' '}
                     <Box component="span" sx={{ color: 'blue', fontWeight: 'bold' }}>
                         Sign up

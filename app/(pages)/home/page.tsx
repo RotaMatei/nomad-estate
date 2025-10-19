@@ -1,6 +1,5 @@
 'use client';
 import React from "react";
-import styles from "../page.module.css";
 import { ThemeProvider } from "@emotion/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -11,6 +10,7 @@ import InvestmentStats from "../../components/homeComponents/investmentStats";
 import WhyChooseNomad from "../../components/homeComponents/whyChooseNomad";
 import GlobalTrustGrid from "../../components/homeComponents/globalTrustGrid";
 import ChoosePath from "../../components/homeComponents/choosePath";
+import { Button } from "@mui/material";
 export default function Home() {
   const router = useRouter();
 
@@ -39,8 +39,9 @@ export default function Home() {
           alignItems: 'center',
         }}
       >
+        <Button onClick={() => router.push('/register')} variant="contained" color="primary">Register</Button>
         {/* <button onClick={() => router.push('/login')} className={styles.secondary}>Login</button>
-        <button onClick={() => router.push('/register')} className={styles.secondary}>Register</button>
+        
         <button onClick={() => router.push('/user/changePassword')} className={styles.secondary}>Change Password</button> */}
       </Box>
     </ThemeProvider >
