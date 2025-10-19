@@ -1,8 +1,8 @@
 'use client';
-import Image from "next/image";
-import styles from "./page.module.css";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import Image from 'next/image';
+import styles from './page.module.css';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function Home() {
   const router = useRouter();
@@ -11,13 +11,13 @@ export default function Home() {
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
-    if(storedUser) setUser(storedUser);
-  }, [])
+    if (storedUser) setUser(storedUser);
+  }, []);
 
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <h2>{user ?? ""}</h2>
+        <h2>{user ?? ''}</h2>
         <Image
           className={styles.logo}
           src="/next.svg"
@@ -57,10 +57,22 @@ export default function Home() {
           >
             Read our docs
           </a>
-          <button onClick={() => router.push('/login')} className={styles.secondary}> Login </button>
-          <button onClick={() => router.push('/register')} className={styles.secondary}> Register </button>
-          <button onClick={() => router.push('/user/logOut')} className={styles.secondary}> Log Out </button>
-          <button onClick={() => router.push('/user/changePassword')} className={styles.secondary}> ChangePassword </button>
+          <button onClick={() => router.push('/login')} className={styles.secondary}>
+            {' '}
+            Login{' '}
+          </button>
+          <button onClick={() => router.push('/register')} className={styles.secondary}>
+            {' '}
+            Register{' '}
+          </button>
+          <button onClick={() => router.push('/user/logOut')} className={styles.secondary}>
+            {' '}
+            Log Out{' '}
+          </button>
+          <button onClick={() => router.push('/user/changePassword')} className={styles.secondary}>
+            {' '}
+            ChangePassword{' '}
+          </button>
         </div>
       </main>
       <footer className={styles.footer}>
@@ -69,13 +81,7 @@ export default function Home() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
+          <Image aria-hidden src="/file.svg" alt="File icon" width={16} height={16} />
           Learn
         </a>
         <a
@@ -83,13 +89,7 @@ export default function Home() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
+          <Image aria-hidden src="/window.svg" alt="Window icon" width={16} height={16} />
           Examples
         </a>
         <a
@@ -97,13 +97,7 @@ export default function Home() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
+          <Image aria-hidden src="/globe.svg" alt="Globe icon" width={16} height={16} />
           Go to nextjs.org →
         </a>
       </footer>
