@@ -120,7 +120,7 @@ export default function ChoosePath() {
                                     </Box>
 
                                     <Typography variant="h6" fontWeight={700} color='text.secondary' display='flex' justifyContent='left'>
-                                        I'm an Investor
+                                        {"I'm an Investor"}
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary" mb={3} display='flex' justifyContent='left'>
                                         Individual Investors
@@ -224,7 +224,7 @@ export default function ChoosePath() {
                                     </Box>
 
                                     <Typography variant="h6" fontWeight={700} color='text.secondary' display='flex' justifyContent='left'>
-                                        I'm an Agency
+                                        {"I'm an Agency"}
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary" mb={3} display='flex' justifyContent='left'>
                                         Real Estate Professionals

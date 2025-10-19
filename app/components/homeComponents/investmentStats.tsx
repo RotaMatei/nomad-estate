@@ -11,8 +11,13 @@ const fadeUp = keyframes`
     transform: translateY(0);
   }
 `;
-
-const StatBlock = ({ value, description, source, delay }: any) => {
+type StatBlockProps = {
+  value: string | number;
+  description: string;
+  source?: string;
+  delay?: number;
+};
+const StatBlock = ({ value, description, source, delay }: StatBlockProps) => {
     const ref = useRef<HTMLDivElement>(null);
     const [visible, setVisible] = useState(false);
 

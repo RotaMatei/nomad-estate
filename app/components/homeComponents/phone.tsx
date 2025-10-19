@@ -135,7 +135,7 @@ export default function Phone() {
                 </Box>
 
                 <Typography sx={{ color: 'grey.500', fontSize: '12px', fontStyle: 'italic', paddingTop: 1, justifyContent: 'center', textAlign: 'center' }}>
-                    Don't have an account?{' '}
+                    {"Don't have an account?"}{' '}
                     <Box component="span" sx={{ color: 'blue', fontWeight: 'bold' }}>
                         Sign up
                     </Box>
