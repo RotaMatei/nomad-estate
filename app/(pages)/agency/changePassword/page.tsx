@@ -1,14 +1,14 @@
 'use client';
-import  api  from "@/app/lib/api";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import api from '@/app/lib/api';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function ChangePasswordPage() {
-    const [agencyId, setAgencyId] = useState();
-    const [oldPassword, setOldPassword] = useState('');
-    const [newPassword, setNewPassword] = useState('');
-    const [error, setError] = useState('');
-    const router = useRouter();
+  const [agencyId, setAgencyId] = useState();
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [error, setError] = useState('');
+  const router = useRouter();
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -36,23 +36,23 @@ export default function ChangePasswordPage() {
         }
     }
 
-    return (
-        <div>
-            <h1>Please provide a new password</h1>
-            <input
-                value={oldPassword}
-                onChange={(e) => setOldPassword(e.target.value)}
-                placeholder="old password"
-                type="password"
-            />
-            <input
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="new password"
-                type="password"
-            />
-            <button onClick={handlePasswordChange}>Login</button>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-        </div>
-    );
+  return (
+    <div>
+      <h1>Please provide a new password</h1>
+      <input
+        value={oldPassword}
+        onChange={(e) => setOldPassword(e.target.value)}
+        placeholder="old password"
+        type="password"
+      />
+      <input
+        value={newPassword}
+        onChange={(e) => setNewPassword(e.target.value)}
+        placeholder="new password"
+        type="password"
+      />
+      <button onClick={handlePasswordChange}>Login</button>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+    </div>
+  );
 }
