@@ -31,8 +31,12 @@ export default function ChangePasswordPage() {
       );
       localStorage.clear();
       router.push('/');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'ChangePassword failed!');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+          setError(err.message);
+      } else {
+          setError('ChangePassword failed');
+      }
     }
   };
 

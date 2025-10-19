@@ -18,8 +18,12 @@ export default function LoginPage() {
       const username = res.data.firstName + ' ' + res.data.lastName;
       localStorage.setItem('user', username);
       router.push('/');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Login failed');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+          setError(err.message);
+      } else {
+          setError('Login failed');
+      }
     }
   };
 
