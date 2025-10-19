@@ -11,7 +11,7 @@ export default function HeroBackground({ children }: { children: React.ReactNode
     try {
       new WaveGradient(canvasRef.current, {
         colors: ['#E80000', '#6ec3f4', '#7038ff', '#ffba27'],
-        fps: 30,
+        fps: 60,
         seed: 0,
         speed: 1.25,
         amplitude: 320,
@@ -26,7 +26,7 @@ export default function HeroBackground({ children }: { children: React.ReactNode
     <section
       style={{
         position: 'relative',
-        height: '550px',
+        height: '620px',
         width: '100%',
         overflow: 'hidden',
       }}

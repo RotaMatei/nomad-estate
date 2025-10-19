@@ -6,7 +6,7 @@ import AppleIcon from '@mui/icons-material/Apple';
 
 export default function Phone() {
     return (
-        <Box
+        <Box 
             sx={{
                 width: 290,
                 height: 580,
