@@ -4,7 +4,7 @@ export const lightTheme = createTheme({
   palette: {
     background: {
       default: '#FFFFFF',
-      paper: '#E80000',
+      paper: '#FFFFFF',
     },
     primary: {
       main: '#E80000',
@@ -21,10 +21,23 @@ export const lightTheme = createTheme({
     },
     grey: {
       500: '#7B7B7B',
-      200: '#c2c2c2ff'
+      200: '#c2c2c2ff',
     },
   },
   typography: {
     fontFamily: 'Montserrat, sans-serif',
+    fontWeightLight: 300,
+    fontWeightRegular: 400,
+    fontWeightMedium: 600,
+    fontWeightBold: 700,
+    h1: { fontWeight: 700 },
+    h2: { fontWeight: 700 },
+    h3: { fontWeight: 700 },
+    h4: { fontWeight: 700 },
+    h5: { fontWeight: 600 },
+    h6: { fontWeight: 600 },
+    body1: { fontWeight: 400 },
+    body2: { fontWeight: 400 },
+    button: { fontWeight: 700, textTransform: 'none' },
   },
 });
