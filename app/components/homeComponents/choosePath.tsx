@@ -4,8 +4,6 @@ import {
     Grid,
     Typography,
     Button,
-    useTheme,
-    useMediaQuery,
     Container,
 } from '@mui/material';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -31,9 +29,6 @@ const agencyFeatures = [
 ];
 
 export default function ChoosePath() {
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
     return (
         <Box
             sx={{
