@@ -73,8 +73,7 @@ export default function Phone() {
                         borderColor: '#e3e3e3ff',
                         backgroundColor: '#fff',
                         position: 'relative',
-                        boxShadow: 'inset 0 -2px 0px 0px',
-                        boxShadowColor: 'transparent',
+                        boxShadow: 'inset 0 -2px 0px 0px #e3e3e3ff',
                         width: '100%'
                     }}
                 >
@@ -103,8 +102,7 @@ export default function Phone() {
                         borderColor: '#e3e3e3ff',
                         backgroundColor: '#fff',
                         position: 'relative',
-                        boxShadow: 'inset 0 -2px 0px 0px',
-                        boxShadowColor: 'transparent',
+                        boxShadow: 'inset 0 -2px 0px 0px #e3e3e3ff',
                         width: '100%'
                     }}
                 >

@@ -89,11 +89,11 @@ export default function Navbar() {
                   fontWeight: 500,
                   cursor: 'pointer',
                   fontFamily: 'Montserrat, sans-serif',
-                  //textTransform: 'none',
+                  //textTransform: 'capitalize',
                   borderRadius: 3,
                 }}
               >
-                About Us
+                ABOUT US
               </Button>
             </Grid>
 
@@ -104,11 +104,11 @@ export default function Navbar() {
                   //backgroundColor: 'primary.main',
                   color: '#fff',
                   fontFamily: 'Montserrat, sans-serif',
-                  //textTransform: 'none',
+                  fontWeight: 500,
                   borderRadius: 3,
                 }}
               >
-                Book a Call
+                BOOK A CALL
               </Button>
             </Grid>
 
@@ -120,11 +120,11 @@ export default function Navbar() {
                   //backgroundColor: 'primary.main',
                   color: '#fff',
                   fontFamily: 'Montserrat, sans-serif',
-                  //textTransform: 'none',
+                  fontWeight: 500,
                   borderRadius: 3,
                 }}
               >
-                Plans
+               PLANS
               </Button>
             </Grid>
 
