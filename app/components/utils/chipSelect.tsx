@@ -25,10 +25,10 @@ export default function ChipSelect({ label, options, values, onChange, focusColo
       <Box
         sx={{
           bgcolor: '#fff',
-          borderRadius: { xs: '12px', md: '16px' },
+          borderRadius: { xs: '12px', lg: '16px' },
           boxShadow: `0 6px 0 ${grey[300]}`,
-          px: { xs: 2, md: 3 },
-          py: { xs: 1.5, md: 2 },
+          px: { xs: 2, lg: 3 },
+          py: { xs: 1.5, lg: 2 },
           '&:focus-within': { boxShadow: `0 6px 0 ${focusColor}` },
         }}
       >

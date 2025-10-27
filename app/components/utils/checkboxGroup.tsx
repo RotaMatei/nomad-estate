@@ -2,6 +2,7 @@ import { Box, Checkbox, FormControlLabel, FormGroup, Typography } from '@mui/mat
 import { grey } from '@mui/material/colors';
 import CheckBoxOutlineBlankRoundedIcon from '@mui/icons-material/CheckBoxOutlineBlankRounded';
 import CheckBoxRoundedIcon from '@mui/icons-material/CheckBoxRounded';
+import { useTheme } from '@mui/material/styles';
 
 export type Option = { value: string; label: string };
 
@@ -13,7 +14,9 @@ type Props = {
   focusColor?: string;
 };
 
-export default function CheckboxGroup({ label, options, values, onChange, focusColor = '#e93b20' }: Props) {
+export default function CheckboxGroup({ label, options, values, onChange, focusColor }: Props) {
+  const theme = useTheme();
+  const activeColor = focusColor ?? theme.palette.primary.main;
   const toggle = (val: string) => {
     const next = values.includes(val) ? values.filter((v) => v !== val) : [...values, val];
     onChange(next);
@@ -22,17 +25,17 @@ export default function CheckboxGroup({ label, options, values, onChange, focusC
   return (
     <Box>
       {label && (
-        <Typography sx={{ fontWeight: 700, mb: 1, color: grey[500] }}>{label}</Typography>
+        <Typography sx={{ fontWeight: 700, mt: 1, mb: 1, color: grey[500], fontSize: { xs: '16px', lg: '20px' } }}>{label}</Typography>
       )}
 
       <Box
         sx={{
-          bgcolor: '#fff',
-          borderRadius: { xs: '12px', md: '16px' },
+          bgcolor: theme.palette.common.white,
+          borderRadius: { xs: '12px', lg: '16px' },
           boxShadow: `0 6px 0 ${grey[300]}`,
-          px: { xs: 2, md: 3 },
-          py: { xs: 1.5, md: 2 },
-          '&:focus-within': { boxShadow: `0 6px 0 ${focusColor}` },
+          px: { xs: 2, lg: 3 },
+          py: { xs: 1.5, lg: 2 },
+          '&:focus-within': { boxShadow: `0 6px 0 ${activeColor}` },
         }}
       >
         <FormGroup sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 1 }}>
@@ -40,17 +43,17 @@ export default function CheckboxGroup({ label, options, values, onChange, focusC
             <FormControlLabel
               key={o.value}
               label={o.label}
-              sx={{ '& .MuiFormControlLabel-label': { color: grey[500] } }}
+              sx={{ '& .MuiFormControlLabel-label': { color: grey[700], fontFamily: 'Montserrat, sans-serif', fontSize: { xs: '14px', lg: '18px' } } }}
               control={
                 <Checkbox
                   checked={values.includes(o.value)}
                   onChange={() => toggle(o.value)}
-                  icon={<CheckBoxOutlineBlankRoundedIcon />}
-                  checkedIcon={<CheckBoxRoundedIcon />}
+                  icon={<CheckBoxOutlineBlankRoundedIcon sx={{ fontSize: { xs: 22, lg: 26 } }} />}
+                  checkedIcon={<CheckBoxRoundedIcon sx={{ fontSize: { xs: 22, lg: 26 } }} />}
                   sx={{
-                    color: grey[500],
+                    color: grey[600],
                     '&.Mui-checked': {
-                      color: '#e93b20',
+                      color: activeColor,
                     },
                   }}
                 />

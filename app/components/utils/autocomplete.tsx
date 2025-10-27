@@ -4,6 +4,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import { grey } from '@mui/material/colors';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
+import { useTheme } from '@mui/material/styles';
 
 type Option = { value: string | number; label: string };
 
@@ -32,8 +33,27 @@ export const CustomAutocomplete = ({
   locked = false,
   selectedColor,
 }: AutocompleteProps) => {
+  const theme = useTheme();
   const isDisabled = disabled || locked;
   const selectedOption = options.find((o) => o.value === value) ?? null;
+  const paperSx = {
+    bgcolor: 'background.default',
+    '& .MuiAutocomplete-option': {
+      color: grey[700],
+    },
+    ...(selectedColor
+      ? {
+          // Ensure selected uses provided brand color instead of theme default
+          '& .MuiAutocomplete-option.Mui-selected, & .MuiAutocomplete-option[aria-selected="true"]': {
+            backgroundColor: `${selectedColor} !important`,
+            color: '#fff',
+          },
+          '& .MuiAutocomplete-option.Mui-focused': {
+            backgroundColor: `${selectedColor}22`,
+          },
+        }
+      : {}),
+  } as const;
 
   return (
     <Box
@@ -42,45 +62,39 @@ export const CustomAutocomplete = ({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        height: { xs: '36px', md: '48px' },
-        bgcolor: isDisabled ? 'grey.200' : '#fff',
-  mx: 0,
-        borderRadius: { xs: '12px', md: '16px' },
+        height: { xs: '36px', lg: '48px' },
+        bgcolor: isDisabled ? 'grey.200' : theme.palette.common.white,
+        mx: 0,
+        borderRadius: { xs: '12px', lg: '16px' },
         color: 'grey.200',
         boxShadow: `0 6px 0 ${grey[300]}`,
-        px: { xs: 1, md: 2 },
-        py: { xs: 1, md: 2 },
-        ...(isDisabled ? {} : {
-          '&:focus-within': {
-            boxShadow: `0 6px 0 ${focusColor}`,
-          },
-        }),
+        px: { xs: 1, lg: 2 },
+        py: { xs: 1, lg: 2 },
+        ...(isDisabled
+          ? {}
+          : {
+              '&:focus-within': {
+                boxShadow: `0 6px 0 ${focusColor}`,
+              },
+            }),
         cursor: isDisabled ? 'not-allowed' : 'text',
         opacity: isDisabled ? 0.95 : 1,
       }}
     >
       <Box sx={{ mr: 1, display: 'flex', alignItems: 'center', color: isDisabled ? grey[500] : focusColor }}>{icon}</Box>
 
-      <Autocomplete
+      <Autocomplete<Option, false, false, false>
         options={options}
-        getOptionLabel={(opt) => (typeof opt === 'string' ? opt : opt.label)}
+        getOptionLabel={(opt) => opt.label}
         value={selectedOption}
-        onChange={(_, newVal) => onChange((newVal as Option | null)?.value ?? '')}
+        onChange={(_, newVal) => onChange((newVal)?.value ?? '')}
         disabled={isDisabled}
-        isOptionEqualToValue={(opt, val) => (opt as Option).value === (val as Option).value}
-        slotProps={selectedColor ? {
+        isOptionEqualToValue={(opt, val) => opt.value === val.value}
+        slotProps={{
           paper: {
-            sx: {
-              '& .MuiAutocomplete-option[aria-selected="true"]': {
-                bgcolor: selectedColor,
-                color: '#fff',
-              },
-              '& .MuiAutocomplete-option.Mui-focused': {
-                bgcolor: `${selectedColor}22`,
-              },
-            },
+            sx: paperSx,
           },
-        } : undefined}
+        }}
         renderInput={(params) => (
           <TextField
             {...params}
@@ -95,7 +109,7 @@ export const CustomAutocomplete = ({
               '& .MuiInputBase-input': {
                 pl: 0,
                 fontFamily: 'Montserrat, sans-serif',
-                fontSize: { xs: '14px', md: '18px' },
+                fontSize: { xs: '14px', lg: '18px' },
                 color: isDisabled ? 'text.disabled' : 'text.primary',
               },
             }}
@@ -104,9 +118,9 @@ export const CustomAutocomplete = ({
         renderOption={(props, option) => {
           // Avoid React warning about spreading a key prop by extracting it
           // See: https://mui.com/material-ui/api/autocomplete/#props-renderoption
-          const { key, ...optionProps } = props as unknown as { key: string } & Record<string, unknown>;
+          const { key, ...optionProps } = props as unknown as { key: string } & React.HTMLAttributes<HTMLLIElement>;
           return (
-            <li key={key} {...(optionProps as any)}>{(option as Option).label}</li>
+            <li key={key} {...optionProps}>{option.label}</li>
           );
         }}
         freeSolo={false}

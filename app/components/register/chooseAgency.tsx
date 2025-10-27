@@ -1,32 +1,253 @@
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 import CustomButton from '@/app/components/utils/button';
 import TouchAppOutlinedIcon from '@mui/icons-material/TouchAppOutlined';
-// explicit palette: two darker blues, base blue, two lighter blues
+import SpinningGlobe from '@/app/reactDevBits/Globe/SpinningGlobe';
+import { useTheme, alpha } from '@mui/material/styles';
 
-export default function ChooseAgency({ onSelect }: { onSelect: () => void }) {
+type Props = {
+  onSelect: () => void;
+  onPreSelect?: () => void;
+  buttonOnly?: boolean;
+  buttonLabel?: string;
+  paddingTop?: number | string;
+  paddingBottom?: number | string;
+};
+
+export default function ChooseAgency({ onSelect, onPreSelect, buttonOnly = false, buttonLabel = 'Sign Up', paddingTop = 60, paddingBottom = 28 }: Props) {
+  const theme = useTheme();
+  const [hoverTick, setHoverTick] = useState(0);
+  const [spinTick, setSpinTick] = useState(0);
+  const [shiftTick, setShiftTick] = useState(0);
+  const holderRef = useRef<HTMLDivElement | null>(null);
+
+  const baseSize = 250;
+  const scale = 6;
+  const scaledSize = baseSize * scale;
+
+  const [globeFits, setGlobeFits] = useState(true);
+  useEffect(() => {
+    const checkFit = () => {
+      if (!holderRef.current) return;
+      const containerWidth = holderRef.current.offsetWidth;
+      setGlobeFits(scaledSize <= containerWidth);
+    };
+
+    checkFit();
+
+    const resizeObserver = new ResizeObserver(checkFit);
+    if (holderRef.current) resizeObserver.observe(holderRef.current);
+
+    return () => resizeObserver.disconnect();
+  }, [scaledSize]);
+
+  const handleHoverStart = useCallback(() => {
+    setHoverTick((t) => t + 1);
+  }, []);
+
+  if (buttonOnly) {
+    return (
+      <Box sx={{ position: 'relative', pt: typeof paddingTop === 'number' ? `${paddingTop}px` : paddingTop, pb: typeof paddingBottom === 'number' ? `${paddingBottom}px` : paddingBottom, textAlign: 'center', overflow: 'hidden' }}>
+        {/* Oversized globe centered horizontally; only bottom half visible */}
+        <Box sx={{ position: 'absolute', top: 0, left: '50%', transform: 'translate(-50%, -50%)', zIndex: 0, pointerEvents: 'none' }}>
+          <SpinningGlobe
+            landColor={'#003FC7'}
+            waterColor={'#6FA8FF'}
+            strokeColor={'#0034A5'}
+            autoRotate
+            autoRotateSpeed={0.5}
+            altitude={1.5}
+            scale={1.5}
+            pointerEvents="none"
+            spinTrigger={spinTick || undefined}
+            shiftTrigger={shiftTick || undefined}
+            shiftTo={{ land: '#d50000ff', water: '#fd5252', stroke: '#e23216ff' }}
+            shiftDurationMs={900}
+            style={{ userSelect: 'none', overflow: 'hidden', isolation: 'isolate' }}
+          />
+        </Box>
+
+        <CustomButton
+          color="secondary"
+          label={buttonLabel}
+          onClick={() => {
+            try { onPreSelect?.(); } catch {}
+            try {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch {}
+            setShiftTick((t) => t + 1);
+            setSpinTick((t) => t + 1);
+            // Wait for spin burst, then trigger parent switch
+            setTimeout(() => {
+              onSelect();
+            }, 900);
+          }}
+          type="button"
+          fullWidth={false}
+          sx={{
+            width: 240,
+            mx: 'auto',
+            backgroundColor: theme.palette.common.white,
+            color: theme.palette.primary.main,
+            boxShadow: `0 6px 0 ${alpha(theme.palette.primary.main, 0.35)}`,
+            '&:hover': { backgroundColor: theme.palette.grey[100] },
+            fontSize: { xs: '0.75rem', sm: '0.8125rem', md: '1rem', lg: '1.125rem' },
+            position: 'relative',
+            zIndex: 1,
+          }}
+          icon={<TouchAppOutlinedIcon sx={{ color: theme.palette.primary.main }} />}
+        />
+      </Box>
+    );
+  }
+
   return (
-    <Box sx={{ height: '100%', position: 'relative', overflow: 'hidden', color: '#fff', display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-start', p: 6 }}>
-      {/* Plain solid circle (blue base), same size/position as previous wavy circle; no border or shadow */}
+    <Box
+      sx={{ height: '100%', position: 'relative', overflow: 'hidden', color: '#fff', display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-start', p: 4 }}
+      onMouseEnter={handleHoverStart}
+      ref={holderRef}
+    >
+      {/* Globe layer */}
       <Box
-        aria-hidden
         sx={{
           position: 'absolute',
-          top: '-60vh',
-          right: 0,
-          zIndex: 0,
-          width: 2000,
-          height: 2000,
-          borderRadius: '50%',
-          backgroundColor: '#003FC7',
-          boxShadow: 'none',
-          border: 'none',
+          top: '50%',
+          transform: globeFits ? 'translate(-50%, -50%)' : 'translateY(-50%)',
+          left: globeFits ? '50%' : 'auto',
+          right: globeFits ? 'auto' : '-3%',
+          zIndex: 1,
+          pointerEvents: 'none',
         }}
-      />
+      >
+        <SpinningGlobe
+          landColor="#003FC7"
+          waterColor="#6FA8FF"
+          strokeColor="#0034A5"
+          autoRotate
+          autoRotateSpeed={0.5}
+          altitude={1.5}
+          scale={scale}
+          pointerEvents="none"
+          spinTrigger={hoverTick > 0 ? hoverTick : undefined}
+          style={{
+            userSelect: 'none',
+            overflow: 'hidden',
+            isolation: 'isolate',
+          }}
+        />
+      </Box>
 
-      {/* Decorative SVG anchored bottom-right; reveals more on wider screens without scaling */}
+      {/* Text content overlaid on top */}
+      <Box sx={{ 
+        width: '100%', 
+        maxWidth: '100%', 
+        textAlign: 'center',
+         position: 'relative', 
+         top: '25vh', 
+         transform:  globeFits ? 'translateY(-30%)': 'translate(-15%, -30%)', 
+         zIndex: 2, 
+         justifyContent: 'center', 
+         display: 'flex', 
+         flexDirection: 'column', 
+         alignItems: 'center', 
+         px: 2 }}>
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 700,
+            maxWidth: '75%',
+            mb: 2,
+            fontSize: {
+              xs: '1.5rem', // ~24px
+              lg: '2rem', // ~32px
+            },
+          }}
+        >
+          Do you have an{' '}
+          <Box
+            component="span"
+            sx={{
+              display: 'inline',
+              fontWeight: 900,
+              maxWidth: '75%',
+              fontSize: {
+                xs: '1.5rem',
+                lg: '2rem',
+              },
+            }}
+          >
+            Agency
+          </Box>
+          ?
+        </Typography>
+
+        <Typography
+          sx={{
+            mb: 4,
+            opacity: 0.95,
+            fontWeight: 700,
+            maxWidth: '75%',
+            fontSize: {
+              xs: '1rem', // ~16px
+              lg: '1.25rem', // ~20px
+            },
+          }}
+        >
+          Use this button to enroll it on the website and start earning more now.
+        </Typography>
+
+        <CustomButton
+          color="secondary"
+          label="Sign Up"
+          onClick={onSelect}
+          type="button"
+          fullWidth={false}
+          sx={{
+            width: 240,
+            mx: 'auto',
+            backgroundColor: theme.palette.common.white,
+            color: theme.palette.primary.main,
+            boxShadow: `0 6px 0 ${alpha(theme.palette.primary.main, 0.35)}`,
+            '&:hover': { backgroundColor: theme.palette.grey[100] },
+            fontSize: {
+              xs: '0.875rem', // ~14px
+              lg: '1.125rem', // ~18px
+            },
+          }}
+          icon={<TouchAppOutlinedIcon sx={{ color: theme.palette.primary.main }} />}
+        />
+
+        <Typography
+          sx={{
+            mt: 3,
+            color: '#fff',
+            fontStyle: 'italic',
+            fontWeight: 400,
+            maxWidth: '75%',
+            fontSize: {
+              xs: '0.875rem',
+              lg: '1.125rem',
+            },
+          }}
+        >
+          Already have an Agency account?{' '}
+          <Link
+            href="/login"
+            style={{
+              fontWeight: 700,
+              fontStyle: 'normal',
+              color: 'inherit',
+              textDecoration: 'none',
+            }}
+          >
+            Log in
+          </Link>
+        </Typography>
+      </Box>
+
+      {/* Decorative SVG aligned exactly with the globe position; fixed intrinsic width */}
       <Box
         component="img"
         src="/ChooseAgency.svg"
@@ -34,48 +255,20 @@ export default function ChooseAgency({ onSelect }: { onSelect: () => void }) {
         aria-hidden
         sx={{
           position: 'absolute',
-            bottom: -16,
-          right: 0,
+          top: 'auto',
+          bottom: 0,
+          transform: globeFits ?  { md: 'translateX(-50%)', lg: 'translateX(-50%)' } : {}, 
+          left: globeFits ? '50%' : 'auto',
+          right: globeFits ? 'auto' : '-3%',
           zIndex: 1,
-          width: 'auto',
-          height: { md: '50%'},
+          width: { md: '1000px', lg: '1500px' },
+          height: 'auto',
           maxWidth: 'none',
           pointerEvents: 'none',
           userSelect: 'none',
           display: 'block',
         }}
       />
-
-  <Box sx={{ width: '100%', maxWidth: '100%', textAlign: 'center', position: 'relative', top: '25vh', transform: 'translateY(-50%)', zIndex: 2 }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, mb: 2 }}>
-          Do you have an <Box component="span" sx={{ display: 'inline', fontWeight: 900 }}>Agency</Box>?
-        </Typography>
-        <Typography sx={{ mb: 4, opacity: 0.95, fontWeight: 700 }}>
-          Use this button to enroll it on the website and start earning more now.
-        </Typography>
-
-        <CustomButton
-          color="secondary"
-          label="SignUp"
-          onClick={onSelect}
-          type="button"
-          fullWidth={false}
-          sx={{
-            width: 240,
-            mx: 'auto',
-            backgroundColor: '#ffffff',
-            color: '#e93b20',
-            boxShadow: '0 6px 0 rgba(233,59,32,0.35)',
-            '&:hover': { backgroundColor: '#f7f7f7' },
-          }}
-          icon={<TouchAppOutlinedIcon sx={{ color: '#e93b20' }} />}
-        />
-
-        <Typography sx={{ mt: 3, color: '#fff', fontStyle: 'italic', fontWeight: 400 }}>
-          Already have an Agency account?{' '}
-          <Link href="/login" style={{ fontWeight: 700, fontStyle: 'normal', color: 'inherit', textDecoration: 'none' }}>Log in</Link>
-        </Typography>
-      </Box>
     </Box>
   );
 }

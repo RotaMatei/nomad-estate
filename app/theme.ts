@@ -8,9 +8,13 @@ export const lightTheme = createTheme({
     },
     primary: {
       main: '#E80000',
+      light: '#FF6666',
+      dark: '#B30000',
     },
     secondary: {
       main: '#00089D',
+      light: '#3B49D1',
+      dark: '#00077F',
     },
     info: {
       main: '#BC2DFF',
