@@ -1,7 +1,9 @@
 import { Box, Typography } from '@mui/material';
+import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined';
 import CustomTextArea from '@/app/components/utils/textarea';
 import ChipSelect, { Option as ChipOption } from '@/app/components/utils/chipSelect';
 import CheckboxGroup, { Option as CheckOption } from '@/app/components/utils/checkboxGroup';
+import { useTheme } from '@mui/material/styles';
 
 type Props = {
   partnershipReason: string;
@@ -60,6 +62,7 @@ export default function AgencyPartnershipGoalsStep({
   setAdditionalInterests,
 }: Props) {
   const GAP = 1; // compact spacing to fit 100vh
+  const theme = useTheme();
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
   <Typography sx={{ fontWeight: 700, mb: GAP, textAlign: 'left', color: 'grey.500', fontSize: { xs: '1.05rem', md: '1.15rem' } }}>Partnership Goals</Typography>
@@ -69,7 +72,8 @@ export default function AgencyPartnershipGoalsStep({
         value={partnershipReason}
         onChange={(e) => setPartnershipReason((e.target as HTMLInputElement).value)}
         placeholder="Tell us about your goals and what you want to achieve"
-        focusColor="#e93b20"
+        icon={<HandshakeOutlinedIcon sx={{ color: theme.palette.primary.main }} />}
+        focusColor={theme.palette.primary.main}
         minRows={2}
         maxRows={4}
       />
@@ -82,10 +86,10 @@ export default function AgencyPartnershipGoalsStep({
 
       {/* Make the two checkbox groups full-width stacked rows */}
       <Box sx={{ mt: GAP }}>
-        <CheckboxGroup label="Services You Provide" options={servicesOptions} values={servicesProvided} onChange={setServicesProvided} />
+        <CheckboxGroup label="Services You Provide" options={servicesOptions} values={servicesProvided} onChange={setServicesProvided} focusColor={theme.palette.primary.main} />
       </Box>
       <Box sx={{ mt: GAP }}>
-        <CheckboxGroup label="Additional Partnership Interests" options={additionalOptions} values={additionalInterests} onChange={setAdditionalInterests} />
+        <CheckboxGroup label="Additional Partnership Interests" options={additionalOptions} values={additionalInterests} onChange={setAdditionalInterests} focusColor={theme.palette.primary.main} />
       </Box>
     </Box>
   );

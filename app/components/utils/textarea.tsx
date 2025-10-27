@@ -36,14 +36,14 @@ export default function CustomTextArea({
         flexDirection: 'row',
         alignItems: 'flex-start',
         justifyContent: 'center',
-        minHeight: { xs: 72, md: 96 },
+  minHeight: { xs: 72, lg: 96 },
         bgcolor: isDisabled ? 'grey.200' : '#fff',
         mx: 0,
-        borderRadius: { xs: '12px', md: '16px' },
+  borderRadius: { xs: '12px', lg: '16px' },
         color: 'grey.200',
         boxShadow: `0 6px 0 ${grey[300]}`,
-        px: { xs: 1, md: 2 },
-        py: { xs: 1.5, md: 2 },
+  px: { xs: 1, lg: 2 },
+  py: { xs: 1.5, lg: 2 },
         ...(isDisabled
           ? {}
           : {
@@ -73,7 +73,7 @@ export default function CustomTextArea({
           ml: 2,
           '& .MuiInputBase-input': {
             fontFamily: 'Montserrat, sans-serif',
-            fontSize: { xs: '14px', md: '18px' },
+            fontSize: { xs: '14px', lg: '18px' },
             color: isDisabled ? 'text.disabled' : 'text.primary',
           },
         }}
