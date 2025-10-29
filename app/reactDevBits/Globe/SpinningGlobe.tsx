@@ -25,7 +25,7 @@ function GlobeMesh({
   waterColor,
   textureUrl = '/earth.png',
   autoRotate = true,
-  autoRotateSpeed = 0.3,
+  autoRotateSpeed = 0.1,
   scale = 1,
   spinTrigger,
 }: Props) {

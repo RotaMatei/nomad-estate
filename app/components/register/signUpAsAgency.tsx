@@ -690,7 +690,7 @@ export default function SignUpAsAgency(props: Props) {
                         )}
                     </Box>
                 </Box>
-                <Typography sx={{ mt: GAP, color: 'text.secondary', textAlign: 'center', fontSize: { xs: '14px', lg: '18px' } }}>
+                <Typography sx={{ mt: GAP, color: 'text.secondary', textAlign: 'center', fontSize: { xs: '14px', lg: '16px' } }}>
                     Already have an Agency account?{' '}
                     <Link href="/login" style={{ fontWeight: 700, color: theme.palette.primary.main, textDecoration: 'none' }}>Log in</Link>
                 </Typography>

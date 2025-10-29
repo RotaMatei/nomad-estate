@@ -32,10 +32,10 @@ export default function CheckboxGroup({ label, options, values, onChange, focusC
         sx={{
           bgcolor: theme.palette.common.white,
           borderRadius: { xs: '12px', lg: '16px' },
-          boxShadow: `0 6px 0 ${grey[300]}`,
+          boxShadow: `0 3px 0 ${grey[300]}`,
           px: { xs: 2, lg: 3 },
           py: { xs: 1.5, lg: 2 },
-          '&:focus-within': { boxShadow: `0 6px 0 ${activeColor}` },
+          '&:focus-within': { boxShadow: `0 3px 0 ${activeColor}` },
         }}
       >
         <FormGroup sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 1 }}>

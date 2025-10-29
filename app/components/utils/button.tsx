@@ -61,7 +61,7 @@ export const CustomButton = ({
             fontWeight: 700,
             color: '#fff',
             backgroundColor: colorMain,
-            boxShadow: `0 6px 0 ${colorLight}`,
+            boxShadow: `0 3px 0 ${colorLight}`,
             px: 3,
             borderRadius: { xs: '12px', lg: '16px' },
             justifyContent: 'center',
@@ -77,7 +77,7 @@ export const CustomButton = ({
             '&.Mui-disabled': {
               color: colorMain,
               backgroundColor: grey[200],
-              boxShadow: `0 6px 0 ${grey[300]}`,
+              boxShadow: `0 3px 0 ${grey[300]}`,
               opacity: 1,
             },
             '&.Mui-disabled .MuiButton-startIcon': {

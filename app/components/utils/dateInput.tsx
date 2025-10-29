@@ -51,12 +51,12 @@ export default function DateInput({
         mx: 0,
         borderRadius: { xs: '12px', lg: '16px' },
         color: 'grey.200',
-        boxShadow: `0 6px 0 ${grey[300]}`,
+        boxShadow: `0 3px 0 ${grey[300]}`,
         px: { xs: 1, lg: 2 },
         py: { xs: 1, lg: 2 },
         ...(isDisabled ? {} : {
           '&:focus-within': {
-            boxShadow: `0 6px 0 ${focusColor}`,
+            boxShadow: `0 3px 0 ${focusColor}`,
           },
         }),
         cursor: isDisabled ? 'not-allowed' : 'text',

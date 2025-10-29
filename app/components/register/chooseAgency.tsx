@@ -57,7 +57,7 @@ export default function ChooseAgency({ onSelect, onPreSelect, buttonOnly = false
             landColor={'#003FC7'}
             waterColor={'#6FA8FF'}
             autoRotate
-            autoRotateSpeed={0.5}
+            autoRotateSpeed={0.15}
             scale={1.5}
             spinTrigger={spinTick || undefined}
             textureUrl="earth-blue.png"
@@ -101,9 +101,9 @@ export default function ChooseAgency({ onSelect, onPreSelect, buttonOnly = false
             mx: 'auto',
             backgroundColor: theme.palette.common.white,
             color: theme.palette.primary.main,
-            boxShadow: `0 6px 0 ${alpha(theme.palette.primary.main, 0.35)}`,
+            boxShadow: `0 3px 0 ${alpha(theme.palette.primary.main, 0.35)}`,
             '&:hover': { backgroundColor: theme.palette.grey[100] },
-            fontSize: { xs: '0.75rem', sm: '0.8125rem', md: '1rem', lg: '1.125rem' },
+            fontSize: { xs: '14px', lg:'16px' },
             position: 'relative',
             zIndex: 1,
           }}
@@ -137,7 +137,7 @@ export default function ChooseAgency({ onSelect, onPreSelect, buttonOnly = false
           landColor="#003FC7"
           waterColor="#6FA8FF"
           autoRotate
-          autoRotateSpeed={0.5}
+          autoRotateSpeed={0.15}
           scale={scale}
           spinTrigger={hoverTick > 0 ? hoverTick : undefined}
           textureUrl="earth-blue.png"
@@ -167,12 +167,12 @@ export default function ChooseAgency({ onSelect, onPreSelect, buttonOnly = false
         <Typography
           variant="h4"
           sx={{
-            fontWeight: 700,
+            fontWeight: 500,
             maxWidth: '75%',
             mb: 2,
             fontSize: {
-              xs: '1.5rem', // ~24px
-              lg: '2rem', // ~32px
+              xs: '14px', 
+              lg: '18px', 
             },
           }}
         >
@@ -181,11 +181,11 @@ export default function ChooseAgency({ onSelect, onPreSelect, buttonOnly = false
             component="span"
             sx={{
               display: 'inline',
-              fontWeight: 900,
+              fontWeight: 700,
               maxWidth: '75%',
               fontSize: {
-                xs: '1.5rem',
-                lg: '2rem',
+                xs: '14px',
+                lg: '18px',
               },
             }}
           >
@@ -198,11 +198,11 @@ export default function ChooseAgency({ onSelect, onPreSelect, buttonOnly = false
           sx={{
             mb: 4,
             opacity: 0.95,
-            fontWeight: 700,
+            fontWeight: 600,
             maxWidth: '75%',
             fontSize: {
-              xs: '1rem', // ~16px
-              lg: '1.25rem', // ~20px
+              xs: '14px', 
+              lg: '16px', 
             },
           }}
         >
@@ -220,11 +220,11 @@ export default function ChooseAgency({ onSelect, onPreSelect, buttonOnly = false
             mx: 'auto',
             backgroundColor: theme.palette.common.white,
             color: theme.palette.primary.main,
-            boxShadow: `0 6px 0 ${alpha(theme.palette.primary.main, 0.35)}`,
+            boxShadow: `0 3px 0 ${alpha(theme.palette.primary.main, 0.35)}`,
             '&:hover': { backgroundColor: theme.palette.grey[100] },
             fontSize: {
-              xs: '0.875rem', // ~14px
-              lg: '1.125rem', // ~18px
+              xs: '14px', // ~14px
+              lg: '16px', // ~18px
             },
           }}
           icon={<TouchAppOutlinedIcon sx={{ color: theme.palette.primary.main }} />}
@@ -238,8 +238,7 @@ export default function ChooseAgency({ onSelect, onPreSelect, buttonOnly = false
             fontWeight: 400,
             maxWidth: '75%',
             fontSize: {
-              xs: '0.875rem',
-              lg: '1.125rem',
+              xs: '14px',
             },
           }}
         >
@@ -273,7 +272,7 @@ export default function ChooseAgency({ onSelect, onPreSelect, buttonOnly = false
           right: globeFits ? 'auto' : '-3%',
           zIndex: 1,
           width: globeFits ? '1500px' : '60vw',
-          maxWidth: '1500px',
+          maxWidth: '1000px',
           height: 'auto',
           maxHeight: '50%',
           pointerEvents: 'none',
