@@ -44,7 +44,7 @@ export const CustomInput = ({
                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'center',
-                height: {xs: '36px', lg: '48px'},
+                height: { xs: '32px', lg: '40px' },
                 bgcolor: isDisabled ? 'grey.200' : (invalid ? alpha(theme.palette.error.main, 0.08) : theme.palette.common.white),
                 mx: 0,
                 borderRadius: {xs:'12px', lg: '16px'},
@@ -77,7 +77,7 @@ export const CustomInput = ({
                 disabled={isDisabled}
                 sx={{
                     fontFamily: 'Montserrat, sans-serif',
-                    fontSize: {xs: '14px', lg: '18px'},
+                    fontSize: {xs: '14px', lg: '16px'},
                     paddingLeft: 2,
                     flex: 1,
                     color: isDisabled ? 'text.disabled' : 'text.primary',

@@ -21,6 +21,7 @@ export default function ChooseInvestor({ onSelect, onPreSelect, buttonOnly = fal
   const theme = useTheme();
   const [hoverTick, setHoverTick] = useState(0);
   const [spinTick, setSpinTick] = useState(0);
+  const [overlayVisible, setOverlayVisible] = useState(false);
   const [shiftTick, setShiftTick] = useState(0);
   const holderRef = useRef<HTMLDivElement | null>(null);
   const handleHoverStart = useCallback(() => {
@@ -56,18 +57,26 @@ export default function ChooseInvestor({ onSelect, onPreSelect, buttonOnly = fal
           <SpinningGlobe
             landColor={'#d50000ff'}
             waterColor={'#fd5252'}
-            strokeColor={'#e23216ff'}
             autoRotate
             autoRotateSpeed={0.5}
-            altitude={1.5}
             scale={1.5}
-            pointerEvents="none"
+            textureUrl="earth-red.png"
             spinTrigger={spinTick || undefined}
-            shiftTrigger={shiftTick || undefined}
-            shiftTo={{ land: '#003FC7', water: '#6FA8FF', stroke: '#0034A5' }}
-            shiftDurationMs={900}
             style={{ userSelect: 'none', overflow: 'hidden', isolation: 'isolate' }}
           />
+          {/* Overlay target globe fades in during spin to avoid blank frame */}
+          <Box sx={{ position: 'absolute', inset: 0, pointerEvents: 'none', opacity: overlayVisible ? 1 : 0, transition: 'opacity 700ms ease-in-out' }}>
+            <SpinningGlobe
+              landColor={'#003FC7'}
+              waterColor={'#6FA8FF'}
+              autoRotate
+              autoRotateSpeed={0.5}
+              scale={1.5}
+              textureUrl="earth-blue.png"
+              spinTrigger={spinTick || undefined}
+              style={{ userSelect: 'none', overflow: 'hidden', isolation: 'isolate' }}
+            />
+          </Box>
         </Box>
 
         <CustomButton
@@ -78,6 +87,7 @@ export default function ChooseInvestor({ onSelect, onPreSelect, buttonOnly = fal
             try {
               window.scrollTo({ top: 0, behavior: 'smooth' });
             } catch {}
+            setOverlayVisible(true);
             setShiftTick((t) => t + 1);
             setSpinTick((t) => t + 1);
             setTimeout(() => {
@@ -119,18 +129,18 @@ export default function ChooseInvestor({ onSelect, onPreSelect, buttonOnly = fal
           right: globeFits ? 'auto' : 'auto',
           zIndex: 1,
           pointerEvents: 'none',
+          width: `${scaledSize}px`,
+          height: `${scaledSize}px`,
         }}
       >
         <SpinningGlobe
           landColor="#d50000ff"
           waterColor="#fd5252"
-          strokeColor="#e23216ff"
           autoRotate
           autoRotateSpeed={0.5}
-          altitude={1.5}
           scale={scale}
-          pointerEvents="none"
           spinTrigger={hoverTick > 0 ? hoverTick : undefined}
+          textureUrl="earth-red.png"
           style={{
             userSelect: 'none',
             overflow: 'hidden',
@@ -152,9 +162,10 @@ export default function ChooseInvestor({ onSelect, onPreSelect, buttonOnly = fal
           transform: globeFits ? { md: 'translateX(-50%)', lg: 'translateX(-50%)' } : {},
           left: globeFits ? '50%' : 0,
           zIndex: 1,
-          width: { md: '1000px', lg: '1500px' },
+          width: globeFits ? '1500px' : '60vw',
+          maxWidth: '1500px',
           height: 'auto',
-          maxWidth: 'none',
+          maxHeight: '50%',
           pointerEvents: 'none',
           userSelect: 'none',
           display: 'block',

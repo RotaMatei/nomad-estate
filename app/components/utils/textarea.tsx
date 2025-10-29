@@ -73,7 +73,7 @@ export default function CustomTextArea({
           ml: 2,
           '& .MuiInputBase-input': {
             fontFamily: 'Montserrat, sans-serif',
-            fontSize: { xs: '14px', lg: '18px' },
+            fontSize: { xs: '14px', lg: '16px' },
             color: isDisabled ? 'text.disabled' : 'text.primary',
           },
         }}

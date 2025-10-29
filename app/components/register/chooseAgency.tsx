@@ -20,6 +20,7 @@ export default function ChooseAgency({ onSelect, onPreSelect, buttonOnly = false
   const theme = useTheme();
   const [hoverTick, setHoverTick] = useState(0);
   const [spinTick, setSpinTick] = useState(0);
+  const [overlayVisible, setOverlayVisible] = useState(false);
   const [shiftTick, setShiftTick] = useState(0);
   const holderRef = useRef<HTMLDivElement | null>(null);
 
@@ -55,28 +56,37 @@ export default function ChooseAgency({ onSelect, onPreSelect, buttonOnly = false
           <SpinningGlobe
             landColor={'#003FC7'}
             waterColor={'#6FA8FF'}
-            strokeColor={'#0034A5'}
             autoRotate
             autoRotateSpeed={0.5}
-            altitude={1.5}
             scale={1.5}
-            pointerEvents="none"
             spinTrigger={spinTick || undefined}
-            shiftTrigger={shiftTick || undefined}
-            shiftTo={{ land: '#d50000ff', water: '#fd5252', stroke: '#e23216ff' }}
-            shiftDurationMs={900}
+            textureUrl="earth-blue.png"
             style={{ userSelect: 'none', overflow: 'hidden', isolation: 'isolate' }}
           />
+          {/* Overlay target globe fades in during spin to avoid blank frame */}
+          <Box sx={{ position: 'absolute', inset: 0, pointerEvents: 'none', opacity: overlayVisible ? 1 : 0, transition: 'opacity 700ms ease-in-out' }}>
+            <SpinningGlobe
+              landColor={'#d50000ff'}
+              waterColor={'#fd5252'}
+              autoRotate
+              autoRotateSpeed={0.5}
+              scale={1.5}
+              textureUrl="earth-red.png"
+              spinTrigger={spinTick || undefined}
+              style={{ userSelect: 'none', overflow: 'hidden', isolation: 'isolate' }}
+            />
+          </Box>
         </Box>
 
         <CustomButton
           color="secondary"
           label={buttonLabel}
           onClick={() => {
-            try { onPreSelect?.(); } catch {}
+            try { onPreSelect?.(); } catch { }
             try {
               window.scrollTo({ top: 0, behavior: 'smooth' });
-            } catch {}
+            } catch { }
+            setOverlayVisible(true);
             setShiftTick((t) => t + 1);
             setSpinTick((t) => t + 1);
             // Wait for spin burst, then trigger parent switch
@@ -105,7 +115,7 @@ export default function ChooseAgency({ onSelect, onPreSelect, buttonOnly = false
 
   return (
     <Box
-      sx={{ height: '100%', position: 'relative', overflow: 'hidden', color: '#fff', display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-start', p: 4 }}
+      sx={{ height: '100%', position: 'relative', overflow: 'hidden', color: '#fff', display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-start', p: 4, width: '100%' }}
       onMouseEnter={handleHoverStart}
       ref={holderRef}
     >
@@ -116,21 +126,21 @@ export default function ChooseAgency({ onSelect, onPreSelect, buttonOnly = false
           top: '50%',
           transform: globeFits ? 'translate(-50%, -50%)' : 'translateY(-50%)',
           left: globeFits ? '50%' : 'auto',
-          right: globeFits ? 'auto' : '-3%',
+          right: globeFits ? 'auto' : 0,
           zIndex: 1,
           pointerEvents: 'none',
+          width: `${scaledSize}px`,
+          height: `${scaledSize}px`,
         }}
       >
         <SpinningGlobe
           landColor="#003FC7"
           waterColor="#6FA8FF"
-          strokeColor="#0034A5"
           autoRotate
           autoRotateSpeed={0.5}
-          altitude={1.5}
           scale={scale}
-          pointerEvents="none"
           spinTrigger={hoverTick > 0 ? hoverTick : undefined}
+          textureUrl="earth-blue.png"
           style={{
             userSelect: 'none',
             overflow: 'hidden',
@@ -140,19 +150,20 @@ export default function ChooseAgency({ onSelect, onPreSelect, buttonOnly = false
       </Box>
 
       {/* Text content overlaid on top */}
-      <Box sx={{ 
-        width: '100%', 
-        maxWidth: '100%', 
+      <Box sx={{
+        width: '100%',
+        maxWidth: '100%',
         textAlign: 'center',
-         position: 'relative', 
-         top: '25vh', 
-         transform:  globeFits ? 'translateY(-30%)': 'translate(-15%, -30%)', 
-         zIndex: 2, 
-         justifyContent: 'center', 
-         display: 'flex', 
-         flexDirection: 'column', 
-         alignItems: 'center', 
-         px: 2 }}>
+        position: 'relative',
+        top: '25vh',
+        transform: globeFits ? 'translateY(-30%)' : 'translate(-15%, -30%)',
+        zIndex: 2,
+        justifyContent: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        px: 2
+      }}>
         <Typography
           variant="h4"
           sx={{
@@ -257,13 +268,14 @@ export default function ChooseAgency({ onSelect, onPreSelect, buttonOnly = false
           position: 'absolute',
           top: 'auto',
           bottom: 0,
-          transform: globeFits ?  { md: 'translateX(-50%)', lg: 'translateX(-50%)' } : {}, 
+          transform: globeFits ? { md: 'translateX(-50%)', lg: 'translateX(-50%)' } : {},
           left: globeFits ? '50%' : 'auto',
           right: globeFits ? 'auto' : '-3%',
           zIndex: 1,
-          width: { md: '1000px', lg: '1500px' },
+          width: globeFits ? '1500px' : '60vw',
+          maxWidth: '1500px',
           height: 'auto',
-          maxWidth: 'none',
+          maxHeight: '50%',
           pointerEvents: 'none',
           userSelect: 'none',
           display: 'block',

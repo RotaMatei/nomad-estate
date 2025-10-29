@@ -46,7 +46,7 @@ export default function DateInput({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        height: { xs: '36px', lg: '48px' },
+        height: { xs: '32px', lg: '40px' },
         bgcolor: isDisabled ? 'grey.200' : (invalid ? '#ffebee' : '#fff'),
         mx: 0,
         borderRadius: { xs: '12px', lg: '16px' },
@@ -79,7 +79,7 @@ export default function DateInput({
         inputProps={{ min, max, inputMode: 'numeric', pattern: '[0-9/]*' }}
         sx={{
           fontFamily: 'Montserrat, sans-serif',
-          fontSize: { xs: '14px', lg: '18px' },
+          fontSize: { xs: '14px', lg: '16px' },
           paddingLeft: 2,
           flex: 1,
           color: isDisabled ? 'text.disabled' : 'text.primary',

@@ -1,270 +1,162 @@
-"use client";
-import { useEffect, useRef, useState } from 'react';
+'use client';
+import { useRef, useEffect, useMemo } from 'react';
+import { Canvas, useFrame, useLoader } from '@react-three/fiber';
+import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
+import * as THREE from 'three';
 import styles from './SpinningGlobe.module.css';
 
-// Minimal Globe.gl public surface we rely on
-type GlobeControls = { autoRotate: boolean; autoRotateSpeed: number; enableZoom?: boolean };
-type GlobeAPI = {
-  globeImageUrl: (v: string | null) => GlobeAPI;
-  backgroundColor: (v: string) => GlobeAPI;
-  showAtmosphere: (v: boolean) => GlobeAPI;
-  polygonCapColor: (fn: () => string) => GlobeAPI;
-  polygonSideColor: (fn: () => string) => GlobeAPI;
-  polygonStrokeColor: (fn: () => string) => GlobeAPI;
-  polygonsData: (data: unknown[]) => GlobeAPI;
-  globeMaterial: () => { color?: { set?: (v: string) => void } } | undefined;
-  onGlobeReady?: (cb: () => void) => void;
-  controls?: () => GlobeControls | undefined;
-  pointOfView: (cfg: { lat: number; lng: number; altitude: number }, ms: number) => void;
-  width: (w: number) => void;
-  height: (h: number) => void;
-};
-
 type Props = {
-  landColor: string; // initial land color
-  waterColor: string; // initial water color
-  strokeColor?: string; // initial stroke color
-  dataUrl?: string;
+  landColor: string;
+  waterColor: string;
+  strokeColor?: string;
+  textureUrl?: string;
   autoRotate?: boolean;
   autoRotateSpeed?: number;
-  altitude?: number;
   scale?: number;
   className?: string;
   style?: React.CSSProperties;
   pointerEvents?: 'auto' | 'none';
   spinTrigger?: number;
-  // New: animate palette without remounting
-  shiftTrigger?: number; // increment to trigger color shift
-  shiftTo?: { land: string; water: string; stroke?: string };
-  shiftDurationMs?: number;
+  align?: 'center' | 'right' | 'left';
 };
 
-export default function SpinningGlobe({
+function GlobeMesh({
   landColor,
   waterColor,
-  strokeColor = '#111',
-  dataUrl = '/earth.geojson',
+  textureUrl = '/earth.png',
   autoRotate = true,
   autoRotateSpeed = 0.3,
-  altitude = 0.8,
   scale = 1,
-  className,
-  style,
-  pointerEvents = 'none',
   spinTrigger,
-  shiftTrigger,
-  shiftTo,
-  shiftDurationMs = 800,
 }: Props) {
-  const globeEl = useRef<HTMLDivElement | null>(null);
-  const [isSpinning, setIsSpinning] = useState(false);
-  const controlsRef = useRef<GlobeControls | null>(null);
+  const groupRef = useRef<THREE.Group>(null);
+  const shouldSpinRef = useRef(false);
   const spinTimeoutRef = useRef<number | null>(null);
-  const spinIdRef = useRef(0);
-  const globeApiRef = useRef<GlobeAPI | null>(null);
-  const currentLandRef = useRef<string>(landColor);
-  const currentWaterRef = useRef<string>(waterColor);
-  const currentStrokeRef = useRef<string>(strokeColor);
+  const texture = useLoader(THREE.TextureLoader, textureUrl);
+  // Ensure correct color space for PNGs with transparency
+  texture.colorSpace = THREE.SRGBColorSpace;
 
-  const baseSize = 250;
-  const scaledSize = baseSize * scale;
+  const safeLandColor = landColor || '#004080';   // fallback dark blue
+  const safeWaterColor = waterColor || '#87CEEB'; // fallback light blue
 
-  useEffect(() => {
-    if (!globeEl.current) return;
-    let cancelled = false;
-
-    import('globe.gl').then((mod) => {
-      if (!globeEl.current) return;
-      type GlobeFactory = (el: HTMLElement) => GlobeAPI;
-      const getCtorUnknown = ((mod as unknown as { default?: unknown }).default ?? (mod as unknown)) as unknown;
-      const GlobeCtor = getCtorUnknown as () => GlobeFactory;
-      const globe = GlobeCtor()(globeEl.current)
-        .globeImageUrl(null)
-        .backgroundColor('rgba(0,0,0,0)')
-        .showAtmosphere(false)
-        .polygonCapColor(() => currentLandRef.current)
-        .polygonSideColor(() => 'rgba(0,0,0,0)')
-        .polygonStrokeColor(() => currentStrokeRef.current)
-        .polygonsData([] as unknown[]);
-
-      const mat = globe.globeMaterial();
-      if (mat?.color?.set) mat.color.set(currentWaterRef.current);
-
-      globe.onGlobeReady?.(() => {
-  const controls = globe.controls?.();
-  controlsRef.current = controls ?? null;
-        if (controls) {
-          controls.autoRotate = !!autoRotate;
-          controls.autoRotateSpeed = autoRotateSpeed;
-          controls.enableZoom = false;
-        }
-
-        try {
-          globe.pointOfView({ lat: 0, lng: 0, altitude }, 0);
-        } catch {}
-
-        // Set scaled size for rendering and layout
-        globe.width(scaledSize);
-        globe.height(scaledSize);
-
-        const canvas = globeEl.current?.querySelector('canvas') as HTMLCanvasElement | null;
-        if (canvas) {
-          canvas.width = scaledSize;
-          canvas.height = scaledSize;
-          canvas.style.position = 'relative';
-          canvas.style.width = `${scaledSize}px`;
-          canvas.style.height = `${scaledSize}px`;
-          canvas.style.pointerEvents = 'none';
-          canvas.style.userSelect = 'none';
-          canvas.style.transform = 'none';
-          canvas.style.transformOrigin = 'center center';
-        }
-
-        // Also update the scene container if present
-        const sceneContainer = globeEl.current?.querySelector('div') as HTMLDivElement | null;
-        if (sceneContainer) {
-          sceneContainer.style.width = `${scaledSize}px`;
-          sceneContainer.style.height = `${scaledSize}px`;
-        }
-        globeApiRef.current = globe;
-      });
-
-      fetch(dataUrl)
-        .then((res) => res.json())
-        .then((data) => {
-          if (!cancelled) globe.polygonsData(data.features || data);
-        })
-        .catch(() => {});
+  const landMaterial = useMemo(() => {
+    return new THREE.MeshBasicMaterial({
+      color: new THREE.Color(safeLandColor),
+      map: texture, // Use PNG transparency as the map, not alphaMap
+      transparent: true,
+      side: THREE.FrontSide,
+      depthWrite: true,
     });
+  }, [texture, safeLandColor]);
 
-    return () => {
-      cancelled = true;
-    };
-  }, [dataUrl, autoRotate, autoRotateSpeed, altitude, scale]);
+  const waterMaterial = useMemo(() => {
+    return new THREE.MeshBasicMaterial({
+      color: new THREE.Color(safeWaterColor),
+      side: THREE.FrontSide,
+    });
+  }, [safeWaterColor]);
+
+  useFrame((_, delta) => {
+    if (groupRef.current) {
+      if (autoRotate) {
+        groupRef.current.rotation.y += autoRotateSpeed * delta;
+      }
+      if (shouldSpinRef.current) {
+        const spinSpeed = (1 / 0.75) * 2.5 * Math.sign(autoRotateSpeed);
+        groupRef.current.rotation.y += spinSpeed * delta;
+      }
+    }
+  });
+
+  // Camera is configured via PerspectiveCamera in the Canvas
 
   useEffect(() => {
+    if (spinTrigger == null || !groupRef.current || spinTimeoutRef.current) return;
+
+    shouldSpinRef.current = true;
+
+    spinTimeoutRef.current = window.setTimeout(() => {
+      shouldSpinRef.current = false;
+      spinTimeoutRef.current = null;
+    }, 800);
+
     return () => {
       if (spinTimeoutRef.current) {
         window.clearTimeout(spinTimeoutRef.current);
         spinTimeoutRef.current = null;
       }
     };
-  }, []);
-
-  useEffect(() => {
-    if (spinTrigger == null || spinTimeoutRef.current) return;
-    const controls = controlsRef.current;
-    setIsSpinning(false);
-    const rafId = requestAnimationFrame(() => setIsSpinning(true));
-
-    if (!controls) return () => cancelAnimationFrame(rafId);
-
-    const mySpinId = ++spinIdRef.current;
-    const dir = controls.autoRotateSpeed < 0 ? -1 : 1;
-    const durationMs = 750;
-    const spinSpeedMag = (1 / (durationMs / 1000)) * 55;
-
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = dir * spinSpeedMag;
-
-    spinTimeoutRef.current = window.setTimeout(() => {
-      if (spinIdRef.current === mySpinId) {
-        controls.autoRotate = autoRotate;
-        controls.autoRotateSpeed = autoRotateSpeed;
-        setIsSpinning(false);
-        // Allow future spins by clearing the in-progress sentinel
-        spinTimeoutRef.current = null;
-      }
-    }, durationMs + 50);
-
-    return () => cancelAnimationFrame(rafId);
   }, [spinTrigger]);
 
-  // Smoothly shift colors without recreating the globe
-  useEffect(() => {
-  if (!shiftTrigger || !shiftTo || !globeApiRef.current) return;
-  const globe = globeApiRef.current as GlobeAPI;
-    const mat = globe.globeMaterial?.();
+  return (
+    <group scale={scale} ref={groupRef}>
+      {/* Water background */}
+      <mesh>
+        {/* Slightly smaller radius so land renders on top without z-fighting */}
+        <sphereGeometry args={[0.999, 64, 64]} />
+        <primitive object={waterMaterial} attach="material" />
+      </mesh>
 
-    const parseHex = (hex: string) => {
-      const h = hex.replace('#', '');
-      const hasAlpha = h.length === 8;
-      const r = parseInt(h.slice(0, 2), 16);
-      const g = parseInt(h.slice(2, 4), 16);
-      const b = parseInt(h.slice(4, 6), 16);
-      const a = hasAlpha ? parseInt(h.slice(6, 8), 16) / 255 : 1;
-      return { r, g, b, a };
-    };
-    const toRgba = (c: { r: number; g: number; b: number; a?: number }) => `rgba(${c.r|0}, ${c.g|0}, ${c.b|0}, ${c.a ?? 1})`;
-    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+      {/* Land mask */}
+      <mesh renderOrder={1}>
+        {/* Land slightly larger or equal to base sphere */}
+        <sphereGeometry args={[1.001, 64, 64]} />
+        <primitive object={landMaterial} attach="material" />
+      </mesh>
+    </group>
+  );
+}
 
-    const fromLand = parseHex(currentLandRef.current);
-    const toLand = parseHex(shiftTo.land);
-    const fromWater = parseHex(currentWaterRef.current);
-    const toWater = parseHex(shiftTo.water);
-    const fromStroke = parseHex(currentStrokeRef.current);
-    const toStroke = parseHex(shiftTo.stroke ?? currentStrokeRef.current);
+export default function SpinningGlobe({
+  landColor,
+  waterColor,
+  strokeColor,
+  textureUrl = '/earth.png',
+  autoRotate,
+  autoRotateSpeed,
+  scale = 1,
+  className,
+  style,
+  pointerEvents = 'none',
+  spinTrigger,
+  align,
+}: Props) {
+  const size = 250 * scale;
 
-    const t0 = performance.now();
-    const dur = Math.max(200, shiftDurationMs);
-    let rafId = 0;
-    const step = () => {
-      const t = Math.min(1, (performance.now() - t0) / dur);
-      const land = {
-        r: lerp(fromLand.r, toLand.r, t),
-        g: lerp(fromLand.g, toLand.g, t),
-        b: lerp(fromLand.b, toLand.b, t),
-        a: lerp(fromLand.a, toLand.a, t),
-      };
-      const water = {
-        r: lerp(fromWater.r, toWater.r, t),
-        g: lerp(fromWater.g, toWater.g, t),
-        b: lerp(fromWater.b, toWater.b, t),
-        a: lerp(fromWater.a, toWater.a, t),
-      };
-      const stroke = {
-        r: lerp(fromStroke.r, toStroke.r, t),
-        g: lerp(fromStroke.g, toStroke.g, t),
-        b: lerp(fromStroke.b, toStroke.b, t),
-        a: lerp(fromStroke.a, toStroke.a, t),
-      };
-
-      // Update colors on the fly
-      globe.polygonCapColor(() => toRgba(land));
-      globe.polygonStrokeColor(() => toRgba(stroke));
-      if (mat?.color?.set) mat.color.set(toRgba(water));
-
-      if (t < 1) {
-        rafId = requestAnimationFrame(step);
-      } else {
-        currentLandRef.current = shiftTo.land;
-        currentWaterRef.current = shiftTo.water;
-        currentStrokeRef.current = shiftTo.stroke ?? currentStrokeRef.current;
-      }
-    };
-    rafId = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(rafId);
-  }, [shiftTrigger]);
+  const alignmentStyle: React.CSSProperties =
+    align === 'right'
+      ? { marginLeft: 'auto', marginRight: 0 }
+      : align === 'left'
+      ? { marginLeft: 0, marginRight: 'auto' }
+      : { margin: '0 auto' };
 
   return (
     <div
       className={`${styles.globeWrap} ${className ?? ''}`}
       style={{
-        width: `${scaledSize}px`,
-        height: `${scaledSize}px`,
+        width: `${size}px`,
+        height: `${size}px`,
         pointerEvents,
+        ...alignmentStyle,
         ...style,
       }}
     >
-      <div
-        ref={globeEl}
-        className={`${styles.globeRoot}`}
-        style={{
-          position: 'relative',
-          width: `${scaledSize}px`,
-          height: `${scaledSize}px`,
-        }}
-      />
+      <Canvas>
+        <PerspectiveCamera makeDefault position={[0, 0, 2.5]} fov={50} near={0.1} far={100} />
+        <ambientLight intensity={0.5} />
+        <directionalLight position={[5, 5, 5]} intensity={1} />
+        <GlobeMesh
+          landColor={landColor}
+          waterColor={waterColor}
+          strokeColor={strokeColor}
+          textureUrl={textureUrl}
+          autoRotate={autoRotate}
+          autoRotateSpeed={autoRotateSpeed}
+          scale={1}
+          spinTrigger={spinTrigger}
+        />
+        <OrbitControls enableZoom={false} enablePan={false} enableRotate={false} />
+      </Canvas>
     </div>
   );
 }

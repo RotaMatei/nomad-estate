@@ -54,10 +54,10 @@ export const CustomButton = ({
           startIcon={startIconEl}
           disabled={disabled}
           sx={{
-            height: { xs: 42, md: 48, lg: 56 },
+            height: { xs: 42, md: 48 },
             textTransform: 'none',
             fontFamily: 'Montserrat, sans-serif',
-            fontSize: { xs: '12px', sm: '13px', md: '14px', lg: '18px' },
+            fontSize: { xs: '12px', md: '14px', lg: '18px' },
             fontWeight: 700,
             color: '#fff',
             backgroundColor: colorMain,

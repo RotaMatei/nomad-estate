@@ -62,7 +62,7 @@ export const CustomAutocomplete = ({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        height: { xs: '36px', lg: '48px' },
+        height: { xs: '32px', lg: '40px' },
         bgcolor: isDisabled ? 'grey.200' : theme.palette.common.white,
         mx: 0,
         borderRadius: { xs: '12px', lg: '16px' },
@@ -109,7 +109,7 @@ export const CustomAutocomplete = ({
               '& .MuiInputBase-input': {
                 pl: 0,
                 fontFamily: 'Montserrat, sans-serif',
-                fontSize: { xs: '14px', lg: '18px' },
+                fontSize: { xs: '14px', lg: '16px' },
                 color: isDisabled ? 'text.disabled' : 'text.primary',
               },
             }}

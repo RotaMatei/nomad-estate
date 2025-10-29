@@ -25,7 +25,7 @@ export default function CheckboxGroup({ label, options, values, onChange, focusC
   return (
     <Box>
       {label && (
-        <Typography sx={{ fontWeight: 700, mt: 1, mb: 1, color: grey[500], fontSize: { xs: '16px', lg: '20px' } }}>{label}</Typography>
+        <Typography sx={{ fontWeight: 700, mt: 1, mb: 1, color: grey[500], fontSize: { xs: '16px', lg: '18px' } }}>{label}</Typography>
       )}
 
       <Box
@@ -43,7 +43,7 @@ export default function CheckboxGroup({ label, options, values, onChange, focusC
             <FormControlLabel
               key={o.value}
               label={o.label}
-              sx={{ '& .MuiFormControlLabel-label': { color: grey[700], fontFamily: 'Montserrat, sans-serif', fontSize: { xs: '14px', lg: '18px' } } }}
+              sx={{ '& .MuiFormControlLabel-label': { color: grey[700], fontFamily: 'Montserrat, sans-serif', fontSize: { xs: '14px', lg: '16px' } } }}
               control={
                 <Checkbox
                   checked={values.includes(o.value)}
