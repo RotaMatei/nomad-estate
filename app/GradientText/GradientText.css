@@ -6,7 +6,7 @@
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  border-radius: 1.25rem;
+  border-radius: none;
   font-weight: 500;
   backdrop-filter: blur(10px);
   transition: box-shadow 0.5s ease-out;
@@ -22,7 +22,7 @@
   bottom: 0;
   background-size: 300% 100%;
   animation: gradient linear infinite;
-  border-radius: inherit;
+  border-radius: none;
   z-index: 0;
   pointer-events: none;
 }
@@ -32,7 +32,7 @@
   position: absolute;
   left: 0;
   top: 0;
-  border-radius: inherit;
+  border-radius: none;
   width: calc(100% - 2px);
   height: calc(100% - 2px);
   left: 50%;
@@ -57,7 +57,7 @@
 }
 
 .text-content {
-  display: inline-block;
+  display: flex;
   position: relative;
   z-index: 2;
   background-size: 300% 100%;
@@ -65,8 +65,16 @@
   -webkit-background-clip: text;
   color: transparent;
   animation: gradient linear infinite;
-  font-size: 36px;
+  font-size: 28px;
   font-family: "Montserrat", sans-serif;
   font-weight: 700;
   margin-bottom: 8px;
+  justify-content: center;
+}
+
+@media (min-width: 850px) {
+  .text-content {
+    font-size: 48px;
+      justify-content: center;
+  }
 }

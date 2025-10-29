@@ -5,12 +5,14 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import { grey } from '@mui/material/colors';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 type Option = { value: string | number; label: string };
 
 export const CustomSelect = ({
   focusColor = '#000000',
   icon = <PersonOutlineOutlinedIcon sx={{ color: grey[500] }} />,
+  selectIcon: SelectIcon = ArrowDropDownIcon,
   label = '',
   value = '',
   onChange = () => {},
@@ -21,6 +23,7 @@ export const CustomSelect = ({
 }: {
   focusColor?: string;
   icon?: ReactNode;
+  selectIcon?: React.ElementType;
   label?: string;
   value?: string | number;
   onChange?: (value: string | number) => void;
@@ -46,12 +49,12 @@ export const CustomSelect = ({
   mx: 0,
   borderRadius: { xs: '12px', md: '16px' },
         color: 'grey.200',
-        boxShadow: `0 6px 0 ${grey[300]}`,
+        boxShadow: `0 3px 0 ${grey[300]}`,
         px: { xs: 1, md: 2 },
         py: { xs: 1, md: 2 },
         ...(isDisabled ? {} : {
           '&:focus-within': {
-            boxShadow: `0 6px 0 ${focusColor}`,
+            boxShadow: `0 3px 0 ${focusColor}`,
           },
         }),
         cursor: isDisabled ? 'not-allowed' : 'pointer',
@@ -66,6 +69,7 @@ export const CustomSelect = ({
         displayEmpty
         variant="standard"
         disabled={isDisabled}
+        IconComponent={SelectIcon}
         // hide standard underline
         renderValue={(selected) => {
           if (selected === '' || selected === undefined) return placeholder || label || 'Select';
@@ -75,9 +79,9 @@ export const CustomSelect = ({
         inputProps={{ 'aria-label': label || placeholder || 'select' }}
         sx={{
           width: '100%',
-          pl: 2,
+          pl: 1,
           fontFamily: 'Montserrat, sans-serif',
-          fontSize: { xs: '14px', md: '18px' },
+          fontSize: { xs: '14px', md: '16px' },
           color: isDisabled ? 'text.disabled' : 'text.primary',
           '&:before, &:after': { display: 'none' },
         }}

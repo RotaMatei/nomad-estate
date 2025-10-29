@@ -13,7 +13,7 @@ type Props = {
   focusColor?: string;
 };
 
-export default function CheckboxGroup({ label, options, values, onChange, focusColor = '#e93b20' }: Props) {
+export default function CheckboxGroup({ label, options, values, onChange, focusColor = 'secondary.main' }: Props) {
   const toggle = (val: string) => {
     const next = values.includes(val) ? values.filter((v) => v !== val) : [...values, val];
     onChange(next);
@@ -29,10 +29,11 @@ export default function CheckboxGroup({ label, options, values, onChange, focusC
         sx={{
           bgcolor: '#fff',
           borderRadius: { xs: '12px', md: '16px' },
-          boxShadow: `0 6px 0 ${grey[300]}`,
+          boxShadow: `0 3px 0 ${grey[300]}`,
           px: { xs: 2, md: 3 },
           py: { xs: 1.5, md: 2 },
-          '&:focus-within': { boxShadow: `0 6px 0 ${focusColor}` },
+          '&:focus-within': { boxShadow: `0 3px 0 ${focusColor}` },
+          
         }}
       >
         <FormGroup sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 1 }}>
@@ -40,17 +41,24 @@ export default function CheckboxGroup({ label, options, values, onChange, focusC
             <FormControlLabel
               key={o.value}
               label={o.label}
-              sx={{ '& .MuiFormControlLabel-label': { color: grey[500] } }}
+              sx={{
+                '& .MuiFormControlLabel-label': {
+                  color: grey[500],
+                  fontSize: '16px',
+                  lineHeight: 1.2,
+                },
+              }}
               control={
                 <Checkbox
                   checked={values.includes(o.value)}
                   onChange={() => toggle(o.value)}
-                  icon={<CheckBoxOutlineBlankRoundedIcon />}
-                  checkedIcon={<CheckBoxRoundedIcon />}
+                  icon={<CheckBoxOutlineBlankRoundedIcon sx={{ scale: 1.2 }} />}
+                  checkedIcon={<CheckBoxRoundedIcon sx={{ scale: 1.2 }}/>}
                   sx={{
                     color: grey[500],
+                    '& .MuiSvgIcon-root': { fontSize: 16 },
                     '&.Mui-checked': {
-                      color: '#e93b20',
+                      color: 'secondary.main',
                     },
                   }}
                 />

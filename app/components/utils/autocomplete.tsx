@@ -44,15 +44,15 @@ export const CustomAutocomplete = ({
         justifyContent: 'center',
         height: { xs: '36px', md: '48px' },
         bgcolor: isDisabled ? 'grey.200' : '#fff',
-  mx: 0,
+        mx: 0,
         borderRadius: { xs: '12px', md: '16px' },
         color: 'grey.200',
-        boxShadow: `0 6px 0 ${grey[300]}`,
+        boxShadow: `0 3px 0 ${grey[300]}`,
         px: { xs: 1, md: 2 },
         py: { xs: 1, md: 2 },
         ...(isDisabled ? {} : {
           '&:focus-within': {
-            boxShadow: `0 6px 0 ${focusColor}`,
+            boxShadow: `0 3px 0 ${focusColor}`,
           },
         }),
         cursor: isDisabled ? 'not-allowed' : 'text',
@@ -95,7 +95,7 @@ export const CustomAutocomplete = ({
               '& .MuiInputBase-input': {
                 pl: 0,
                 fontFamily: 'Montserrat, sans-serif',
-                fontSize: { xs: '14px', md: '18px' },
+                fontSize: { xs: '14px', md: '16px' },
                 color: isDisabled ? 'text.disabled' : 'text.primary',
               },
             }}

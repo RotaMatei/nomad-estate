@@ -49,7 +49,7 @@ export const CustomButton = ({
                     fontWeight: 700,
                     color: '#fff',
                     backgroundColor: colorMain,
-                    boxShadow: `0 6px 0 ${colorLight}`,
+                    boxShadow: `0 3px 0 ${colorLight}`,
                     px: 3,
                     borderRadius: { xs: '12px', md: '16px' },
                     justifyContent: 'center',
