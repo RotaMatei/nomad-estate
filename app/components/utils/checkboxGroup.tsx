@@ -48,12 +48,13 @@ export default function CheckboxGroup({ label, options, values, onChange, focusC
                 <Checkbox
                   checked={values.includes(o.value)}
                   onChange={() => toggle(o.value)}
-                  icon={<CheckBoxOutlineBlankRoundedIcon sx={{ fontSize: { xs: 22, lg: 26 } }} />}
-                  checkedIcon={<CheckBoxRoundedIcon sx={{ fontSize: { xs: 22, lg: 26 } }} />}
+                  icon={<CheckBoxOutlineBlankRoundedIcon sx={{ scale: 1.2 }} />}
+                  checkedIcon={<CheckBoxRoundedIcon sx={{ scale: 1.2 }}/>}
                   sx={{
-                    color: grey[600],
+                    color: grey[500],
+                    '& .MuiSvgIcon-root': { fontSize: 16 },
                     '&.Mui-checked': {
-                      color: activeColor,
+                      color: 'secondary.main',
                     },
                   }}
                 />

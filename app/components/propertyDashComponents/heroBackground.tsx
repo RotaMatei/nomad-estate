@@ -15,15 +15,14 @@ const GradientContainer: React.FC<GradientContainerProps> = ({
   return (
     <Box
       sx={{
-        position: 'absolute',
-        top: '50%',
+        position: 'relative',
+        top: { xs: '34%', md: '20%' },
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        height: '150vh',
+        height: {xs:'160vh',md:'700px'},
         width: '95vw',
-        background: 'linear-gradient(to bottom, #ffffff, #d0e6ff, #e0cfff)',
+        background: 'linear-gradient(to bottom, #ffffff, #ffffff, #e0cfff, #c1ccffff )',
         borderRadius,
-        padding,
         display: 'flex',
         flexDirection: 'column',
       }}
