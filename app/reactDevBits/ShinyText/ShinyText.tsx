@@ -1,4 +1,4 @@
-import "./ShinyText.css";
+import './ShinyText.css';
 
 interface ShinyTextProps {
   text: string;
@@ -11,13 +11,13 @@ const ShinyText: React.FC<ShinyTextProps> = ({
   text,
   disabled = false,
   speed = 5,
-  className = "",
+  className = '',
 }) => {
   const animationDuration = `${speed}s`;
 
   return (
     <div
-      className={`shiny-text ${disabled ? "disabled" : ""} ${className}`}
+      className={`shiny-text ${disabled ? 'disabled' : ''} ${className}`}
       style={{ animationDuration }}
     >
       {text}

@@ -32,8 +32,7 @@ export default function PropertiesDashboard() {
           zIndex: 1,
           px: 4,
         }}
-      >
-      </Box>
-    </ThemeProvider >
+      ></Box>
+    </ThemeProvider>
   );
 }

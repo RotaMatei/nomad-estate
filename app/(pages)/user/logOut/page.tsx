@@ -32,9 +32,9 @@ export default function UserLogOut() {
       router.push('/');
     } catch (err: unknown) {
       if (err instanceof Error) {
-          setError(err.message);
+        setError(err.message);
       } else {
-          setError('LogOut failed');
+        setError('LogOut failed');
       }
     }
   };

@@ -16,7 +16,14 @@ type Props = {
   paddingBottom?: number | string;
 };
 
-export default function ChooseAgency({ onSelect, onPreSelect, buttonOnly = false, buttonLabel = 'Sign Up', paddingTop = 60, paddingBottom = 28 }: Props) {
+export default function ChooseAgency({
+  onSelect,
+  onPreSelect,
+  buttonOnly = false,
+  buttonLabel = 'Sign Up',
+  paddingTop = 60,
+  paddingBottom = 28,
+}: Props) {
   const theme = useTheme();
   const [hoverTick, setHoverTick] = useState(0);
   const [spinTick, setSpinTick] = useState(0);
@@ -50,9 +57,26 @@ export default function ChooseAgency({ onSelect, onPreSelect, buttonOnly = false
 
   if (buttonOnly) {
     return (
-      <Box sx={{ position: 'relative', pt: typeof paddingTop === 'number' ? `${paddingTop}px` : paddingTop, pb: typeof paddingBottom === 'number' ? `${paddingBottom}px` : paddingBottom, textAlign: 'center', overflow: 'hidden' }}>
+      <Box
+        sx={{
+          position: 'relative',
+          pt: typeof paddingTop === 'number' ? `${paddingTop}px` : paddingTop,
+          pb: typeof paddingBottom === 'number' ? `${paddingBottom}px` : paddingBottom,
+          textAlign: 'center',
+          overflow: 'hidden',
+        }}
+      >
         {/* Oversized globe centered horizontally; only bottom half visible */}
-        <Box sx={{ position: 'absolute', top: 0, left: '50%', transform: 'translate(-50%, -50%)', zIndex: 0, pointerEvents: 'none' }}>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 0,
+            pointerEvents: 'none',
+          }}
+        >
           <SpinningGlobe
             landColor={'#003FC7'}
             waterColor={'#6FA8FF'}
@@ -64,7 +88,15 @@ export default function ChooseAgency({ onSelect, onPreSelect, buttonOnly = false
             style={{ userSelect: 'none', overflow: 'hidden', isolation: 'isolate' }}
           />
           {/* Overlay target globe fades in during spin to avoid blank frame */}
-          <Box sx={{ position: 'absolute', inset: 0, pointerEvents: 'none', opacity: overlayVisible ? 1 : 0, transition: 'opacity 700ms ease-in-out' }}>
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              pointerEvents: 'none',
+              opacity: overlayVisible ? 1 : 0,
+              transition: 'opacity 700ms ease-in-out',
+            }}
+          >
             <SpinningGlobe
               landColor={'#d50000ff'}
               waterColor={'#fd5252'}
@@ -82,10 +114,12 @@ export default function ChooseAgency({ onSelect, onPreSelect, buttonOnly = false
           color="secondary"
           label={buttonLabel}
           onClick={() => {
-            try { onPreSelect?.(); } catch { }
+            try {
+              onPreSelect?.();
+            } catch {}
             try {
               window.scrollTo({ top: 0, behavior: 'smooth' });
-            } catch { }
+            } catch {}
             setOverlayVisible(true);
             setShiftTick((t) => t + 1);
             setSpinTick((t) => t + 1);
@@ -115,7 +149,17 @@ export default function ChooseAgency({ onSelect, onPreSelect, buttonOnly = false
 
   return (
     <Box
-      sx={{ height: '100%', position: 'relative', overflow: 'hidden', color: '#fff', display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-start', p: 4, width: '100%' }}
+      sx={{
+        height: '100%',
+        position: 'relative',
+        overflow: 'hidden',
+        color: '#fff',
+        display: 'flex',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start',
+        p: 4,
+        width: '100%',
+      }}
       onMouseEnter={handleHoverStart}
       ref={holderRef}
     >
@@ -150,20 +194,22 @@ export default function ChooseAgency({ onSelect, onPreSelect, buttonOnly = false
       </Box>
 
       {/* Text content overlaid on top */}
-      <Box sx={{
-        width: '100%',
-        maxWidth: '100%',
-        textAlign: 'center',
-        position: 'relative',
-        top: '25vh',
-        transform: globeFits ? 'translateY(-30%)' : 'translate(-15%, -30%)',
-        zIndex: 2,
-        justifyContent: 'center',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        px: 2
-      }}>
+      <Box
+        sx={{
+          width: '100%',
+          maxWidth: '100%',
+          textAlign: 'center',
+          position: 'relative',
+          top: '25vh',
+          transform: globeFits ? 'translateY(-30%)' : 'translate(-15%, -30%)',
+          zIndex: 2,
+          justifyContent: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          px: 2,
+        }}
+      >
         <Typography
           variant="h4"
           sx={{

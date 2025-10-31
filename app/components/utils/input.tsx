@@ -1,39 +1,39 @@
-import { ReactNode } from "react";
-import { Box, Input } from "@mui/material";
+import { ReactNode } from 'react';
+import { Box, Input } from '@mui/material';
 import DoNotDisturbAltOutlinedIcon from '@mui/icons-material/DoNotDisturbAltOutlined';
-import { grey } from "@mui/material/colors";
-import { alpha, useTheme } from "@mui/material/styles";
+import { grey } from '@mui/material/colors';
+import { alpha, useTheme } from '@mui/material/styles';
 
 export const CustomInput = ({
-    focusColor = '#000000',
-    icon = <DoNotDisturbAltOutlinedIcon sx={{ color: grey[500] }} />,
-    label = "",
-    value = "",
-    onChange = () => {},
-    onFocus,
-    onBlur,
-    placeholder = "",
-    type = "text",
-    disabled = false,
-    locked = false,
-    endAdornment,
-    onEndAdornmentClick,
-    invalid = false,
+  focusColor = '#000000',
+  icon = <DoNotDisturbAltOutlinedIcon sx={{ color: grey[500] }} />,
+  label = '',
+  value = '',
+  onChange = () => {},
+  onFocus,
+  onBlur,
+  placeholder = '',
+  type = 'text',
+  disabled = false,
+  locked = false,
+  endAdornment,
+  onEndAdornmentClick,
+  invalid = false,
 }: {
-    focusColor?: string;
-    icon?: ReactNode;
-    label?: string;
-    value?: string;
-    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
-    onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
-    placeholder?: string;
-    type?: string;
-    disabled?: boolean;
-    locked?: boolean;
-    endAdornment?: ReactNode;
-    onEndAdornmentClick?: (e?: React.MouseEvent<HTMLElement>) => void;
-    invalid?: boolean;
+  focusColor?: string;
+  icon?: ReactNode;
+  label?: string;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  type?: string;
+  disabled?: boolean;
+  locked?: boolean;
+  endAdornment?: ReactNode;
+  onEndAdornmentClick?: (e?: React.MouseEvent<HTMLElement>) => void;
+  invalid?: boolean;
 }) => {
     const theme = useTheme();
     const isDisabled = disabled || locked;
