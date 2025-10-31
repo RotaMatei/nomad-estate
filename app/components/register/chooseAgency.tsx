@@ -272,7 +272,7 @@ export default function ChooseAgency({ onSelect, onPreSelect, buttonOnly = false
           right: globeFits ? 'auto' : '-3%',
           zIndex: 1,
           width: globeFits ? '1500px' : '60vw',
-          maxWidth: '1000px',
+          maxWidth: '1500px',
           height: 'auto',
           maxHeight: '50%',
           pointerEvents: 'none',
