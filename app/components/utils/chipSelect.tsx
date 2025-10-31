@@ -11,7 +11,13 @@ type Props = {
   focusColor?: string;
 };
 
-export default function ChipSelect({ label, options, values, onChange, focusColor = '#e93b20' }: Props) {
+export default function ChipSelect({
+  label,
+  options,
+  values,
+  onChange,
+  focusColor = '#e93b20',
+}: Props) {
   const toggle = (val: string) => {
     const next = values.includes(val) ? values.filter((v) => v !== val) : [...values, val];
     onChange(next);
@@ -19,9 +25,7 @@ export default function ChipSelect({ label, options, values, onChange, focusColo
 
   return (
     <Box>
-      {label && (
-        <Typography sx={{ fontWeight: 700, mb: 1, color: grey[500] }}>{label}</Typography>
-      )}
+      {label && <Typography sx={{ fontWeight: 700, mb: 1, color: grey[500] }}>{label}</Typography>}
       <Box
         sx={{
           bgcolor: '#fff',

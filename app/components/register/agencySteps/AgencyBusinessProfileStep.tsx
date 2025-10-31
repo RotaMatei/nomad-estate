@@ -60,32 +60,68 @@ export default function AgencyBusinessProfileStep({
   const open = Boolean(anchorEl);
   const currencyIcon = (code: typeof currency) => {
     switch (code) {
-      case 'USD': return <AttachMoneyOutlinedIcon />;
-      case 'GBP': return <CurrencyPoundOutlinedIcon />;
-      case 'JPY': return <CurrencyYenOutlinedIcon />;
-      case 'CHF': return <CurrencyFrancOutlinedIcon />;
+      case 'USD':
+        return <AttachMoneyOutlinedIcon />;
+      case 'GBP':
+        return <CurrencyPoundOutlinedIcon />;
+      case 'JPY':
+        return <CurrencyYenOutlinedIcon />;
+      case 'CHF':
+        return <CurrencyFrancOutlinedIcon />;
       case 'EUR':
-      default: return <EuroOutlinedIcon />;
+      default:
+        return <EuroOutlinedIcon />;
     }
   };
-  const handleCurrencyClick = (e?: React.MouseEvent<HTMLElement>) => setAnchorEl((e?.currentTarget as HTMLElement) || null);
-  const handleCurrencySelect = (code: typeof currency) => { setCurrency(code); setAnchorEl(null); };
+  const handleCurrencyClick = (e?: React.MouseEvent<HTMLElement>) =>
+    setAnchorEl((e?.currentTarget as HTMLElement) || null);
+  const handleCurrencySelect = (code: typeof currency) => {
+    setCurrency(code);
+    setAnchorEl(null);
+  };
   return (
     <Box>
-      <Typography sx={{ fontWeight: 700, mb: GAP, textAlign: 'left', color: 'grey.500', fontSize: { xs: '1.1rem', md: '1.2rem' } }}>
+      <Typography
+        sx={{
+          fontWeight: 700,
+          mb: GAP,
+          textAlign: 'left',
+          color: 'grey.500',
+          fontSize: { xs: '1.1rem', md: '1.2rem' },
+        }}
+      >
         Business Profile
       </Typography>
-      <Typography sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: 700, mt: 1, mb: 1, textAlign: 'left', color: 'grey.500', fontSize: { xs: '16px', md: '18px', lg: '20px' } }}>
+      <Typography
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          fontWeight: 700,
+          mt: 1,
+          mb: 1,
+          textAlign: 'left',
+          color: 'grey.500',
+          fontSize: { xs: '16px', md: '18px', lg: '20px' },
+        }}
+      >
         <MonetizationOnOutlinedIcon sx={{ color: theme.palette.primary.main }} /> Primary Markets
       </Typography>
-      <CheckboxGroup options={marketOptions} values={primaryMarkets} onChange={setPrimaryMarkets} focusColor={theme.palette.primary.main} />
+      <CheckboxGroup
+        options={marketOptions}
+        values={primaryMarkets}
+        onChange={setPrimaryMarkets}
+        focusColor={theme.palette.primary.main}
+      />
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: GAP, mt: GAP }}>
         <Box sx={{ flex: 1 }}>
           <CustomInput
             label="Yearly Transactions"
             value={yearlyTransactions}
-            onChange={(e) => setYearlyTransactions((e.target as HTMLInputElement).value.replace(/[^0-9]/g, ''))}
+            onChange={(e) =>
+              setYearlyTransactions((e.target as HTMLInputElement).value.replace(/[^0-9]/g, ''))
+            }
             placeholder="Yearly Transactions"
             icon={<TrendingUpOutlinedIcon />}
             focusColor={theme.palette.primary.main}
@@ -95,10 +131,19 @@ export default function AgencyBusinessProfileStep({
           <CustomInput
             label="Average Property Value"
             value={averagePropertyValue}
-            onChange={(e) => setAveragePropertyValue((e.target as HTMLInputElement).value.replace(/[^0-9.,]/g, ''))}
+            onChange={(e) =>
+              setAveragePropertyValue((e.target as HTMLInputElement).value.replace(/[^0-9.,]/g, ''))
+            }
             placeholder="Average Property Value"
             icon={<TrendingUpOutlinedIcon />}
-            endAdornment={<Box sx={{ display: 'flex', alignItems: 'center', color: theme.palette.primary.main }}>{currencyIcon(currency)}<ArrowDropDownIcon /></Box>}
+            endAdornment={
+              <Box
+                sx={{ display: 'flex', alignItems: 'center', color: theme.palette.primary.main }}
+              >
+                {currencyIcon(currency)}
+                <ArrowDropDownIcon />
+              </Box>
+            }
             onEndAdornmentClick={handleCurrencyClick}
             focusColor={theme.palette.primary.main}
           />
@@ -110,23 +155,25 @@ export default function AgencyBusinessProfileStep({
               sx: {
                 bgcolor: theme.palette.common.white,
                 borderRadius: 2,
-                boxShadow: '0 8px 24px rgba(0,0,0,0.12)'
-              }
+                boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+              },
             }}
             MenuListProps={{
               sx: {
                 p: 0,
-                bgcolor: theme.palette.common.white
-              }
+                bgcolor: theme.palette.common.white,
+              },
             }}
           >
-            {([
-              { code: 'EUR', label: 'EUR', Icon: EuroOutlinedIcon },
-              { code: 'USD', label: 'USD', Icon: AttachMoneyOutlinedIcon },
-              { code: 'GBP', label: 'GBP', Icon: CurrencyPoundOutlinedIcon },
-              { code: 'JPY', label: 'JPY', Icon: CurrencyYenOutlinedIcon },
-              { code: 'CHF', label: 'CHF', Icon: CurrencyFrancOutlinedIcon },
-            ] as const).map(({ code, label, Icon }) => (
+            {(
+              [
+                { code: 'EUR', label: 'EUR', Icon: EuroOutlinedIcon },
+                { code: 'USD', label: 'USD', Icon: AttachMoneyOutlinedIcon },
+                { code: 'GBP', label: 'GBP', Icon: CurrencyPoundOutlinedIcon },
+                { code: 'JPY', label: 'JPY', Icon: CurrencyYenOutlinedIcon },
+                { code: 'CHF', label: 'CHF', Icon: CurrencyFrancOutlinedIcon },
+              ] as const
+            ).map(({ code, label, Icon }) => (
               <MenuItem
                 key={code}
                 onClick={() => handleCurrencySelect(code)}
@@ -137,14 +184,16 @@ export default function AgencyBusinessProfileStep({
                     bgcolor: alpha(theme.palette.primary.main, 0.1),
                   },
                   '&.Mui-selected:hover': {
-                      bgcolor: alpha(theme.palette.primary.main, 0.16),
+                    bgcolor: alpha(theme.palette.primary.main, 0.16),
                   },
                   '&:hover': {
                     bgcolor: alpha(theme.palette.background.default, 0.9),
                   },
                 }}
               >
-                <Icon sx={{ mr: 1, color: currency === code ? theme.palette.primary.main : grey[500] }} />
+                <Icon
+                  sx={{ mr: 1, color: currency === code ? theme.palette.primary.main : grey[500] }}
+                />
                 {label}
               </MenuItem>
             ))}

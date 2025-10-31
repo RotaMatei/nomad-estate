@@ -55,13 +55,25 @@ export default function AgencyCompanyInfoStep({
   const isValidWebsite = (s: string) => /^https?:\/\/.+\..+/.test(s);
   const yearNum = parseInt(establishedYear || '0', 10);
   const isYearTooHigh = establishedYear.length === 4 && yearNum > currentYear;
-  const isYearInvalid = establishedYear.length > 0 && (isNaN(yearNum) || establishedYear.length !== 4);
+  const isYearInvalid =
+    establishedYear.length > 0 && (isNaN(yearNum) || establishedYear.length !== 4);
   const invalidName = companyName.length > 0 && !isValidCompanyName(companyName) && !nameFocused;
-  const invalidYear = (isYearInvalid || isYearTooHigh) && !yearFocused && establishedYear.length > 0;
+  const invalidYear =
+    (isYearInvalid || isYearTooHigh) && !yearFocused && establishedYear.length > 0;
   const invalidSite = companyWebsite.length > 0 && !isValidWebsite(companyWebsite) && !siteFocused;
   return (
     <Box>
-  <Typography sx={{ fontWeight: 700, mb: GAP, textAlign: 'left', color: 'grey.500', fontSize: { xs: '1.1rem', md: '1.2rem' } }}>Company Information</Typography>
+      <Typography
+        sx={{
+          fontWeight: 700,
+          mb: GAP,
+          textAlign: 'left',
+          color: 'grey.500',
+          fontSize: { xs: '1.1rem', md: '1.2rem' },
+        }}
+      >
+        Company Information
+      </Typography>
 
       <CustomInput
         label="Company Name"
@@ -74,7 +86,11 @@ export default function AgencyCompanyInfoStep({
         focusColor={theme.palette.primary.main}
         invalid={invalidName}
       />
-      <Collapse in={nameFocused && companyName.length > 0 && !isValidCompanyName(companyName)} timeout={200} unmountOnExit>
+      <Collapse
+        in={nameFocused && companyName.length > 0 && !isValidCompanyName(companyName)}
+        timeout={200}
+        unmountOnExit
+      >
         <Typography variant="caption" sx={{ color: 'error.main', pl: 1, mt: 0.5 }}>
           Company name can contain letters, spaces and dots only.
         </Typography>
@@ -96,7 +112,11 @@ export default function AgencyCompanyInfoStep({
           <CustomInput
             label="Established Year"
             value={establishedYear}
-            onChange={(e) => setEstablishedYear((e.target as HTMLInputElement).value.replace(/[^0-9]/g, '').slice(0, 4))}
+            onChange={(e) =>
+              setEstablishedYear(
+                (e.target as HTMLInputElement).value.replace(/[^0-9]/g, '').slice(0, 4),
+              )
+            }
             onFocus={() => setYearFocused(true)}
             onBlur={() => setYearFocused(false)}
             placeholder="Year Of Establishment"
@@ -139,7 +159,11 @@ export default function AgencyCompanyInfoStep({
           focusColor={theme.palette.primary.main}
           invalid={invalidSite}
         />
-        <Collapse in={siteFocused && companyWebsite.length > 0 && !isValidWebsite(companyWebsite)} timeout={200} unmountOnExit>
+        <Collapse
+          in={siteFocused && companyWebsite.length > 0 && !isValidWebsite(companyWebsite)}
+          timeout={200}
+          unmountOnExit
+        >
           <Typography variant="caption" sx={{ color: 'error.main', pl: 1, mt: 0.5 }}>
             Must start with http:// or https:// and contain a dot.
           </Typography>

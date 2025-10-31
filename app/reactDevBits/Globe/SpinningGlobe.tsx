@@ -36,7 +36,7 @@ function GlobeMesh({
   // Ensure correct color space for PNGs with transparency
   texture.colorSpace = THREE.SRGBColorSpace;
 
-  const safeLandColor = landColor || '#004080';   // fallback dark blue
+  const safeLandColor = landColor || '#004080'; // fallback dark blue
   const safeWaterColor = waterColor || '#87CEEB'; // fallback light blue
 
   const landMaterial = useMemo(() => {
@@ -127,8 +127,8 @@ export default function SpinningGlobe({
     align === 'right'
       ? { marginLeft: 'auto', marginRight: 0 }
       : align === 'left'
-      ? { marginLeft: 0, marginRight: 'auto' }
-      : { margin: '0 auto' };
+        ? { marginLeft: 0, marginRight: 'auto' }
+        : { margin: '0 auto' };
 
   return (
     <div

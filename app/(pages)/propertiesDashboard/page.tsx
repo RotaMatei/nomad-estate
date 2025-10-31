@@ -26,8 +26,7 @@ export default function PropertiesDashboard() {
           justifyContent: 'normal',
           alignItems: 'center',
         }}
-      >
-      </Box>
-    </ThemeProvider >
+      ></Box>
+    </ThemeProvider>
   );
 }
