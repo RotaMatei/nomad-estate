@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Grid, Typography, Paper } from '@mui/material';
 import FadeContent from '../../reactDevBits/FadeContent/FadeContent';
+import AnimatedContent from '@/app/reactDevBits/AnimatedContent/AnimatedContent';
 
 const WhyChooseNomad = () => {
     const features = [
@@ -59,9 +60,20 @@ const WhyChooseNomad = () => {
 
                 <Grid container spacing={4} justifyContent="center" alignItems="center">
                     {features.map((feature, index) => (
-                        
-                            <Grid size={{ xs: 12, md: 5 }} key={index}>
-                                <FadeContent blur={false} duration={1000} easing="ease-out" initialOpacity={0}>
+
+                        <Grid size={{ xs: 12, md: 5 }} key={index}>
+                            <AnimatedContent
+                                distance={100}
+                                direction="vertical"
+                                reverse={false}
+                                duration={1.1}
+                                //ease="bounce.out"
+                                initialOpacity={0.2}
+                                animateOpacity
+                                scale={1.0}
+                                threshold={0.1}
+                                delay={0}
+                            >
                                 <Paper
                                     elevation={3}
                                     sx={{
@@ -78,10 +90,10 @@ const WhyChooseNomad = () => {
                                     <Typography variant="body2" color="text.secondary">
                                         {feature.description}
                                     </Typography>
-                                </Paper> 
-                                </FadeContent>
-                            </Grid>
-                       
+                                </Paper>
+                            </AnimatedContent>
+                        </Grid>
+
                     ))}
                 </Grid>
 
