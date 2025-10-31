@@ -120,7 +120,7 @@ export const CustomAutocomplete = ({
           // See: https://mui.com/material-ui/api/autocomplete/#props-renderoption
           const { key, ...optionProps } = props as unknown as { key: string } & React.HTMLAttributes<HTMLLIElement>;
           return (
-            <li key={key} {...optionProps}>{option.label}</li>
+            <li {...optionProps} key={`option-${String(option.value ?? key)}`}>{option.label}</li>
           );
         }}
         freeSolo={false}

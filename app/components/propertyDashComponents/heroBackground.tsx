@@ -16,15 +16,18 @@ const GradientContainer: React.FC<GradientContainerProps> = ({
     <Box
       sx={{
         position: 'relative',
-        top: { xs: '34%', md: '20%' },
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        height: {xs:'160vh',md:'700px'},
         width: '95vw',
+        mx: 'auto',
+        mt: { xs: 2, sm: 3, md: 4 },
+        mb: { xs: 4, md: 6 },
+        minHeight: 'auto',
         background: 'linear-gradient(to bottom, #ffffff, #ffffff, #e0cfff, #c1ccffff )',
         borderRadius,
         display: 'flex',
         flexDirection: 'column',
+        p: padding,
+        // Extend the gradient lower so cards can overlap it visually
+        pb: { xs: '150px', sm: '220px', md: '300px', lg: '350px' },
       }}
     >
       {children}

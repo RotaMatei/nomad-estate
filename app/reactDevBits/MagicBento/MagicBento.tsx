@@ -5,7 +5,6 @@ import { Box, Slider, Typography, Stack, Divider } from '@mui/material';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import MonetizationOnOutlinedIcon from '@mui/icons-material/MonetizationOnOutlined';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
-import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import HomeWorkOutlinedIcon from '@mui/icons-material/HomeWorkOutlined';
 import SingleBedOutlinedIcon from '@mui/icons-material/SingleBedOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
@@ -66,9 +65,9 @@ const cardData: BentoCardProps[] = [
   },
   {
     color: '#060010',
-    title: 'Automation',
-    description: 'Streamline workflows',
-    label: 'Efficiency',
+    title: 'Coming soon',
+    description: 'View properties around the globe',
+    label: 'Globe View',
   },
 ];
 

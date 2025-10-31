@@ -22,9 +22,10 @@ export default function Navbar() {
       sx={{
         px: 4,
         paddingTop: { xs: 0, md: 3 },
-        paddingBottom: 10,
+        paddingBottom: { xs: 6, sm: 3, md: 1 },
         fontFamily: 'Montserrat, sans-serif',
-        zIndex: 300,
+        position: 'relative',
+        zIndex: 1000, // ensure navbar sits above gradient/cards on all devices
       }}
     >
       <Grid container spacing={2} alignItems="center" display={{ xs: 'none', md: 'flex' }}>
@@ -160,7 +161,7 @@ export default function Navbar() {
         </Grid>
 
       </Grid>
-      <Grid container sx={{ marginTop: 6, display:'flex', justifyContent:'center' }}>
+  <Grid container sx={{ marginTop: { xs: 6, sm: 3, md: 0 }, display:{ xs: 'flex', md: 'none' }, justifyContent:'center' }}>
         <Grid size={{ xs: 9, md: 6 }}>
           <Box
             sx={{

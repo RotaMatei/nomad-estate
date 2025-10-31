@@ -4,7 +4,15 @@ import { Box, Button, Grid, InputBase, Typography } from '@mui/material';
 
 export default function HeroText() {
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <Box sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            position: 'relative',
+            zIndex: 2, // above background, below filters/navbar
+            pointerEvents: 'none',
+            mt: { xs: 15, sm:20}, // push text lower on sm+
+        }}>
             <Typography variant="h1" sx={{textAlign:'center'}}>
                 <GradientText
                     colors={["#e80000ff", "#BC2DFF", "#121de6ff", "#BC2DFF", "#E80000"]}

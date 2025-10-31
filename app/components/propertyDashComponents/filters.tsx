@@ -4,9 +4,8 @@ import MagicBento from '@/app/reactDevBits/MagicBento/MagicBento';
 
 export default function Filters() {
     return (
-        <Box className="filters-container">
-
-            <Box sx={{ position: 'absolute', }}>
+        <Box className="filters-container" sx={{ mt: { xs: 2, md: 3 } }}>
+            <Box>
                 <MagicBento
                     textAutoHide={true}
                     enableStars={true}

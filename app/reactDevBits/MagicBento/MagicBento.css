@@ -16,14 +16,11 @@
   gap: 0.5em;
   padding: 0.75em;
   font-size: clamp(1rem, 0.9rem + 0.5vw, 1.5rem);
-  position: absolute; /* overlay above background */
-  left: 50%;
-  transform: translateX(-50%);
-  top: 8rem; /* default offset; refined per breakpoint below */
   width: 95vw; /* wider by default */
   max-width: 1200px; /* allow it to be wider than before */
+  margin: 0.5rem auto 0; /* center; small default spacing */
+  position: relative; /* participate in layout so container grows */
   z-index: 3; /* ensure over gradient */
-
 }
 
 .card {
@@ -135,7 +132,7 @@
     grid-template-columns: 1fr;
     width: 96vw; /* wider on xs */
     max-width: none;
-    top: 64rem;
+    margin-top: -10rem;
     box-sizing: border-box;
   }
 
@@ -168,6 +165,18 @@
     min-height: 0;
     align-self: start;
   }
+
+  /* Hide the fourth card on extra-small screens */
+  .card:nth-child(4) {
+    display: none;
+  }
+}
+
+/* Ensure Card 4 is hidden up to 600px wide as well (covers more small devices) */
+@media (max-width: 600px) {
+  .card-grid > .card:nth-child(4) {
+    display: none !important;
+  }
 }
 
 @media (min-width: 451px) {
@@ -178,9 +187,9 @@
     gap: 0.75em;
     width: 95vw; /* keep it wide on sm/md */
     max-width: 1200px;
-    top: 60rem;
     padding: 0.75em;
     box-sizing: border-box;
+     margin-top: -13rem; /* extreme overlap on small/medium screens */
   }
 
 
@@ -228,7 +237,7 @@
   .card-grid {
     grid-template-columns: repeat(4, 1fr);
     grid-template-rows: 1fr 1fr 1fr;
-   top:30rem;
+    margin-top: -22rem; /* extreme overlap on large screens */
    /* Reduce vertical spacing between rows on the right side */
    gap: 0.35em 0.75em; /* row-gap column-gap */
   }

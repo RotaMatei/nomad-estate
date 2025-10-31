@@ -10,14 +10,17 @@ import Filters from '@/app/components/propertyDashComponents/filters';
 export default function PropertiesDashboard() {
   return (
     <ThemeProvider theme={lightTheme}>
-      <Box sx={{ backgroundColor: 'background.default', height: '250vh', position: 'relative', justifyContent: 'center', alignItems: 'center' }}>
+      <Box sx={{ backgroundColor: 'background.default', minHeight: '190vh', position: 'relative', justifyContent: 'center', alignItems: 'center' }}>
         <Navbar />
         <GradientContainer>
           <HeroText />
-          <Filters />
         </GradientContainer>
-        
+        <Filters />
+
       </Box>
+      <Box sx={{ backgroundColor: 'background.default', minHeight: '60vh', justifyContent: 'center', alignItems: 'center'}}>
+
+      </Box  >
       <Box
         sx={{
           backgroundColor: 'text.secondary',
@@ -25,6 +28,9 @@ export default function PropertiesDashboard() {
           display: 'flex',
           justifyContent: 'normal',
           alignItems: 'center',
+          position: 'relative',
+          zIndex: 1,
+          px: 4,
         }}
       >
       </Box>

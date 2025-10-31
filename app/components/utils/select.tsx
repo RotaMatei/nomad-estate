@@ -95,7 +95,7 @@ export const CustomSelect = ({
         }}
         // hide standard underline
         renderValue={(selected) => {
-          if (selected === '' || selected === undefined) return '';
+          if (selected === '' || selected === undefined) return label || placeholder || '';
           const found = options.find((o) => o.value === selected);
           return found ? found.label : String(selected);
         }}
