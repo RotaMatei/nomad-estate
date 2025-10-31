@@ -10,31 +10,35 @@ export default function ChangePasswordPage() {
   const [error, setError] = useState('');
   const router = useRouter();
 
-    useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            if(payload) setAgencyId(payload.sub);
-        }
-    })
-
-    const handlePasswordChange = async () => {
-        try {
-            await api.patch("/auth/agency/change-password", { agencyId, oldPassword, newPassword }, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
-            });
-            localStorage.clear();
-            router.push("/");
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                setError(err.message);
-            } else {
-                setError("ChangePassword failed!");
-            }
-        }
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload) setAgencyId(payload.sub);
     }
+  });
+
+  const handlePasswordChange = async () => {
+    try {
+      await api.patch(
+        '/auth/agency/change-password',
+        { agencyId, oldPassword, newPassword },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        },
+      );
+      localStorage.clear();
+      router.push('/');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('ChangePassword failed!');
+      }
+    }
+  };
 
   return (
     <div>

@@ -41,24 +41,30 @@ export const CustomSelect = ({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-  height: { xs: '32px', lg: '40px' },
+        height: { xs: '32px', lg: '40px' },
         bgcolor: isDisabled ? 'grey.200' : '#fff',
-  mx: 0,
-  borderRadius: { xs: '12px', lg: '16px' },
+        mx: 0,
+        borderRadius: { xs: '12px', lg: '16px' },
         color: 'grey.200',
         boxShadow: `0 6px 0 ${grey[300]}`,
-  px: { xs: 1, lg: 2 },
-  py: { xs: 1, lg: 2 },
-        ...(isDisabled ? {} : {
-          '&:focus-within': {
-            boxShadow: `0 6px 0 ${focusColor}`,
-          },
-        }),
+        px: { xs: 1, lg: 2 },
+        py: { xs: 1, lg: 2 },
+        ...(isDisabled
+          ? {}
+          : {
+              '&:focus-within': {
+                boxShadow: `0 6px 0 ${focusColor}`,
+              },
+            }),
         cursor: isDisabled ? 'not-allowed' : 'pointer',
         opacity: isDisabled ? 0.95 : 1,
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', color: isDisabled ? grey[500] : focusColor }}>{icon}</Box>
+      <Box
+        sx={{ display: 'flex', alignItems: 'center', color: isDisabled ? grey[500] : focusColor }}
+      >
+        {icon}
+      </Box>
 
       <Select
         value={value}

@@ -57,7 +57,7 @@ const Glare: React.FC<GlareProps> = ({
     '--gh-duration': `${transitionDuration}ms`,
     '--gh-size': `${glareSize}%`,
     '--gh-rgba': rgba,
-    '--gh-border': borderColor
+    '--gh-border': borderColor,
   };
 
   const [run, setRun] = useState(false);

@@ -36,14 +36,14 @@ export default function CustomTextArea({
         flexDirection: 'row',
         alignItems: 'flex-start',
         justifyContent: 'center',
-  minHeight: { xs: 72, lg: 96 },
+        minHeight: { xs: 72, lg: 96 },
         bgcolor: isDisabled ? 'grey.200' : '#fff',
         mx: 0,
-  borderRadius: { xs: '12px', lg: '16px' },
+        borderRadius: { xs: '12px', lg: '16px' },
         color: 'grey.200',
         boxShadow: `0 6px 0 ${grey[300]}`,
-  px: { xs: 1, lg: 2 },
-  py: { xs: 1.5, lg: 2 },
+        px: { xs: 1, lg: 2 },
+        py: { xs: 1.5, lg: 2 },
         ...(isDisabled
           ? {}
           : {
@@ -55,7 +55,16 @@ export default function CustomTextArea({
         opacity: isDisabled ? 0.95 : 1,
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', color: isDisabled ? grey[500] : focusColor, pt: 0.5 }}>{icon}</Box>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          color: isDisabled ? grey[500] : focusColor,
+          pt: 0.5,
+        }}
+      >
+        {icon}
+      </Box>
 
       <TextField
         variant="standard"

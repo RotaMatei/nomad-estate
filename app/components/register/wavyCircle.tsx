@@ -12,7 +12,13 @@ type WavyCircleProps = {
   colors?: string[]; // explicit 5-color palette (two darker, base, two lighter)
 };
 
-export default function WavyCircle({ size = 520, intensity = 260, speed = 1.15, baseColor, colors }: WavyCircleProps) {
+export default function WavyCircle({
+  size = 520,
+  intensity = 260,
+  speed = 1.15,
+  baseColor,
+  colors,
+}: WavyCircleProps) {
   const theme = useTheme();
   const isSm = useMediaQuery(theme.breakpoints.down('sm'));
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -71,7 +77,13 @@ export default function WavyCircle({ size = 520, intensity = 260, speed = 1.15, 
         }}
       />
       <noscript>
-        <Box sx={{ width: '100%', height: '100%', background: `radial-gradient(circle at 30% 30%, ${lighten(base, 0.4)}, ${base})` }} />
+        <Box
+          sx={{
+            width: '100%',
+            height: '100%',
+            background: `radial-gradient(circle at 30% 30%, ${lighten(base, 0.4)}, ${base})`,
+          }}
+        />
       </noscript>
     </Box>
   );

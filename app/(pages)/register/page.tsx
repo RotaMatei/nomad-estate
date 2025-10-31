@@ -74,7 +74,9 @@ export default function RegisterPage() {
     };
   }, []);
   useEffect(() => {
-    api.get('/countries/retrieve/get-all').then((response) => setCountries(response.data as Country[]));
+    api
+      .get('/countries/retrieve/get-all')
+      .then((response) => setCountries(response.data as Country[]));
   }, []);
 
   useEffect(() => {
@@ -84,15 +86,19 @@ export default function RegisterPage() {
       setSelectedCityId('');
 
       // Fetch states for the country
-      api.get(`/states/retrieve/get-all/${selectedCountryId}`)
-        .then((r) => setStates(((r.data as State[]) || [])))
+      api
+        .get(`/states/retrieve/get-all/${selectedCountryId}`)
+        .then((r) => setStates((r.data as State[]) || []))
         .catch(() => setStates([]));
 
       // Always fetch cities by country to show when no state is selected
-      api.get(`/cities/retrieve/get-all-by-country/${selectedCountryId}`)
+      api
+        .get(`/cities/retrieve/get-all-by-country/${selectedCountryId}`)
         .then((r) => {
           const fetched = (r.data as City[]) || [];
-          const fetchedSorted = [...fetched].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+          const fetchedSorted = [...fetched].sort((a, b) =>
+            a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }),
+          );
           setCitiesByCountry(fetchedSorted);
           setCities(fetchedSorted);
         })
@@ -115,7 +121,9 @@ export default function RegisterPage() {
         .get(`/cities/retrieve/get-all-by-state/${selectedStateId}`)
         .then((r) => {
           const data = (r.data as City[]) || [];
-          const sorted = [...data].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+          const sorted = [...data].sort((a, b) =>
+            a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }),
+          );
           setCities(sorted);
         })
         .catch(() => setCities([]));
@@ -155,7 +163,7 @@ export default function RegisterPage() {
       localStorage.setItem('refreshToken', res.data.refreshToken);
       localStorage.setItem('jti', res.data.RefreshJTI);
       localStorage.setItem('user', res.data.firstName + ' ' + res.data.lastName);
-  router.push('/');
+      router.push('/');
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -171,9 +179,16 @@ export default function RegisterPage() {
   };
 
   // Generate a UUID for related records
-  const genId = () => (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
+  const genId = () =>
+    typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
-  type RelatedSets = { primaryMarkets: string[]; servicesProvided: string[]; additionalPartnershipInterests: string[] };
+  type RelatedSets = {
+    primaryMarkets: string[];
+    servicesProvided: string[];
+    additionalPartnershipInterests: string[];
+  };
   type AgencyRegisterPayload = {
     email: string;
     password: string;
@@ -203,7 +218,10 @@ export default function RegisterPage() {
   };
 
   // Handle Agency register + related record creation using dedicated services
-  const handleAgencyRegister = async (data: { payload: AgencyRegisterPayload; related: RelatedSets }) => {
+  const handleAgencyRegister = async (data: {
+    payload: AgencyRegisterPayload;
+    related: RelatedSets;
+  }) => {
     try {
       const res = await api.post('/auth/agency/register', data.payload);
       // Persist tokens
@@ -220,13 +238,17 @@ export default function RegisterPage() {
 
       // Fire related creations in parallel (best-effort)
       const pmReqs = (data.related.primaryMarkets || []).map((p) =>
-        api.post('/agency/primary-market/create', { id: genId(), agencyId, primaryMarket: p })
+        api.post('/agency/primary-market/create', { id: genId(), agencyId, primaryMarket: p }),
       );
       const spReqs = (data.related.servicesProvided || []).map((s) =>
-        api.post('/agency/service-provided/create', { id: genId(), agencyId, serviceProvided: s })
+        api.post('/agency/service-provided/create', { id: genId(), agencyId, serviceProvided: s }),
       );
       const apiReqs = (data.related.additionalPartnershipInterests || []).map((a) =>
-        api.post('/agency/additional-partnership-interest/create', { id: genId(), agencyId, additionalPartnershipInterest: a })
+        api.post('/agency/additional-partnership-interest/create', {
+          id: genId(),
+          agencyId,
+          additionalPartnershipInterest: a,
+        }),
       );
 
       await Promise.allSettled([...pmReqs, ...spReqs, ...apiReqs]);
@@ -240,75 +262,98 @@ export default function RegisterPage() {
   };
 
   // Agency flow: submit directly (confirm inline on the form)
-  const handleAgencySubmitRequest = (data: { payload: AgencyRegisterPayload; related: RelatedSets }) => {
+  const handleAgencySubmitRequest = (data: {
+    payload: AgencyRegisterPayload;
+    related: RelatedSets;
+  }) => {
     handleAgencyRegister(data);
   };
 
   return (
-    <Box sx={{ height: { xs: 'auto', md: '100vh' }, overflow: { xs: 'visible', md: 'hidden' }, bgcolor: '#fff' }}>
+    <Box
+      sx={{
+        height: { xs: 'auto', md: '100vh' },
+        overflow: { xs: 'visible', md: 'hidden' },
+        bgcolor: '#fff',
+      }}
+    >
       {/* Mobile: opposite-role quick switch above the active form */}
       <Box sx={{ display: { xs: 'block', md: 'none' } }}>
         <Box>
           <Box sx={{ flexShrink: 0 }}>
             {isAgencyRegister ? (
-              <ChooseInvestor onSelect={onSelectInvestorMobile} onPreSelect={onPreSelectMobile} buttonOnly buttonLabel="Sign up as Investor" paddingTop={72} paddingBottom={72} />
+              <ChooseInvestor
+                onSelect={onSelectInvestorMobile}
+                onPreSelect={onPreSelectMobile}
+                buttonOnly
+                buttonLabel="Sign up as Investor"
+                paddingTop={72}
+                paddingBottom={72}
+              />
             ) : (
-              <ChooseAgency onSelect={onSelectAgencyMobile} onPreSelect={onPreSelectMobile} buttonOnly buttonLabel="Sign up as Agency" paddingTop={72} paddingBottom={72} />
+              <ChooseAgency
+                onSelect={onSelectAgencyMobile}
+                onPreSelect={onPreSelectMobile}
+                buttonOnly
+                buttonLabel="Sign up as Agency"
+                paddingTop={72}
+                paddingBottom={72}
+              />
             )}
           </Box>
           <Box sx={{ mt: 6, opacity: mobileFormOpacity, transition: 'opacity 350ms ease' }}>
             {isAgencyRegister ? (
               <SignUpAsAgency
-              countries={countries}
-              states={states}
-              cities={cities}
-              selectedCountryId={selectedCountryId}
-              selectedStateId={selectedStateId}
-              selectedCityId={selectedCityId}
-              setSelectedCountryById={setSelectedCountryId}
-              setSelectedStateById={setSelectedStateId}
-              setSelectedCityById={setSelectedCityId}
-              email={email}
-              setEmail={setEmail}
-              password={password}
-              setPassword={setPassword}
-              firstName={firstName}
-              setFirstName={setFirstName}
-              lastName={lastName}
-              setLastName={setLastName}
-              phonePrefix={phonePrefix}
-              setPhonePrefix={setPhonePrefix}
-              phoneNumber={phoneNumber}
-              setPhoneNumber={setPhoneNumber}
-              onSubmit={handleAgencySubmitRequest}
-            />
+                countries={countries}
+                states={states}
+                cities={cities}
+                selectedCountryId={selectedCountryId}
+                selectedStateId={selectedStateId}
+                selectedCityId={selectedCityId}
+                setSelectedCountryById={setSelectedCountryId}
+                setSelectedStateById={setSelectedStateId}
+                setSelectedCityById={setSelectedCityId}
+                email={email}
+                setEmail={setEmail}
+                password={password}
+                setPassword={setPassword}
+                firstName={firstName}
+                setFirstName={setFirstName}
+                lastName={lastName}
+                setLastName={setLastName}
+                phonePrefix={phonePrefix}
+                setPhonePrefix={setPhonePrefix}
+                phoneNumber={phoneNumber}
+                setPhoneNumber={setPhoneNumber}
+                onSubmit={handleAgencySubmitRequest}
+              />
             ) : (
               <SignUpAsInvestor
-              countries={countries}
-              states={states}
-              cities={cities}
-              selectedCountryId={selectedCountryId}
-              selectedStateId={selectedStateId}
-              selectedCityId={selectedCityId}
-              setSelectedCountryById={setSelectedCountryId}
-              setSelectedStateById={setSelectedStateId}
-              setSelectedCityById={setSelectedCityId}
-              email={email}
-              setEmail={setEmail}
-              password={password}
-              setPassword={setPassword}
-              firstName={firstName}
-              setFirstName={setFirstName}
-              lastName={lastName}
-              setLastName={setLastName}
-              phonePrefix={phonePrefix}
-              setPhonePrefix={setPhonePrefix}
-              phoneNumber={phoneNumber}
-              setPhoneNumber={setPhoneNumber}
-              birthDate={birthDate}
-              setBirthDate={setBirthDate}
-              onSubmit={handleInvestorSubmitRequest}
-            />
+                countries={countries}
+                states={states}
+                cities={cities}
+                selectedCountryId={selectedCountryId}
+                selectedStateId={selectedStateId}
+                selectedCityId={selectedCityId}
+                setSelectedCountryById={setSelectedCountryId}
+                setSelectedStateById={setSelectedStateId}
+                setSelectedCityById={setSelectedCityId}
+                email={email}
+                setEmail={setEmail}
+                password={password}
+                setPassword={setPassword}
+                firstName={firstName}
+                setFirstName={setFirstName}
+                lastName={lastName}
+                setLastName={setLastName}
+                phonePrefix={phonePrefix}
+                setPhonePrefix={setPhonePrefix}
+                phoneNumber={phoneNumber}
+                setPhoneNumber={setPhoneNumber}
+                birthDate={birthDate}
+                setBirthDate={setBirthDate}
+                onSubmit={handleInvestorSubmitRequest}
+              />
             )}
           </Box>
         </Box>

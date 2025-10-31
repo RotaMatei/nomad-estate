@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import type { Metadata } from 'next';
+import './globals.css';
 import Providers from '@/app/providers';
 import { Montserrat } from 'next/font/google';
 
 const montserrat = Montserrat({
   subsets: ['latin'],
-  weight: ['300','400','500','600','700','800','900'],
+  weight: ['300', '400', '500', '600', '700', '800', '900'],
   display: 'swap',
 });
 
@@ -23,9 +23,7 @@ export default function RootLayout({
     <html lang="en">
       <head />
       <body className={montserrat.className}>
-        <Providers>
-          {children}
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

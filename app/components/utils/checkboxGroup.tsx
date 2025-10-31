@@ -25,7 +25,17 @@ export default function CheckboxGroup({ label, options, values, onChange, focusC
   return (
     <Box>
       {label && (
-        <Typography sx={{ fontWeight: 700, mt: 1, mb: 1, color: grey[500], fontSize: { xs: '16px', lg: '18px' } }}>{label}</Typography>
+        <Typography
+          sx={{
+            fontWeight: 700,
+            mt: 1,
+            mb: 1,
+            color: grey[500],
+            fontSize: { xs: '16px', lg: '18px' },
+          }}
+        >
+          {label}
+        </Typography>
       )}
 
       <Box
@@ -38,12 +48,20 @@ export default function CheckboxGroup({ label, options, values, onChange, focusC
           '&:focus-within': { boxShadow: `0 6px 0 ${activeColor}` },
         }}
       >
-        <FormGroup sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 1 }}>
+        <FormGroup
+          sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 1 }}
+        >
           {options.map((o) => (
             <FormControlLabel
               key={o.value}
               label={o.label}
-              sx={{ '& .MuiFormControlLabel-label': { color: grey[700], fontFamily: 'Montserrat, sans-serif', fontSize: { xs: '14px', lg: '16px' } } }}
+              sx={{
+                '& .MuiFormControlLabel-label': {
+                  color: grey[700],
+                  fontFamily: 'Montserrat, sans-serif',
+                  fontSize: { xs: '14px', lg: '16px' },
+                },
+              }}
               control={
                 <Checkbox
                   checked={values.includes(o.value)}

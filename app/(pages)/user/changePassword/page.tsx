@@ -33,9 +33,9 @@ export default function ChangePasswordPage() {
       router.push('/');
     } catch (err: unknown) {
       if (err instanceof Error) {
-          setError(err.message);
+        setError(err.message);
       } else {
-          setError('ChangePassword failed');
+        setError('ChangePassword failed');
       }
     }
   };

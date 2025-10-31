@@ -44,8 +44,23 @@ function VerifyContent() {
   }, [params]);
 
   return (
-    <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16 }}>
-      <h1>{status === 'success' ? 'Email Verified' : status === 'error' ? 'Verification Error' : 'Verifying…'}</h1>
+    <div
+      style={{
+        minHeight: '60vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        gap: 16,
+      }}
+    >
+      <h1>
+        {status === 'success'
+          ? 'Email Verified'
+          : status === 'error'
+            ? 'Verification Error'
+            : 'Verifying…'}
+      </h1>
       <p>{message}</p>
       {status !== 'idle' && (
         <button onClick={() => router.push('/login')} style={{ padding: '10px 16px' }}>
@@ -58,7 +73,20 @@ function VerifyContent() {
 
 export default function VerifyPage() {
   return (
-    <Suspense fallback={<div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Verifying…</div>}>
+    <Suspense
+      fallback={
+        <div
+          style={{
+            minHeight: '60vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          Verifying…
+        </div>
+      }
+    >
       <VerifyContent />
     </Suspense>
   );

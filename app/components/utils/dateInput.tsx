@@ -1,7 +1,7 @@
-import { ReactNode } from "react";
-import { Box, Input } from "@mui/material";
+import { ReactNode } from 'react';
+import { Box, Input } from '@mui/material';
 import EventOutlinedIcon from '@mui/icons-material/EventOutlined';
-import { grey } from "@mui/material/colors";
+import { grey } from '@mui/material/colors';
 
 type Props = {
   focusColor?: string;
@@ -24,12 +24,12 @@ type Props = {
 export default function DateInput({
   focusColor = '#000000',
   icon = <EventOutlinedIcon sx={{ color: grey[500] }} />,
-  label = "",
-  value = "",
+  label = '',
+  value = '',
   onChange = () => {},
   onFocus,
   onBlur,
-  placeholder = "",
+  placeholder = '',
   disabled = false,
   locked = false,
   endAdornment,
@@ -47,23 +47,27 @@ export default function DateInput({
         alignItems: 'center',
         justifyContent: 'center',
         height: { xs: '32px', lg: '40px' },
-        bgcolor: isDisabled ? 'grey.200' : (invalid ? '#ffebee' : '#fff'),
+        bgcolor: isDisabled ? 'grey.200' : invalid ? '#ffebee' : '#fff',
         mx: 0,
         borderRadius: { xs: '12px', lg: '16px' },
         color: 'grey.200',
         boxShadow: `0 6px 0 ${grey[300]}`,
         px: { xs: 1, lg: 2 },
         py: { xs: 1, lg: 2 },
-        ...(isDisabled ? {} : {
-          '&:focus-within': {
-            boxShadow: `0 6px 0 ${focusColor}`,
-          },
-        }),
+        ...(isDisabled
+          ? {}
+          : {
+              '&:focus-within': {
+                boxShadow: `0 6px 0 ${focusColor}`,
+              },
+            }),
         cursor: isDisabled ? 'not-allowed' : 'text',
         opacity: isDisabled ? 0.95 : 1,
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', color: isDisabled ? grey[500] : focusColor }}>
+      <Box
+        sx={{ display: 'flex', alignItems: 'center', color: isDisabled ? grey[500] : focusColor }}
+      >
         {icon}
       </Box>
       <Input
@@ -86,7 +90,16 @@ export default function DateInput({
         }}
       />
       {endAdornment ? (
-        <Box onClick={onEndAdornmentClick} sx={{ ml: 1, display: 'flex', alignItems: 'center', color: isDisabled ? grey[500] : focusColor, cursor: onEndAdornmentClick ? 'pointer' : 'default' }}>
+        <Box
+          onClick={onEndAdornmentClick}
+          sx={{
+            ml: 1,
+            display: 'flex',
+            alignItems: 'center',
+            color: isDisabled ? grey[500] : focusColor,
+            cursor: onEndAdornmentClick ? 'pointer' : 'default',
+          }}
+        >
           {endAdornment}
         </Box>
       ) : null}

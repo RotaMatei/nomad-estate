@@ -29,7 +29,7 @@ export default function Navbar() {
     >
       <Grid container spacing={2} alignItems="center" display={{ xs: 'none', md: 'flex' }}>
         {/* Logo */}
-        <Grid size={{ xs: 12, md: 6 }} >
+        <Grid size={{ xs: 12, md: 6 }}>
           <Box
             sx={{
               display: { xs: 'none', md: 'flex' },
@@ -37,7 +37,6 @@ export default function Navbar() {
               gap: 2, // spacing between Typography and Search Box
             }}
           >
-
             <Typography
               sx={{
                 color: 'background.default',
@@ -77,13 +76,12 @@ export default function Navbar() {
           </Box>
         </Grid>
 
-
         {/* Buttons */}
         <Grid size={{ xs: 12, md: 6 }}>
           <Grid container spacing={2} justifyContent={{ xs: 'center', md: 'flex-end' }}>
             <Grid>
               <Button
-                variant='text'
+                variant="text"
                 sx={{
                   color: 'background.default',
                   fontWeight: 500,
@@ -99,7 +97,7 @@ export default function Navbar() {
 
             <Grid>
               <Button
-                variant='text'
+                variant="text"
                 sx={{
                   //backgroundColor: 'primary.main',
                   color: '#fff',
@@ -124,7 +122,7 @@ export default function Navbar() {
                   borderRadius: 3,
                 }}
               >
-               PLANS
+                PLANS
               </Button>
             </Grid>
 
@@ -148,7 +146,6 @@ export default function Navbar() {
             </Grid>
           </Grid>
         </Grid>
-
       </Grid>
       <Grid container sx={{ marginTop: 6 }}>
         <Grid size={{ xs: 9, md: 6 }}>
@@ -176,13 +173,19 @@ export default function Navbar() {
             />
           </Box>
         </Grid>
-        <Grid size={{ xs: 2, sm: 1 }} sx={{ display: { xs: 'flex', md: 'none' }, justifyContent: 'center', }}>
+        <Grid
+          size={{ xs: 2, sm: 1 }}
+          sx={{ display: { xs: 'flex', md: 'none' }, justifyContent: 'center' }}
+        >
           <IconButton aria-label="login" onClick={() => console.log('Login clicked')}>
             <PersonOutlineOutlinedIcon sx={{ color: 'background.default' }} />
           </IconButton>
         </Grid>
 
-        <Grid size={{ xs: 1, md: 0 }} sx={{ display: { xs: 'flex', md: 'none' }, justifyContent: 'flex-end' }}>
+        <Grid
+          size={{ xs: 1, md: 0 }}
+          sx={{ display: { xs: 'flex', md: 'none' }, justifyContent: 'flex-end' }}
+        >
           <IconButton onClick={handleDrawerToggle}>
             <MenuIcon sx={{ color: 'background.default' }} />
           </IconButton>
@@ -238,10 +241,7 @@ export default function Navbar() {
               ))}
             </List>
             <Grid container sx={{ paddingTop: '42vh' }}>
-              <Grid
-                size={{ xs: 2 }}
-                sx={{ paddingTop: '24px' }}
-              >
+              <Grid size={{ xs: 2 }} sx={{ paddingTop: '24px' }}>
                 <img
                   src="logo.jpeg"
                   alt="Logo"

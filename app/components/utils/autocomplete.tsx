@@ -44,10 +44,11 @@ export const CustomAutocomplete = ({
     ...(selectedColor
       ? {
           // Ensure selected uses provided brand color instead of theme default
-          '& .MuiAutocomplete-option.Mui-selected, & .MuiAutocomplete-option[aria-selected="true"]': {
-            backgroundColor: `${selectedColor} !important`,
-            color: '#fff',
-          },
+          '& .MuiAutocomplete-option.Mui-selected, & .MuiAutocomplete-option[aria-selected="true"]':
+            {
+              backgroundColor: `${selectedColor} !important`,
+              color: '#fff',
+            },
           '& .MuiAutocomplete-option.Mui-focused': {
             backgroundColor: `${selectedColor}22`,
           },
@@ -81,13 +82,22 @@ export const CustomAutocomplete = ({
         opacity: isDisabled ? 0.95 : 1,
       }}
     >
-      <Box sx={{ mr: 1, display: 'flex', alignItems: 'center', color: isDisabled ? grey[500] : focusColor }}>{icon}</Box>
+      <Box
+        sx={{
+          mr: 1,
+          display: 'flex',
+          alignItems: 'center',
+          color: isDisabled ? grey[500] : focusColor,
+        }}
+      >
+        {icon}
+      </Box>
 
       <Autocomplete<Option, false, false, false>
         options={options}
         getOptionLabel={(opt) => opt.label}
         value={selectedOption}
-        onChange={(_, newVal) => onChange((newVal)?.value ?? '')}
+        onChange={(_, newVal) => onChange(newVal?.value ?? '')}
         disabled={isDisabled}
         isOptionEqualToValue={(opt, val) => opt.value === val.value}
         slotProps={{
@@ -118,9 +128,13 @@ export const CustomAutocomplete = ({
         renderOption={(props, option) => {
           // Avoid React warning about spreading a key prop by extracting it
           // See: https://mui.com/material-ui/api/autocomplete/#props-renderoption
-          const { key, ...optionProps } = props as unknown as { key: string } & React.HTMLAttributes<HTMLLIElement>;
+          const { key, ...optionProps } = props as unknown as {
+            key: string;
+          } & React.HTMLAttributes<HTMLLIElement>;
           return (
-            <li key={key} {...optionProps}>{option.label}</li>
+            <li key={key} {...optionProps}>
+              {option.label}
+            </li>
           );
         }}
         freeSolo={false}

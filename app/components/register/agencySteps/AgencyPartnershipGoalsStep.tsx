@@ -65,7 +65,17 @@ export default function AgencyPartnershipGoalsStep({
   const theme = useTheme();
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-  <Typography sx={{ fontWeight: 700, mb: GAP, textAlign: 'left', color: 'grey.500', fontSize: { xs: '1.05rem', md: '1.15rem' } }}>Partnership Goals</Typography>
+      <Typography
+        sx={{
+          fontWeight: 700,
+          mb: GAP,
+          textAlign: 'left',
+          color: 'grey.500',
+          fontSize: { xs: '1.05rem', md: '1.15rem' },
+        }}
+      >
+        Partnership Goals
+      </Typography>
 
       <CustomTextArea
         label="Why do you want to partner with Nomad Estate?"
@@ -79,17 +89,46 @@ export default function AgencyPartnershipGoalsStep({
       />
 
       {/* Keep chips side-by-side on desktop for compactness */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: { xs: GAP, md: GAP * 1.5 }, mt: GAP }}>
-        <ChipSelect label="Regional Network Listings" options={regionOptions} values={regionPreferences} onChange={setRegionPreferences} />
-        <ChipSelect label="Target Client Type" options={targetOptions} values={targetClients} onChange={setTargetClients} />
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+          gap: { xs: GAP, md: GAP * 1.5 },
+          mt: GAP,
+        }}
+      >
+        <ChipSelect
+          label="Regional Network Listings"
+          options={regionOptions}
+          values={regionPreferences}
+          onChange={setRegionPreferences}
+        />
+        <ChipSelect
+          label="Target Client Type"
+          options={targetOptions}
+          values={targetClients}
+          onChange={setTargetClients}
+        />
       </Box>
 
       {/* Make the two checkbox groups full-width stacked rows */}
       <Box sx={{ mt: GAP }}>
-        <CheckboxGroup label="Services You Provide" options={servicesOptions} values={servicesProvided} onChange={setServicesProvided} focusColor={theme.palette.primary.main} />
+        <CheckboxGroup
+          label="Services You Provide"
+          options={servicesOptions}
+          values={servicesProvided}
+          onChange={setServicesProvided}
+          focusColor={theme.palette.primary.main}
+        />
       </Box>
       <Box sx={{ mt: GAP }}>
-        <CheckboxGroup label="Additional Partnership Interests" options={additionalOptions} values={additionalInterests} onChange={setAdditionalInterests} focusColor={theme.palette.primary.main} />
+        <CheckboxGroup
+          label="Additional Partnership Interests"
+          options={additionalOptions}
+          values={additionalInterests}
+          onChange={setAdditionalInterests}
+          focusColor={theme.palette.primary.main}
+        />
       </Box>
     </Box>
   );

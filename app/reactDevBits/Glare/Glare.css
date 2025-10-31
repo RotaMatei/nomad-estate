@@ -37,14 +37,18 @@
 
 @keyframes glare-sweep {
   0% {
-    background-position: -100% -100%, 0 0;
+    background-position:
+      -100% -100%,
+      0 0;
   }
   100% {
-    background-position: 100% 100%, 0 0;
+    background-position:
+      100% 100%,
+      0 0;
   }
 }
 
 /* Trigger animation when data-run="true"; JS toggles this attribute */
-.glare[data-run="true"]::after {
+.glare[data-run='true']::after {
   animation: glare-sweep var(--gh-duration) ease both;
 }
