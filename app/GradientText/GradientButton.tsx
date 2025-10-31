@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@mui/material';
 import '@/app/GradientText/GradientText.css';
+import type { SxProps, Theme } from '@mui/material/styles';
 
 type Props = {
   label: string;
@@ -10,7 +11,7 @@ type Props = {
   width?: number | string;
   animationSpeed?: number; // seconds
   colors?: string[]; // gradient colors
-  sx?: any;
+  sx?: SxProps<Theme>;
 };
 
 export default function GradientButton({

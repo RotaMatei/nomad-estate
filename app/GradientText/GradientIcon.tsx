@@ -27,17 +27,18 @@ export default function GradientIcon({
   const id = useId().replace(/:/g, '');
 
   // Pull original children from the provided icon (typically one <path/>)
-  const origChildren = (icon.props as any).children;
-  const childrenArray = Array.isArray(origChildren) ? origChildren : [origChildren];
+  const childrenArray = React.Children.toArray(icon.props.children);
 
-  const paintedChildren = childrenArray.filter(Boolean).map((child: any, idx: number) =>
-    // Apply gradient to both fill and stroke, so outlined icons (stroke-based) are also painted
-    React.cloneElement(child, {
-      key: idx,
-      fill: `url(#${id})`,
-      stroke: `url(#${id})`,
-    }),
-  );
+  const paintedChildren = childrenArray
+    .filter(React.isValidElement)
+    .map((child, idx) =>
+      // Apply gradient to both fill and stroke, so outlined icons (stroke-based) are also painted
+      React.cloneElement(child as React.ReactElement<React.SVGProps<SVGElement>>, {
+        key: idx,
+        fill: `url(#${id})`,
+        stroke: `url(#${id})`,
+      }),
+    );
 
   // Clone the icon to inject <defs> and recolored children
   const cloned = React.cloneElement(

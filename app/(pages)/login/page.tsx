@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import api from '../../lib/api';
+import axios from 'axios';
 import '@/app/GradientText/GradientText.css';
 import { Box, Typography, IconButton } from '@mui/material';
 import { useTheme, alpha } from '@mui/material/styles';
@@ -49,6 +50,15 @@ export default function LoginPage() {
     prevValidRef.current = isValid;
   }, [isValid]);
 
+  type LoginResponse = {
+    accessToken: string;
+    refreshToken: string;
+    RefreshJTI?: string;
+    sub?: string;
+    firstName?: string;
+    lastName?: string;
+  };
+
   const handleUserLogin = async () => {
     if (!isValid) return;
     // trigger glare sweep on valid attempt
@@ -56,7 +66,7 @@ export default function LoginPage() {
     requestAnimationFrame(() => setGlareRun(true));
 
     // helper to persist tokens and optional name
-    const persistAndRedirect = (data: any) => {
+    const persistAndRedirect = (data: LoginResponse) => {
       if (!data) return;
       localStorage.setItem('token', data.accessToken);
       localStorage.setItem('refreshToken', data.refreshToken);
@@ -71,19 +81,19 @@ export default function LoginPage() {
 
     try {
       // Attempt user login first
-      const resUser = await api.post('/auth/user/login', { email, password });
+      const resUser = await api.post<LoginResponse>('/auth/user/login', { email, password });
       persistAndRedirect(resUser.data);
       return;
-    } catch (err: any) {
-      const status = err?.response?.status as number | undefined;
+    } catch (err: unknown) {
+      const status = axios.isAxiosError(err) ? err.response?.status : undefined;
       // Only fallback to agency on HTTP error codes
       if (status && status >= 400) {
         try {
-          const resAgency = await api.post('/auth/agency/login', { email, password });
+          const resAgency = await api.post<LoginResponse>('/auth/agency/login', { email, password });
           persistAndRedirect(resAgency.data);
           return;
-        } catch (err2: any) {
-          const status2 = err2?.response?.status as number | undefined;
+        } catch (err2: unknown) {
+          const status2 = axios.isAxiosError(err2) ? err2.response?.status : undefined;
           if (status2 && status2 >= 400) {
             setError('Invalid credentials');
           } else if (err2 instanceof Error) {

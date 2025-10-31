@@ -133,7 +133,7 @@ const WorldMap: React.FC<WorldMapProps> = ({ data }) => {
         >
           {geoData && (
             <>
-              <GeoJSON data={geoData} style={styleFeature as any} />
+              <GeoJSON data={geoData} style={styleFeature as L.GeoJSONOptions['style']} />
               <StretchSVG geoData={geoData} />
             </>
           )}

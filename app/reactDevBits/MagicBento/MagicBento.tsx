@@ -579,7 +579,8 @@ const MagicBento: React.FC<BentoProps> = ({
         const { data } = await api.get('/countries/retrieve/get-all');
         if (cancelled) return;
         // Expecting array of Country: { id, name, code, ... }
-        const mapped = (data || []).map((c: any) => ({
+        type CountryDTO = { id: number | string; name?: string; code?: string };
+        const mapped = ((data as CountryDTO[]) || []).map((c) => ({
           value: c.id, // prefer numeric id to match cities API param
           label: c.name ?? String(c.code ?? c.id),
         }));
@@ -612,7 +613,8 @@ const MagicBento: React.FC<BentoProps> = ({
       try {
         const { data } = await api.get(`/cities/retrieve/get-all-by-country/${country}`);
         if (cancelled) return;
-        const mapped = (data || []).map((ct: any) => ({
+        type CityDTO = { id: number | string; name?: string };
+        const mapped = ((data as CityDTO[]) || []).map((ct) => ({
           value: ct.id,
           label: ct.name ?? String(ct.id),
         }));
