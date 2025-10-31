@@ -772,56 +772,6 @@ export default function SignUpAsAgency(props: Props) {
               </Box>
             </Box>
 
-<<<<<<< HEAD
-            {/* CTA container: match Investor gap before the button */}
-            <Box sx={{ mt: 1, pt: GAP, pb: { xs: 4, md: 4 }, maxWidth: 640, mx: 'auto', flexShrink: 0 }}>
-                <Box sx={{ display: 'flex', gap: { xs: 1.5, md: 2 }, alignItems: 'center', justifyContent: 'center', flexWrap: 'nowrap' }}>
-                    {stepIndex > 0 && (
-                        <Box sx={{ flex: 'none' }}>
-                            <Button
-                                aria-label="Back"
-                                onClick={() => setStepIndex((s) => Math.max(0, s - 1))}
-                                startIcon={<ArrowBackIosNewIcon sx={{ color: '#fff' }} />}
-                                disableElevation
-                                sx={{
-                                    height: { xs: 42, md: 48, lg: 56 },
-                                    width: { xs: 42, md: 48, lg: 56 },
-                                    minWidth: 0,
-                                    px: 1.25,
-                                    border: 'none',
-                                    outline: 'none',
-                                    textTransform: 'none',
-                                    fontFamily: 'Montserrat, sans-serif',
-                                    fontSize: { xs: '12px', sm: '13px', md: '14px', lg: '18px' },
-                                    fontWeight: 700,
-                                    color: '#fff',
-                                    backgroundColor: theme.palette.primary.main,
-                                    borderRadius: { xs: '12px', lg: '16px' },
-                                    justifyContent: 'center',
-                                    '& .MuiButton-startIcon': { mr: 0 },
-                                    '&:hover': { backgroundColor: theme.palette.primary.dark },
-                                    '&:focus-visible': { outline: 'none' },
-                                }}
-                            />
-                        </Box>
-                    )}
-                    {/* Primary CTA: flex-grow to fill remaining space; responsive minWidth to avoid overflow on mobile */}
-                    <Box sx={{ flex: 1, minWidth: { xs: 0, md: 240 } }}>
-                        {stepIndex < 3 ? (
-                            <Glare shouldPlay={isCurrentStepComplete} glareColor={theme.palette.common.white} glareOpacity={0.5} glareAngle={-30} glareSize={380} transitionDuration={900} style={{ width: '100%' }}>
-                                <CustomButton label="Continue" onClick={() => setStepIndex((s) => Math.min(3, s + 1))} color="primary" disabled={!isCurrentStepComplete} containerSx={{ width: '100%' }} sx={{ fontWeight: 700, px: 5, whiteSpace: 'nowrap' }} />
-                            </Glare>
-                        ) : (
-                            <Glare shouldPlay={isFormComplete} glareColor={theme.palette.common.white} glareOpacity={0.5} glareAngle={-30} glareSize={380} transitionDuration={900} style={{ width: '100%' }}>
-                                <CustomButton label="Create Account" onClick={handleSubmit} color="primary" disabled={!isFormComplete} containerSx={{ width: '100%' }} sx={{ fontWeight: 700, px: 5, whiteSpace: 'nowrap' }} />
-                            </Glare>
-                        )}
-                    </Box>
-                </Box>
-                <Typography sx={{ mt: GAP, color: 'text.secondary', textAlign: 'center', fontSize: { xs: '14px', lg: '16px' } }}>
-                    Already have an Agency account?{' '}
-                    <Link href="/login" style={{ fontWeight: 700, color: theme.palette.primary.main, textDecoration: 'none' }}>Log in</Link>
-=======
             <Box sx={{ display: 'flex', gap: GAP, mt: GAP }}>
               <Box sx={{ flex: 1 }}>
                 <CustomAutocomplete
@@ -931,7 +881,6 @@ export default function SignUpAsAgency(props: Props) {
               >
                 <Typography variant="caption" sx={{ color: 'error.main', pl: 1, mt: 0.5 }}>
                   Street address must be at least 16 characters.
->>>>>>> LoginPage
                 </Typography>
               </Collapse>
             </Box>
