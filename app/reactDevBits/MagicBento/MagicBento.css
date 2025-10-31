@@ -229,6 +229,8 @@
     grid-template-columns: repeat(4, 1fr);
     grid-template-rows: 1fr 1fr 1fr;
    top:30rem;
+   /* Reduce vertical spacing between rows on the right side */
+   gap: 0.35em 0.75em; /* row-gap column-gap */
   }
 
   /* Large tall card on the left */
@@ -261,7 +263,13 @@
   .card:nth-child(4) {
     grid-column: 3 / span 2;
     grid-row: 2 / span 2;
-    height:81%;
+    /* Raise the card upwards while keeping the bottom aligned with card 1 */
+    --card4-raise: 0.75rem; /* tweak this to control extra height at the top */
+    height: calc(100% + var(--card4-raise));
+    margin-top: calc(var(--card4-raise) * -1);
+    aspect-ratio: auto;
+    min-height: 0;
+    align-self: stretch;
   }
 }
 

@@ -797,6 +797,7 @@ const MagicBento: React.FC<BentoProps> = ({
                           focusColor="#003FC7"
                           icon={<HomeWorkOutlinedIcon />}
                           selectIcon={KeyboardArrowDownOutlinedIcon}
+                          selectedColor="#003FC7"
                           label="Property Type"
                           value={propertyType}
                           onChange={setPropertyType}
@@ -809,11 +810,12 @@ const MagicBento: React.FC<BentoProps> = ({
                             { value: 'DUPLEX', label: 'Duplex' },
                           ]}
                         />
-
+                           <Typography variant="subtitle2" sx={{ fontWeight: 500, color: 'grey.500' }}>Number of Bedrooms</Typography>
                         <CustomSelect
                           focusColor="#003FC7"
                           icon={<SingleBedOutlinedIcon />}
                           selectIcon={KeyboardArrowDownOutlinedIcon}
+                          selectedColor="#003FC7"
                           label="Bedrooms"
                           value={bedrooms}
                           onChange={setBedrooms}
@@ -835,24 +837,26 @@ const MagicBento: React.FC<BentoProps> = ({
                       <div className="card__label">Performance</div>
                     </div>
                     <div className="card__content">
-                      <Typography variant="subtitle2" sx={{ fontWeight: 500, mb: 1, color: 'grey.500' }}>Investment Metrics</Typography>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 500, mb: 1, color: 'grey.500' }}>Property Score</Typography>
                     
                       <Stack spacing={{ xs: 1.5, md: 2 }}>
                         <CustomSelect
                           focusColor="#003FC7"
                           icon={<StarBorderOutlinedIcon />}
                           selectIcon={KeyboardArrowDownOutlinedIcon}
+                          selectedColor="#003FC7"
                           label="Investment Score"
                           value={investmentScore}
                           onChange={setInvestmentScore}
                           placeholder="Score"
                           options={Array.from({ length: 11 }, (_, i) => ({ value: i, label: String(i) }))}
                         />
-
+                         <Typography variant="subtitle2" sx={{ fontWeight: 500, mb: 1, color: 'grey.500' }}>Desired Yield</Typography>
                         <CustomSelect
                           focusColor="#003FC7"
                           icon={<PercentOutlinedIcon />}
                           selectIcon={KeyboardArrowDownOutlinedIcon}
+                          selectedColor="#003FC7"
                           label="Expected Yield"
                           value={expectedYield}
                           onChange={setExpectedYield}

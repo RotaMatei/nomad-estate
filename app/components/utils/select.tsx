@@ -11,15 +11,16 @@ type Option = { value: string | number; label: string };
 
 export const CustomSelect = ({
   focusColor = '#000000',
-  icon = <PersonOutlineOutlinedIcon sx={{ color: grey[500] }} />,
+  icon = <PersonOutlineOutlinedIcon sx={{ color: grey[700] }} />,
   selectIcon: SelectIcon = ArrowDropDownIcon,
   label = '',
   value = '',
-  onChange = () => {},
+  onChange = () => { },
   placeholder = '',
   options = [],
   disabled = false,
   locked = false,
+  selectedColor,
 }: {
   focusColor?: string;
   icon?: ReactNode;
@@ -31,6 +32,7 @@ export const CustomSelect = ({
   options?: Option[];
   disabled?: boolean;
   locked?: boolean;
+  selectedColor?: string;
 }) => {
   const isDisabled = disabled || locked;
   const handleChange = (e: SelectChangeEvent<string | number>) => {
@@ -44,14 +46,14 @@ export const CustomSelect = ({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-  height: { xs: '32px', lg: '40px' },
+        height: { xs: '32px', lg: '40px' },
         bgcolor: isDisabled ? 'grey.200' : '#fff',
-  mx: 0,
-  borderRadius: { xs: '12px', lg: '16px' },
+        mx: 0,
+        borderRadius: { xs: '12px', lg: '16px' },
         color: 'grey.200',
         boxShadow: `0 3px 0 ${grey[300]}`,
-        px: { xs: 1, md: 2 },
-        py: { xs: 1, md: 2 },
+        px: { xs: 1, lg: 2 },
+        py: { xs: 1, lg: 2 },
         ...(isDisabled ? {} : {
           '&:focus-within': {
             boxShadow: `0 3px 0 ${focusColor}`,
@@ -61,7 +63,7 @@ export const CustomSelect = ({
         opacity: isDisabled ? 0.95 : 1,
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', color: isDisabled ? grey[500] : focusColor }}>{icon}</Box>
+      <Box sx={{ mr: 1, display: 'flex', alignItems: 'center', color: isDisabled ? grey[700]: focusColor }}>{icon}</Box>
 
       <Select
         value={value}
@@ -70,27 +72,47 @@ export const CustomSelect = ({
         variant="standard"
         disabled={isDisabled}
         IconComponent={SelectIcon}
+        MenuProps={{
+          PaperProps: {
+            sx: {
+              bgcolor: 'background.default',
+              '& .MuiMenuItem-root': {
+                color: grey[700],
+              },
+              ...(selectedColor
+                ? {
+                    '& .MuiMenuItem-root.Mui-selected, & .MuiMenuItem-root[aria-selected="true"]': {
+                      backgroundColor: `${selectedColor} !important`,
+                      color: '#fff',
+                    },
+                    '& .MuiMenuItem-root.Mui-focusVisible, & .MuiMenuItem-root.Mui-selected.Mui-focusVisible': {
+                      backgroundColor: `${selectedColor}22`,
+                    },
+                  }
+                : {}),
+            },
+          },
+        }}
         // hide standard underline
         renderValue={(selected) => {
-          if (selected === '' || selected === undefined) return placeholder || label || 'Select';
+          if (selected === '' || selected === undefined) return '';
           const found = options.find((o) => o.value === selected);
           return found ? found.label : String(selected);
         }}
         inputProps={{ 'aria-label': label || placeholder || 'select' }}
         sx={{
           width: '100%',
-          pl: 1,
+          pl: 0,
           fontFamily: 'Montserrat, sans-serif',
           fontSize: { xs: '14px', lg: '16px' },
           color: isDisabled ? 'text.disabled' : 'text.primary',
           '&:before, &:after': { display: 'none' },
+          '& .MuiSvgIcon-root': {
+            color: isDisabled ? grey[700] : focusColor,
+          },
         }}
       >
-        {placeholder ? (
-          <MenuItem value="" disabled>
-            {placeholder}
-          </MenuItem>
-        ) : null}
+        {/* Removed header/placeholder item inside the dropdown as requested */}
         {options.map((opt) => (
           <MenuItem key={String(opt.value)} value={opt.value}>
             {opt.label}
