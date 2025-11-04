@@ -38,9 +38,6 @@ export default function Home() {
           alignItems: 'center',
         }}
       >
-        <Button onClick={() => router.push('/register')} variant="contained" color="primary">
-          Register
-        </Button>
         {/* <button onClick={() => router.push('/login')} className={styles.secondary}>Login</button>
         
         <button onClick={() => router.push('/user/changePassword')} className={styles.secondary}>Change Password</button> */}

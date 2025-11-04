@@ -5,6 +5,18 @@ const api = axios.create({
   withCredentials: true,
 });
 
+// Attach Authorization header automatically if a token exists
+api.interceptors.request.use((config) => {
+  try {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+  } catch {}
+  return config;
+});
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {

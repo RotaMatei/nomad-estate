@@ -2,18 +2,37 @@
 import { Box, Button, Grid, InputBase, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CreditCardOutlinedIcon from '@mui/icons-material/CreditCardOutlined';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Drawer, IconButton, List, ListItem, ListItemText } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
+import { useRouter } from 'next/navigation';
 
-export default function Navbar() {
+export default function Navbar({ navColor = 'background.default' }: { navColor?: string }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const router = useRouter();
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
   };
+
+  // Detect auth state from localStorage token
+  useEffect(() => {
+    // Initial check
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    setIsLoggedIn(!!token);
+
+    // Listen for token changes across tabs/windows
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'token') {
+        setIsLoggedIn(!!e.newValue);
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   const pages = ['Home', 'About Us', 'Properties', 'Plans', 'Contact'];
 
@@ -39,7 +58,7 @@ export default function Navbar() {
           >
             <Typography
               sx={{
-                color: 'background.default',
+                color: navColor,
                 fontWeight: 'bold',
                 fontSize: '16px',
                 display: { xs: 'none', md: 'flex' },
@@ -52,7 +71,7 @@ export default function Navbar() {
               sx={{
                 alignItems: 'center',
                 border: '1px solid',
-                borderColor: 'background.default',
+                borderColor: navColor,
                 borderRadius: 4,
                 px: 4,
                 py: 0.5,
@@ -62,14 +81,14 @@ export default function Navbar() {
                 justifyContent: 'left',
               }}
             >
-              <SearchIcon sx={{ color: 'background.default', mr: 1 }} />
+              <SearchIcon sx={{ color: navColor, mr: 1 }} />
               <InputBase
                 placeholder="Search Properties"
                 sx={{
                   width: '100%',
                   fontFamily: 'Montserrat, sans-serif',
                   fontSize: '16px',
-                  color: 'background.default',
+                  color: navColor,
                 }}
               />
             </Box>
@@ -83,7 +102,7 @@ export default function Navbar() {
               <Button
                 variant="text"
                 sx={{
-                  color: 'background.default',
+                  color: navColor,
                   fontWeight: 500,
                   cursor: 'pointer',
                   fontFamily: 'Montserrat, sans-serif',
@@ -100,7 +119,7 @@ export default function Navbar() {
                 variant="text"
                 sx={{
                   //backgroundColor: 'primary.main',
-                  color: '#fff',
+                  color: navColor,
                   fontFamily: 'Montserrat, sans-serif',
                   fontWeight: 500,
                   borderRadius: 3,
@@ -116,7 +135,7 @@ export default function Navbar() {
                 startIcon={<CreditCardOutlinedIcon />}
                 sx={{
                   //backgroundColor: 'primary.main',
-                  color: '#fff',
+                  color: navColor,
                   fontFamily: 'Montserrat, sans-serif',
                   fontWeight: 500,
                   borderRadius: 3,
@@ -130,8 +149,8 @@ export default function Navbar() {
               <Button
                 variant="outlined"
                 sx={{
-                  borderColor: 'background.default',
-                  color: 'background.default',
+                  borderColor: navColor,
+                  color: navColor,
                   fontFamily: 'Montserrat, sans-serif',
                   textTransform: 'none',
                   borderRadius: 3,
@@ -140,8 +159,9 @@ export default function Navbar() {
                     borderColor: '#cc0000',
                   },
                 }}
+                onClick={() => router.push(isLoggedIn ? '/user' : '/login')}
               >
-                Log in
+                {isLoggedIn ? 'My Account' : 'Log in'}
               </Button>
             </Grid>
           </Grid>
@@ -177,8 +197,11 @@ export default function Navbar() {
           size={{ xs: 2, sm: 1 }}
           sx={{ display: { xs: 'flex', md: 'none' }, justifyContent: 'center' }}
         >
-          <IconButton aria-label="login" onClick={() => console.log('Login clicked')}>
-            <PersonOutlineOutlinedIcon sx={{ color: 'background.default' }} />
+          <IconButton
+            aria-label="login"
+            onClick={() => router.push(isLoggedIn ? '/user' : '/login')}
+          >
+            <PersonOutlineOutlinedIcon sx={{ color: navColor }} />
           </IconButton>
         </Grid>
 

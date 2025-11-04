@@ -23,7 +23,6 @@ const WorldMap = dynamic(() => import('@/app/components/login/WorldMap'), {
 });
 
 export default function LoginPage() {
-  useTheme();
   const theme = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -71,6 +70,7 @@ export default function LoginPage() {
       localStorage.setItem('token', data.accessToken);
       localStorage.setItem('refreshToken', data.refreshToken);
       if (data.RefreshJTI) localStorage.setItem('jti', data.RefreshJTI);
+      if (data.sub) localStorage.setItem('userId', data.sub);
       // set username if present (not guaranteed by API)
       if (data.firstName || data.lastName) {
         const username = `${data.firstName ?? ''} ${data.lastName ?? ''}`.trim();
@@ -156,20 +156,22 @@ export default function LoginPage() {
   return (
     <Box
       sx={{
-        minHeight: '100vh',
+        height: '100vh',
+        overflow: 'hidden',
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'center',
         bgcolor: '#fff',
-        p: { xs: 2, md: 6 },
+        p: { xs: 2, md: 6, lg: 4 },
       }}
     >
       <Box
         sx={{
           display: 'grid',
           gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-          gap: { xs: 4, md: 8 },
+          gap: { xs: 4, md: 8, lg: 6 },
           alignItems: 'center',
+          height: '100%',
           width: '100%',
         }}
       >
@@ -194,7 +196,7 @@ export default function LoginPage() {
             <Box component="span" sx={{ fontStyle: 'italic' }}>
               Join{' '}
             </Box>
-            <Box component="span" sx={{ fontWeight: 800, fontStyle: 'normal' }}>
+            <Box component="span" sx={{ fontWeight: 800, fontStyle: 'normal', color:'primary.main' }}>
               Nomad Estate
             </Box>
             <Box component="span" sx={{ fontStyle: 'italic' }}>
@@ -219,7 +221,7 @@ export default function LoginPage() {
               maxWidth: 540,
               width: '100%',
               alignItems: 'center',
-              pt: { xs: 4, md: 6 },
+              pt: { xs: 4, md: 6, lg: 4 },
             }}
           >
             <Box sx={{ width: '100%' }}>
@@ -295,13 +297,14 @@ export default function LoginPage() {
                   fontWeight: 700,
                   textDecoration: 'none',
                   fontSize: '1rem',
+                  color: theme.palette.primary.main
                 }}
               >
                 Sign up
               </Link>
             </Typography>
 
-            <Typography sx={{ mt: 4, color: theme.palette.grey[700] }}>
+            <Typography sx={{ color: theme.palette.grey[700] }}>
               Connect with other apps
             </Typography>
 
@@ -354,8 +357,9 @@ export default function LoginPage() {
             display: { xs: 'none', md: 'flex' },
             alignItems: 'center',
             justifyContent: 'center',
-            maxWidth: '40vw',
-            transform: 'translate(-10%,0%)',
+            maxWidth: '52vw',
+            height: '100%',
+            transform: 'translateX(-3%)',
           }}
         >
           <WorldMap data={countryStats} />

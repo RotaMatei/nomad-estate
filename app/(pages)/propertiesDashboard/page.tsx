@@ -6,7 +6,7 @@ import GradientContainer from '@/app/components/propertyDashComponents/heroBackg
 import Navbar from '@/app/components/propertyDashComponents/navbarDasboard';
 import HeroText from '@/app/components/propertyDashComponents/heroText';
 import Filters from '@/app/components/propertyDashComponents/filters';
-
+import Properties from '@/app/components/propertyDashComponents/properties';
 export default function PropertiesDashboard() {
   return (
     <ThemeProvider theme={lightTheme}>
@@ -18,7 +18,8 @@ export default function PropertiesDashboard() {
         <Filters />
 
       </Box>
-      <Box sx={{ backgroundColor: 'background.default', minHeight: '60vh', justifyContent: 'center', alignItems: 'center'}}>
+      <Box sx={{ backgroundColor: 'background.default', minHeight: '70vh', justifyContent: 'center', alignItems: 'center'}}>
+        <Properties />
 
       </Box  >
       <Box

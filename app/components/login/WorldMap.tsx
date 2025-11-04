@@ -23,50 +23,14 @@ const getCountryColor = (users: number, agencies: number): string => {
   return interpolateRgb('#EEE', baseColor)(intensity);
 };
 
-// Stretch the SVG layer to fill the container
-const StretchSVG: React.FC<{ geoData: FeatureCollection }> = ({ geoData }) => {
+// Fit the map view to the GeoJSON bounds without stretching
+const FitToBounds: React.FC<{ geoData: FeatureCollection }> = ({ geoData }) => {
   const map = useMap();
-
   useEffect(() => {
-    const stretch = () => {
-      const overlay = map.getPane('overlayPane');
-      if (!overlay) return;
-
-      const svg = overlay.querySelector('svg') as SVGElement | null;
-      if (!svg) return;
-
-      const bounds = L.geoJSON(geoData).getBounds();
-      const sw = bounds.getSouthWest();
-      const ne = bounds.getNorthEast();
-      const p1 = map.latLngToLayerPoint(sw);
-      const p2 = map.latLngToLayerPoint(ne);
-
-      const contentWidth = Math.abs(p2.x - p1.x);
-      const contentHeight = Math.abs(p2.y - p1.y);
-      const containerSize = map.getSize();
-
-      const scaleX = containerSize.x / contentWidth;
-      const scaleY = containerSize.y / contentHeight;
-
-      svg.style.transformOrigin = 'center center';
-      svg.style.transform = `scale(${scaleX}, ${scaleY})`;
-    };
-
-    // Wait until map is ready and GeoJSON is rendered
-    const waitAndStretch = () => {
-      setTimeout(() => {
-        stretch();
-        map.on('resize', stretch);
-      }, 100); // slight delay to ensure DOM is ready
-    };
-
-    waitAndStretch();
-
-    return () => {
-      map.off('resize', stretch);
-    };
+    const bounds = L.geoJSON(geoData).getBounds();
+    // Avoid any initial pan/zoom animation on mount
+    map.fitBounds(bounds, { padding: [10, 10], animate: false });
   }, [geoData, map]);
-
   return null;
 };
 
@@ -80,6 +44,8 @@ const WorldMap: React.FC<WorldMapProps> = ({ data }) => {
       .then((res) => res.json())
       .then(setGeoData);
   }, []);
+
+  // no-op
 
   const styleFeature = (feature: Feature): L.PathOptions => {
     const iso = feature.properties?.ISO_A2;
@@ -101,8 +67,7 @@ const WorldMap: React.FC<WorldMapProps> = ({ data }) => {
       style={{
         position: 'relative',
         width: '100%',
-        maxWidth: '960px',
-        aspectRatio: '16 / 9',
+        height: '100%',
         margin: '0 auto',
       }}
     >
@@ -121,7 +86,12 @@ const WorldMap: React.FC<WorldMapProps> = ({ data }) => {
           style={{
             width: '100%',
             height: '100%',
+            background: 'transparent',
+            overflow: 'visible',
           }}
+          // Disable Leaflet animations to prevent top-to-bottom transition on load
+          zoomAnimation={false}
+          fadeAnimation={false}
           dragging={false}
           zoomControl={false}
           scrollWheelZoom={false}
@@ -134,7 +104,7 @@ const WorldMap: React.FC<WorldMapProps> = ({ data }) => {
           {geoData && (
             <>
               <GeoJSON data={geoData} style={styleFeature as L.GeoJSONOptions['style']} />
-              <StretchSVG geoData={geoData} />
+              <FitToBounds geoData={geoData} />
             </>
           )}
         </MapContainer>
