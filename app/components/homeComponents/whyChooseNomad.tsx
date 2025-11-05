@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Grid, Typography, Paper } from '@mui/material';
 import FadeContent from '../../reactDevBits/FadeContent/FadeContent';
+import AnimatedContent from '@/app/reactDevBits/AnimatedContent/AnimatedContent';
 
 const WhyChooseNomad = () => {
   const features = [
@@ -74,20 +75,59 @@ const WhyChooseNomad = () => {
                     textAlign: 'left',
                   }}
                 >
-                  <Typography variant="h6" fontWeight="700" color="error.main" gutterBottom>
-                    {feature.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {feature.description}
-                  </Typography>
-                </Paper>
-              </FadeContent>
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
-    </Box>
-  );
+                    Why choose Nomad Estate?
+                </Typography>
+
+                <Typography
+                    variant="subtitle1"
+                    textAlign="center"
+                    sx={{ marginBottom: '48px', opacity: 0.9 }}
+                >
+                    Four key factors that guarantee our market dominance.
+                </Typography>
+
+                <Grid container spacing={4} justifyContent="center" alignItems="center">
+                    {features.map((feature, index) => (
+
+                        <Grid size={{ xs: 12, md: 5 }} key={index}>
+                            <AnimatedContent
+                                distance={100}
+                                direction="vertical"
+                                reverse={false}
+                                duration={1.1}
+                                //ease="bounce.out"
+                                initialOpacity={0.2}
+                                animateOpacity
+                                scale={1.0}
+                                threshold={0.1}
+                                delay={0}
+                            >
+                                <Paper
+                                    elevation={3}
+                                    sx={{
+                                        backgroundColor: '#fff',
+                                        padding: '32px',
+                                        borderRadius: '16px',
+                                        textAlign: 'left',
+
+                                    }}
+                                >
+                                    <Typography variant="h6" fontWeight="700" color="error.main" gutterBottom>
+                                        {feature.title}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                        {feature.description}
+                                    </Typography>
+                                </Paper>
+                            </AnimatedContent>
+                        </Grid>
+
+                    ))}
+                </Grid>
+
+            </Box>
+        </Box>
+    );
 };
 
 export default WhyChooseNomad;
