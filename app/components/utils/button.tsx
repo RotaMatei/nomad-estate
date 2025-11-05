@@ -57,7 +57,7 @@ export const CustomButton = ({
             height: { xs: 42, md: 48 },
             textTransform: 'none',
             fontFamily: 'Montserrat, sans-serif',
-            fontSize: { xs: '12px', md: '14px', lg: '18px' },
+            fontSize: { xs: '12px', md: '14px', lg: '16px' },
             fontWeight: 700,
             color: '#fff',
             backgroundColor: colorMain,
