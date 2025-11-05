@@ -10,16 +10,9 @@ import InvestmentStats from '../../components/homeComponents/investmentStats';
 import WhyChooseNomad from '../../components/homeComponents/whyChooseNomad';
 import GlobalTrustGrid from '../../components/homeComponents/globalTrustGrid';
 import ChoosePath from '../../components/homeComponents/choosePath';
-import { Button } from '@mui/material';
+
 export default function Home() {
   const router = useRouter();
-
-  // const [user, setUser] = useState('');
-
-  // useEffect(() => {
-  //   const storedUser = localStorage.getItem('user');
-  //   if (storedUser) setUser(storedUser);
-  // }, [])
 
   return (
     <ThemeProvider theme={lightTheme}>

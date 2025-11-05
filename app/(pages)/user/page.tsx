@@ -140,7 +140,7 @@ export default function UserDashboardPage() {
 
   return (
     <Box sx={{ backgroundColor: 'background.default', minHeight: '100vh', overflow: 'hidden'}}>
-      <Navbar navColor="primary.main" />
+      <Navbar navColor="primary.main" mobileNavColor="primary.main" />
 
       {/* Content container */}
       <Box
@@ -188,7 +188,7 @@ export default function UserDashboardPage() {
             variant="outlined"
             color="primary"
             onClick={handleLogout}
-            sx={{ textTransform: 'none', borderRadius: 3, fontWeight: 600 }}
+            sx={{ textTransform: 'none', borderRadius: 3, fontWeight: 600, display: { xs: 'none', md: 'block' } }}
           >
             Log out
           </Button>
