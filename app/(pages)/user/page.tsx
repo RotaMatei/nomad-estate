@@ -72,7 +72,7 @@ export default function UserDashboardPage() {
         const userRes = await api.get<UserProfile>(`/user/retrieve/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const u: any = userRes.data;
+        const u = userRes.data as Partial<UserProfile>;
         const normalized: UserProfile = {
           firstName: u.firstName ?? null,
           lastName: u.lastName ?? null,
@@ -100,7 +100,7 @@ export default function UserDashboardPage() {
               const agRes = await api.get<AgencyProfile>(`/agency/retrieve/${agencyId}`, {
                 headers: { Authorization: `Bearer ${token}` },
               });
-              const a: any = agRes.data;
+              const a = agRes.data as Partial<AgencyProfile>;
               const normalizedAgency: AgencyProfile = {
                 id: agencyId,
                 email: a.email ?? null,
