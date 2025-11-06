@@ -65,7 +65,7 @@ export default function Navbar(
     >
       <Grid container spacing={2} alignItems="center" display={{ xs: 'none', md: 'flex' }}>
         {/* Logo */}
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid size={{ xs: 12, md: 5 }}>
           <Box
             sx={{
               display: { xs: 'none', md: 'flex' },
@@ -90,10 +90,10 @@ export default function Navbar(
                 border: '1px solid',
                 borderColor: navColor,
                 borderRadius: 4,
-                px: 4,
+                px: 1,
                 py: 0.5,
                 height: '35px',
-                width: '30vw',
+                width: {md:'22.5vw', lg:'27.5vw'},
                 display: { xs: 'none', md: 'flex' },
                 justifyContent: 'left',
               }}
@@ -113,7 +113,7 @@ export default function Navbar(
         </Grid>
 
         {/* Buttons */}
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid size={{ xs: 12, md: 7 }}>
           <Grid container spacing={2} justifyContent={{ xs: 'center', md: 'flex-end' }}>
             <Grid>
               <Button
@@ -184,8 +184,8 @@ export default function Navbar(
           </Grid>
         </Grid>
       </Grid>
-      <Grid container sx={{ marginTop: 6 }}>
-        <Grid size={{ xs: 8, md: 6 }}>
+      <Grid container sx={{ marginTop: 6 }} columns={{ xs: 12, sm: 16, md: 12 }}>
+        <Grid size={{ xs: isLoggedIn ? 9 : 10, sm: isLoggedIn ? 8 : 9, md: 6 }}>
           <Box
             sx={{
               alignItems: 'center',
@@ -198,7 +198,7 @@ export default function Navbar(
               display: { xs: 'flex', md: 'none' },
             }}
           >
-            <SearchIcon sx={{ color: mColor, ml:1}} />
+            <SearchIcon sx={{ color: mColor, ml: 1 }} />
             <InputBase
               placeholder="AI Search"
               sx={{
@@ -206,13 +206,16 @@ export default function Navbar(
                 fontFamily: 'Montserrat, sans-serif',
                 fontSize: '14px',
                 color: mColor,
-                ml:1,
+                ml: 1,
               }}
             />
           </Box>
         </Grid>
+        <Grid size={{ xs: 0, sm: 5, md: 0 }}
+          width={'100%'} sx={{ display: { xs: 'none',sm: 'block', md: 'none' }, justifyContent: 'center' }}>
+        </Grid>
         <Grid
-          size={{ xs: 1 }}
+          size={{ xs: 1, sm: 1, md: 2 }}
           sx={{ display: { xs: 'flex', md: 'none' }, justifyContent: 'center' }}
         >
           <IconButton
@@ -227,7 +230,7 @@ export default function Navbar(
 
         {isLoggedIn ? (
           <Grid
-            size={{ xs: 2 }}
+            size={{ xs: 1, sm: 1, md: 2 }}
             sx={{ display: { xs: 'flex', md: 'none' }, justifyContent: 'center', }}
           >
             <IconButton aria-label="log out" onClick={handleLogout} title="Log out">
@@ -237,11 +240,11 @@ export default function Navbar(
         ) : null}
 
         <Grid
-          size={{ xs: 1 }}
-          sx={{ display: { xs: 'flex', md: 'none' }, justifyContent: 'flex-end' }}
+          size={{ xs: 1, sm: 1, md: 2 }}
+          sx={{ display: { xs: 'flex', md: 'none' }, justifyContent: 'center', m: 0  }}
         >
           <IconButton onClick={handleDrawerToggle}>
-            <MenuIcon sx={{ color: mColor, ml: 1 }} />
+            <MenuIcon sx={{ color: mColor, ml: 0 }} />
           </IconButton>
         </Grid>
 
