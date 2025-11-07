@@ -7,12 +7,17 @@ import { Drawer, IconButton, List, ListItem, ListItemText } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 
-export default function Navbar({ navColor = 'background.default' }: { navColor?: string }) {
+export default function Navbar(
+  { navColor = 'background.default', mobileNavColor }: { navColor?: string; mobileNavColor?: string }
+) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
+  const mColor = mobileNavColor ?? navColor;
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
@@ -35,6 +40,18 @@ export default function Navbar({ navColor = 'background.default' }: { navColor?:
   }, []);
 
   const pages = ['Home', 'About Us', 'Properties', 'Plans', 'Contact'];
+
+  const handleLogout = () => {
+    try {
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('jti');
+      localStorage.removeItem('user');
+      localStorage.removeItem('userId');
+      setIsLoggedIn(false);
+    } catch { }
+    router.push('/login');
+  };
 
   return (
     <Box
@@ -173,9 +190,9 @@ export default function Navbar({ navColor = 'background.default' }: { navColor?:
             sx={{
               alignItems: 'center',
               border: '1px solid',
-              borderColor: navColor,
+              borderColor: mColor,
               borderRadius: 4,
-              px: 4,
+              mx:1,
               py: 0.5,
               height: '35px',
               display: { xs: 'flex', md: 'none' },
@@ -183,7 +200,7 @@ export default function Navbar({ navColor = 'background.default' }: { navColor?:
           >
             <SearchIcon sx={{ color: mColor, ml: 1 }} />
             <InputBase
-              placeholder="Search Properties"
+              placeholder="AI Search"
               sx={{
                 width: '100%',
                 fontFamily: 'Montserrat, sans-serif',
@@ -203,9 +220,11 @@ export default function Navbar({ navColor = 'background.default' }: { navColor?:
         >
           <IconButton
             aria-label="login"
-            onClick={() => router.push(isLoggedIn ? '/user' : '/login')}
+            component={Link}
+            href={isLoggedIn ? '/user' : '/login'}
+            title={isLoggedIn ? 'My Account' : 'Log in'}
           >
-            <PersonOutlineOutlinedIcon sx={{ color: navColor }} />
+            <PersonOutlineOutlinedIcon sx={{ color: mColor }} />
           </IconButton>
         </Grid>
 
@@ -250,7 +269,7 @@ export default function Navbar({ navColor = 'background.default' }: { navColor?:
               position: 'absolute',
               top: 16,
               right: 16,
-              color: navColor,
+              color: 'grey.500',
             }}
           >
             <CloseIcon />
@@ -267,7 +286,7 @@ export default function Navbar({ navColor = 'background.default' }: { navColor?:
                           fontFamily: 'Montserrat, sans-serif',
                           fontSize: '18px',
                           fontWeight: 500,
-                          color: navColor,
+                          color: 'primary.main',
                           ml: 2,
                         }}
                       >
@@ -291,7 +310,7 @@ export default function Navbar({ navColor = 'background.default' }: { navColor?:
                   fontWeight="600"
                   textAlign={{ xs: 'left', md: 'left' }}
                   fontSize={'20px'}
-                  sx={{ paddingTop: '20px', color: navColor }}
+                  sx={{ paddingTop: '20px', color: 'primary.main' }}
                 >
                   Nomad Estate
                 </Typography>
