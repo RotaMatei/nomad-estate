@@ -13,10 +13,10 @@ const metrics = [
 
 export default function TopMetrics() {
   return (
-    <Grid container spacing={2}>
+    <Grid container spacing={2} sx={{mt:4, mb:4}}>
       {metrics.map((m, i) => (
-        <Grid sx={{ xs: 6, md: 4 }} key={i} component="div">
-          <Paper elevation={3} sx={{ p: 2, borderRadius: 4, textAlign: 'center' , backgroundColor: 'background.default' }}>
+        <Grid key={i} size={{ xs: 6, sm: 4, md: 2 }}>
+          <Paper elevation={3} sx={{ p: 2, borderRadius: 4, textAlign: 'center' , backgroundColor: 'background.default', boxShadow: 'none', border: '1px solid', borderColor: '#c2c2c265', height: 100, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <Typography variant="h6" sx={{ color: 'secondary.main' }}>{m.value}</Typography>
             <Typography variant="body2" color="text.secondary">{m.label}</Typography>
           </Paper>
