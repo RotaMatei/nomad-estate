@@ -26,6 +26,7 @@ export default function UserDashboardPage() {
     phoneNumber: string | null;
     phoneNumberVerified: boolean | null;
     birthDate: string | null;
+    createdAt?: string | null;
     profilePictureData?: string | null;
   };
   type AgencyProfile = {
@@ -83,6 +84,7 @@ export default function UserDashboardPage() {
           phoneNumberVerified:
             typeof u.phoneNumberVerified === 'boolean' ? u.phoneNumberVerified : null,
           birthDate: u.birthDate ?? null,
+          createdAt: u.createdAt ?? null,
           profilePictureData: u.profilePictureData ?? null,
         };
         setProfile(normalized);
@@ -140,7 +142,7 @@ export default function UserDashboardPage() {
 
   return (
     <Box sx={{ backgroundColor: 'background.default', minHeight: '100vh', overflow: 'hidden'}}>
-      <Navbar navColor="primary.main" mobileNavColor="primary.main" />
+      <Navbar navColor="primary.main" />
 
       {/* Content container */}
       <Box
@@ -188,7 +190,7 @@ export default function UserDashboardPage() {
             variant="outlined"
             color="primary"
             onClick={handleLogout}
-            sx={{ textTransform: 'none', borderRadius: 3, fontWeight: 600, display: { xs: 'none', md: 'block' } }}
+            sx={{ textTransform: 'none', borderRadius: 3, fontWeight: 600 }}
           >
             Log out
           </Button>
@@ -263,7 +265,7 @@ export default function UserDashboardPage() {
                 backgroundColor: 'background.default',
                 transition: 'box-shadow 200ms ease',
                 '&:hover': { boxShadow: '0 6px 18px rgba(0,0,0,0.06)' },
-                height: '20vh'
+                height: '200px',
               }}
             >
               <CardContent>
@@ -278,6 +280,7 @@ export default function UserDashboardPage() {
                     Email: <Box component="span" sx={{ fontWeight: 600 }}>{profile?.email ?? '—'}</Box>
                     {typeof profile?.emailVerified === 'boolean' && (
                       <Chip
+                        component="span"
                         size="small"
                         label={profile.emailVerified ? 'Verified' : 'Unverified'}
                         color={profile.emailVerified ? 'success' : 'default'}
@@ -289,6 +292,7 @@ export default function UserDashboardPage() {
                     Phone: <Box component="span" sx={{ fontWeight: 600 }}>{profile?.phoneNumber ?? '—'}</Box>
                     {typeof profile?.phoneNumberVerified === 'boolean' && (
                       <Chip
+                        component="span"
                         size="small"
                         label={profile.phoneNumberVerified ? 'Verified' : 'Unverified'}
                         color={profile.phoneNumberVerified ? 'success' : 'default'}
@@ -300,7 +304,7 @@ export default function UserDashboardPage() {
                     Role: <Box component="span" sx={{ fontWeight: 600 }}>{profile?.role ?? '—'}</Box>
                   </Typography>
                   <Typography sx={{ color: 'text.secondary' }}>
-                    Member since: <Box component="span" sx={{ fontWeight: 600 }}>{profile?.birthDate ? new Date(profile.birthDate).toLocaleDateString() : '—'}</Box>
+                    Member since: <Box component="span" sx={{ fontWeight: 600 }}>{profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString() : '—'}</Box>
                   </Typography>
                 </Stack>
               </CardContent>
@@ -316,7 +320,7 @@ export default function UserDashboardPage() {
                 backgroundColor: 'background.default',
                 transition: 'box-shadow 200ms ease',
                 '&:hover': { boxShadow: '0 6px 18px rgba(0,0,0,0.06)' },
-                height:'20vh'
+                height:'200px'
               }}
             >
               <CardContent>
@@ -403,6 +407,7 @@ export default function UserDashboardPage() {
                           Email: <Box component="span" sx={{ fontWeight: 600 }}>{agency.email ?? '—'}</Box>
                           {typeof agency.emailVerified === 'boolean' && (
                             <Chip
+                              component="span"
                               size="small"
                               label={agency.emailVerified ? 'Verified' : 'Unverified'}
                               color={agency.emailVerified ? 'success' : 'default'}
@@ -414,6 +419,7 @@ export default function UserDashboardPage() {
                           Phone: <Box component="span" sx={{ fontWeight: 600 }}>{agency.phoneNumber ?? '—'}</Box>
                           {typeof agency.phoneNumberVerified === 'boolean' && (
                             <Chip
+                              component="span"
                               size="small"
                               label={agency.phoneNumberVerified ? 'Verified' : 'Unverified'}
                               color={agency.phoneNumberVerified ? 'success' : 'default'}

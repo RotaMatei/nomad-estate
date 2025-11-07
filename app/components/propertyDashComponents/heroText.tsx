@@ -11,7 +11,7 @@ export default function HeroText() {
             position: 'relative',
             zIndex: 2, // above background, below filters/navbar
             pointerEvents: 'none',
-            mt: { xs: 15, sm:20}, // push text lower on sm+
+            mt: { xs: 15, sm: 3}, // push text lower on sm+
         }}>
             <Typography variant="h1" sx={{textAlign:'center'}}>
                 <GradientText

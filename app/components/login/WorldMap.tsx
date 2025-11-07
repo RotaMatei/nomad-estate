@@ -28,8 +28,7 @@ const FitToBounds: React.FC<{ geoData: FeatureCollection }> = ({ geoData }) => {
   const map = useMap();
   useEffect(() => {
     const bounds = L.geoJSON(geoData).getBounds();
-    // Avoid any initial pan/zoom animation on mount
-    map.fitBounds(bounds, { padding: [10, 10], animate: false });
+    map.fitBounds(bounds, { padding: [10, 10] });
   }, [geoData, map]);
   return null;
 };
@@ -89,9 +88,6 @@ const WorldMap: React.FC<WorldMapProps> = ({ data }) => {
             background: 'transparent',
             overflow: 'visible',
           }}
-          // Disable Leaflet animations to prevent top-to-bottom transition on load
-          zoomAnimation={false}
-          fadeAnimation={false}
           dragging={false}
           zoomControl={false}
           scrollWheelZoom={false}

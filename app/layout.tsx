@@ -13,6 +13,7 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   title: 'Nomad Estate',
   description: 'A platform for nomadic real estate',
+  abstract:'This is a platform for nomadic real estate, providing users with access to properties and investment opportunities worldwide.',
 };
 
 export default function RootLayout({

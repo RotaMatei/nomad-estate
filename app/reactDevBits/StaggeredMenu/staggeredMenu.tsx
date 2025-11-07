@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined';
-import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 import { CustomButton } from '@/app/components/utils/button';
 import { gsap } from 'gsap';
@@ -69,7 +68,7 @@ export interface StaggeredMenuHandle {
   isOpen: () => boolean;
 }
 
-export const StaggeredMenu = forwardRef<StaggeredMenuHandle, StaggeredMenuProps>(({ 
+export const StaggeredMenu = forwardRef<StaggeredMenuHandle, StaggeredMenuProps>(({
   position = 'right',
   colors = ['#B19EEF', '#5227FF'],
   items = [],
@@ -132,13 +131,13 @@ export const StaggeredMenu = forwardRef<StaggeredMenuHandle, StaggeredMenuProps>
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-  const panel = panelRef.current;
+      const panel = panelRef.current;
       const preContainer = preLayersRef.current;
       const plusH = plusHRef.current;
       const plusV = plusVRef.current;
       const icon = iconRef.current;
       const textInner = textInnerRef.current;
-  const headerEl = headerRef.current;
+      const headerEl = headerRef.current;
 
       let preLayers: HTMLElement[] = [];
       if (preContainer) {
@@ -146,10 +145,10 @@ export const StaggeredMenu = forwardRef<StaggeredMenuHandle, StaggeredMenuProps>
       }
       preLayerElsRef.current = preLayers;
 
-  const offscreen = position === 'left' ? -100 : 100;
+      const offscreen = position === 'left' ? -100 : 100;
       if (panel) gsap.set(panel, { xPercent: offscreen });
       if (preLayers.length) gsap.set(preLayers, { xPercent: offscreen });
-  if (headerEl) gsap.set(headerEl, { xPercent: offscreen });
+      if (headerEl) gsap.set(headerEl, { xPercent: offscreen });
       if (plusH) gsap.set(plusH, { transformOrigin: '50% 50%', rotate: 0 });
       if (plusV) gsap.set(plusV, { transformOrigin: '50% 50%', rotate: 90 });
       if (icon) gsap.set(icon, { rotate: 0, transformOrigin: '50% 50%' });
@@ -160,8 +159,8 @@ export const StaggeredMenu = forwardRef<StaggeredMenuHandle, StaggeredMenuProps>
   }, [menuButtonColor, position]);
 
   const buildOpenTimeline = useCallback(() => {
-  const panel = panelRef.current;
-  const headerEl = headerRef.current;
+    const panel = panelRef.current;
+    const headerEl = headerRef.current;
     const layers = preLayerElsRef.current;
     if (!panel) return null;
 
@@ -203,7 +202,7 @@ export const StaggeredMenu = forwardRef<StaggeredMenuHandle, StaggeredMenuProps>
 
     const layerDur = 0.5;
     const layerStagger = 0.09;
-    
+
     layers.forEach((el, i) => {
       tl.fromTo(
         el,
@@ -213,10 +212,10 @@ export const StaggeredMenu = forwardRef<StaggeredMenuHandle, StaggeredMenuProps>
       );
     });
 
-  const lastLayerTime = layers.length ? (layers.length - 1) * layerStagger : 0;
+    const lastLayerTime = layers.length ? (layers.length - 1) * layerStagger : 0;
     const panelInsertTime = lastLayerTime + (layers.length ? layerDur - 0.1 : 0);
     const panelDuration = 0.65;
-    
+
     tl.fromTo(
       panel,
       { xPercent: offscreenX }, // Use the calculated offscreen value
@@ -330,12 +329,12 @@ export const StaggeredMenu = forwardRef<StaggeredMenuHandle, StaggeredMenuProps>
     openTlRef.current = null;
     itemEntranceTweenRef.current?.kill();
 
-  const panel = panelRef.current;
-  const headerEl = headerRef.current;
+    const panel = panelRef.current;
+    const headerEl = headerRef.current;
     const layers = preLayerElsRef.current;
     if (!panel) return;
 
-  const all: HTMLElement[] = headerEl ? [...layers, headerEl, panel] : [...layers, panel];
+    const all: HTMLElement[] = headerEl ? [...layers, headerEl, panel] : [...layers, panel];
     closeTweenRef.current?.kill();
     const offscreen = position === 'left' ? -100 : 100;
     closeTweenRef.current = gsap.to(all, {
@@ -482,7 +481,7 @@ export const StaggeredMenu = forwardRef<StaggeredMenuHandle, StaggeredMenuProps>
       data-open={open || undefined}
       data-fit={fitContainer ? 'container' : undefined}
     >
-  <div ref={preLayersRef} className="sm-prelayers" aria-hidden="true" style={prelayersStyle}>
+      <div ref={preLayersRef} className="sm-prelayers" aria-hidden="true" style={prelayersStyle}>
         {(() => {
           const base = colors && colors.length ? colors.slice(0, 4) : ['#1e1e22', '#35353c'];
           let arr: string[] = [];
@@ -546,18 +545,21 @@ export const StaggeredMenu = forwardRef<StaggeredMenuHandle, StaggeredMenuProps>
           {headerCtaLabel && (
             <CustomButton
               color="primary"
-              icon={<ChatOutlinedIcon sx={{ color: 'var(--sm-accent)' }} fontSize="small" />}
+              icon={<ChatOutlinedIcon sx={{ color: 'currentColor', transition: 'color 0.2s ease' }} fontSize="small" />}
               label={headerCtaLabel}
               onClick={headerCtaOnClick}
               fullWidth
               sx={{
-                backgroundColor: '#fff',
-                color: theme.palette.secondary.main,
+                backgroundColor: 'transparent',
+                color: '#fff',
                 boxShadow: '0 3px 0 rgba(0,0,0,0.06)',
                 borderRadius: '12px',
-                fontSize: { xs: 12, md: 14, lg: 16 },
+                border: `1px solid ${theme.palette.background.default}`,
+                fontSize: { xs: 12, md: 14, lg: 14 },
+                height: { xs: 38, md: 42, lg: 38 }, /* slightly reduced heights */
                 '&:hover': {
-                  backgroundColor: theme.palette.background.default,
+                  backgroundColor: '#fff',
+                  color: theme.palette.secondary.main,
                 },
               }}
               containerSx={{ mb: 2 }}
@@ -677,9 +679,7 @@ export const StaggeredMenu = forwardRef<StaggeredMenuHandle, StaggeredMenuProps>
               <span className="sm-profile-name">{profileName}</span>
               <span className="sm-profile-email">{profileEmail}</span>
             </span>
-            <span className="sm-profile-caret" aria-hidden="true">
-              <KeyboardArrowDownOutlinedIcon fontSize="small" />
-            </span>
+            {/* Removed dropdown caret icon per requirement */}
           </button>
         </div>
       </aside>

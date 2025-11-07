@@ -6,8 +6,8 @@ import {
   Typography,
   Chip,
   Box,
+  Button,
   Stack,
-  CardActionArea,
 } from '@mui/material';
 
 interface RealEstateCardProps {
@@ -40,55 +40,60 @@ const RealEstateCard: React.FC<RealEstateCardProps> = ({
   onViewDetails,
 }) => {
   return (
-    <Card
-      sx={{
-        width: '100%',
-        borderRadius: 4,
-        boxShadow: 'none',
-        backgroundColor: 'background.default',
-      }}
-    >
-      <CardActionArea onClick={onViewDetails} sx={{ borderRadius: 4 }}>
-        <Box sx={{ position: 'relative', borderRadius: 4, overflow: 'hidden' }}>
-          <CardMedia component="img" height="200" image={imageUrl} alt={title} sx={{ display: 'block' }} />
-          <Chip
-            label={`Score: ${score}`}
-            color="success"
-            size="small"
-            sx={{ position: 'absolute', top: 8, right: 8 }}
-          />
-        </Box>
+    <Card sx={{ width: '100%', borderRadius: 4, boxShadow: 'none', backgroundColor: 'background.default' }}>
+      <Box sx={{ position: 'relative'}}>
+        <CardMedia
+          component="img"
+          height="200"
+          image={imageUrl}
+          alt={title}
+        />
+        <Chip
+          label={`Score: ${score}`}
+          color="success"
+          size="small"
+          sx={{ position: 'absolute', top: 8, right: 8 }}
+        />
+      </Box>
 
-        <CardContent sx={{ px: 0, py: 1, backgroundColor: 'background.default' }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-            {title}
-          </Typography>
-          <Typography variant="caption" color="grey.500" sx={{fontWeight: 500}}>
-            {location}
-          </Typography>
+      <CardContent sx={{ px: 2, py: 1, backgroundColor: 'background.default' }}>
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          {title}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {location}
+        </Typography>
 
-          <Typography variant="body1" sx={{ mt: 1, color: 'primary.main', fontWeight: 700 }}>
-            {price}
-          </Typography>
+        <Typography variant="h5" sx={{ mt: 1, color: 'primary.main', fontWeight: 700 }}>
+          {price}
+        </Typography>
 
-          <Stack direction="row"  sx={{ mt: 1, flexWrap: 'wrap'  }}>
-            <Typography variant="caption" sx={{ fontWeight: 500, mr: 2 }}>{beds} beds</Typography>
-            <Typography variant="caption" sx={{ fontWeight: 500, mr: 2 }}>{baths} bathrooms</Typography>
-            <Typography variant="caption" sx={{ fontWeight: 500 }}>{area}m²</Typography>
-          </Stack>
+        <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+          <Typography variant="body2">{beds} beds</Typography>
+          <Typography variant="body2">{baths} bathrooms</Typography>
+          <Typography variant="body2">{area}m²</Typography>
+        </Stack>
 
-          <Typography variant="caption" sx={{ mt: 1, fontWeight: 500, color:'text.secondary' }}>
-            Expected yield{' '}
-            <Box component="span" sx={{ color: 'green', fontWeight: 600 }}>
-              {expectedYield}%
-            </Box>
-          </Typography>
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          Expected yield{' '}
+          <Box component="span" sx={{ color: 'green', fontWeight: 600 }}>
+            {expectedYield}%
+          </Box>
+        </Typography>
 
-          <Typography variant="caption" color="grey.500" sx={{ mt: 1, display: 'block', fontWeight: 500 }}>
-            {company}
-          </Typography>
-        </CardContent>
-      </CardActionArea>
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+          {company}
+        </Typography>
+
+        <Button
+          variant="contained"
+          fullWidth
+          sx={{ mt: 2, borderRadius: 2 }}
+          onClick={onViewDetails}
+        >
+          View Details
+        </Button>
+      </CardContent>
     </Card>
   );
 };
