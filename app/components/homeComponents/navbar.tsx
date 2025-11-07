@@ -10,6 +10,8 @@ import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import { UserProfile } from './types';
+import api from '@/app/lib/api';
 
 export default function Navbar(
   { navColor = 'background.default', mobileNavColor }: { navColor?: string; mobileNavColor?: string }
@@ -18,6 +20,8 @@ export default function Navbar(
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
   const mColor = mobileNavColor ?? navColor;
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
@@ -25,9 +29,44 @@ export default function Navbar(
 
   // Detect auth state from localStorage token
   useEffect(() => {
-    // Initial check
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    setIsLoggedIn(!!token);
+    let mounted = true;
+
+    const fetchUser = async () => {
+      // Initial check
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      if (!mounted) return;
+      setIsLoggedIn(!!token);
+
+      if (!token) {
+        setUserId(null);
+        setUser(null);
+        return;
+      }
+
+      try {
+        // decode JWT payload safely
+        const parts = token.split('.');
+        const payload = parts[1] ? JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))) : null;
+        const id = payload ? String(payload.sub) : null;
+        if (!mounted) return;
+        setUserId(id);
+
+        if (id) {
+          // fetch user profile and set the state with the response data
+          const res = await api.get<UserProfile>(`users/retrieve/${id}`);
+          if (!mounted) return;
+          setUser(res.data as UserProfile);
+        } else {
+          setUser(null);
+        }
+      } catch {
+        if (!mounted) return;
+        setUserId(null);
+        setUser(null);
+      }
+    };
+
+    fetchUser();
 
     // Listen for token changes across tabs/windows
     const onStorage = (e: StorageEvent) => {
@@ -36,7 +75,10 @@ export default function Navbar(
       }
     };
     window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
+    return () => {
+      mounted = false;
+      window.removeEventListener('storage', onStorage);
+    };
   }, []);
 
   const pages = ['Home', 'About Us', 'Properties', 'Plans', 'Contact'];
@@ -178,7 +220,9 @@ export default function Navbar(
                 }}
                 onClick={() => router.push(isLoggedIn ? '/user' : '/login')}
               >
-                {isLoggedIn ? 'My Account' : 'Log in'}
+                {isLoggedIn ?
+                 "MY ACCOUNT"
+                 : 'Log in'}
               </Button>
             </Grid>
           </Grid>

@@ -14,7 +14,7 @@ type Props = {
   focusColor?: string;
 };
 
-export default function CheckboxGroup({ label, options, values, onChange, focusColor }: Props) {
+export default function CheckboxGroup({ label, options, values, onChange, focusColor = grey[700] }: Props) {
   const theme = useTheme();
   const activeColor = focusColor ?? theme.palette.primary.main;
   const toggle = (val: string) => {

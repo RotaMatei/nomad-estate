@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Box, Input } from '@mui/material';
 import EventOutlinedIcon from '@mui/icons-material/EventOutlined';
 import { grey } from '@mui/material/colors';
+import { useTheme } from '@mui/material/styles';
 
 type Props = {
   focusColor?: string;
@@ -19,10 +20,12 @@ type Props = {
   invalid?: boolean;
   min?: string; // YYYY-MM-DD
   max?: string; // YYYY-MM-DD
+  bgColor?: string;
+  textColor?: string;
 };
 
 export default function DateInput({
-  focusColor = '#000000',
+  focusColor = grey[700],
   icon = <EventOutlinedIcon sx={{ color: grey[500] }} />,
   label = '',
   value = '',
@@ -37,8 +40,13 @@ export default function DateInput({
   invalid = false,
   min,
   max,
+  bgColor,
+  textColor,
 }: Props) {
+  const theme = useTheme();
   const isDisabled = disabled || locked;
+  const resolvedBg = isDisabled ? theme.palette.grey[200] : (invalid ? '#ffebee' : (bgColor ?? theme.palette.background.default));
+  const resolvedText = textColor ?? grey[700];
   return (
     <Box
       sx={{
@@ -47,10 +55,10 @@ export default function DateInput({
         alignItems: 'center',
         justifyContent: 'center',
         height: { xs: '32px', lg: '40px' },
-        bgcolor: isDisabled ? 'grey.200' : invalid ? '#ffebee' : '#fff',
+  bgcolor: resolvedBg,
         mx: 0,
         borderRadius: { xs: '12px', lg: '16px' },
-        color: 'grey.200',
+  color: resolvedText,
         boxShadow: `0 3px 0 ${grey[300]}`,
         px: { xs: 1, lg: 2 },
         py: { xs: 1, lg: 2 },
@@ -84,7 +92,7 @@ export default function DateInput({
           fontSize: { xs: '14px', lg: '16px' },
           paddingLeft: 2,
           flex: 1,
-          color: isDisabled ? 'text.disabled' : 'text.primary',
+          color: isDisabled ? 'text.disabled' : resolvedText,
         }}
       />
       {endAdornment ? (

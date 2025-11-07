@@ -1,0 +1,15 @@
+.mapContainer {
+  position: relative;
+  height: 400px;
+  width: 100%;
+}
+
+.controls {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 1000;
+}

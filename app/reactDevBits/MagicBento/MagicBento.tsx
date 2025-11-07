@@ -15,6 +15,14 @@ import CheckboxGroup, { type Option as CheckboxOption } from '../../components/u
 import CustomButton from '../../components/utils/button';
 import api from '../../lib/api';
 import { CustomSelect } from '../../components/utils/select';
+import { MapGlobeSwitcher } from "../../components/propertyDashComponents/MapGlobeSwitcher";
+import { Location } from "../../components/propertyDashComponents/location";
+
+const mockLocations: Location[] = [
+  { id: 1, name: "Paris", lat: 48.8566, lng: 2.3522 },
+  { id: 2, name: "Berlin", lat: 52.52, lng: 13.405 },
+  { id: 3, name: "Tokyo", lat: 35.6762, lng: 139.6503 },
+];
 
 export interface BentoCardProps {
   color?: string;
@@ -570,6 +578,12 @@ const MagicBento: React.FC<BentoProps> = ({
   const [bedrooms, setBedrooms] = useState<string | number>('');
   const [investmentScore, setInvestmentScore] = useState<string | number>('');
   const [expectedYield, setExpectedYield] = useState<string | number>('');
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+
+  useEffect(() => {
+    // Log selected location id when it changes (move console.log out of JSX)
+    console.log('Selected Location ID:', selectedId);
+  }, [selectedId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -658,6 +672,10 @@ const MagicBento: React.FC<BentoProps> = ({
   const payload = { country, city, budgetMin: budget[0], budgetMax: budget[1], goals, benefits };
     // eslint-disable-next-line no-console
     console.log('Search with filters:', payload);
+  };
+
+  const handleReload = () => {
+    console.log("Reloading data...");
   };
 
   return (
@@ -873,12 +891,12 @@ const MagicBento: React.FC<BentoProps> = ({
                   </Box>
                 ) : (
                   <>
-                    <div className="card__header">
-                      <div className="card__label">{card.label}</div>
-                    </div>
-                    <div className="card__content">
-                      <h2 className="card__title">{card.title}</h2>
-                      <p className="card__description">{card.description}</p>
+                    <div className="card">
+                      <div className="card__content">
+                        <h2 className="card__title">Global Locations</h2>
+                        <MapGlobeSwitcher locations={mockLocations} onReload={handleReload} onSelect={setSelectedId} />
+                        <p className="card__description">Explore the locations on map or globe.</p>
+                      </div>
                     </div>
                   </>
                 )}

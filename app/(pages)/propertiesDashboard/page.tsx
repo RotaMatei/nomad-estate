@@ -7,6 +7,7 @@ import Navbar from '@/app/components/propertyDashComponents/navbarDasboard';
 import HeroText from '@/app/components/propertyDashComponents/heroText';
 import Filters from '@/app/components/propertyDashComponents/filters';
 import Properties from '@/app/components/propertyDashComponents/properties';
+
 export default function PropertiesDashboard() {
   return (
     <ThemeProvider theme={lightTheme}>

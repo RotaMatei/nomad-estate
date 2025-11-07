@@ -10,6 +10,8 @@ type Option = { value: string | number; label: string };
 
 type AutocompleteProps = {
   focusColor?: string;
+  bgColor?: string;
+  textColor?: string;
   icon?: ReactNode;
   label?: string;
   value?: string | number | '';
@@ -22,7 +24,9 @@ type AutocompleteProps = {
 };
 
 export const CustomAutocomplete = ({
-  focusColor = '#000000',
+  focusColor = grey[700],
+  bgColor,
+  textColor,
   icon = <PersonOutlineOutlinedIcon />,
   label = '',
   value = '',
@@ -35,6 +39,8 @@ export const CustomAutocomplete = ({
 }: AutocompleteProps) => {
   const theme = useTheme();
   const isDisabled = disabled || locked;
+  const resolvedBg = isDisabled ? theme.palette.grey[200] : (bgColor ?? theme.palette.background.default);
+  const resolvedText = textColor ?? grey[700]; // already grey[700], keep comment for clarity
   const selectedOption = options.find((o) => o.value === value) ?? null;
   const paperSx = {
     bgcolor: 'background.default',
@@ -64,10 +70,10 @@ export const CustomAutocomplete = ({
         alignItems: 'center',
         justifyContent: 'center',
         height: { xs: '32px', lg: '40px' },
-        bgcolor: isDisabled ? 'grey.200' : theme.palette.common.white,
+  bgcolor: resolvedBg,
         mx: 0,
         borderRadius: { xs: '12px', lg: '16px' },
-        color: 'grey.200',
+  color: resolvedText,
         boxShadow: `0 3px 0 ${grey[300]}`,
         px: { xs: 1, lg: 2 },
         py: { xs: 1, lg: 2 },
@@ -120,7 +126,7 @@ export const CustomAutocomplete = ({
                 pl: 0,
                 fontFamily: 'Montserrat, sans-serif',
                 fontSize: { xs: '14px', lg: '16px' },
-                color: isDisabled ? 'text.disabled' : 'text.primary',
+                color: isDisabled ? 'text.disabled' : resolvedText,
               },
             }}
           />

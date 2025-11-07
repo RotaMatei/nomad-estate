@@ -5,7 +5,9 @@ import { grey } from '@mui/material/colors';
 import { alpha, useTheme } from '@mui/material/styles';
 
 export const CustomInput = ({
-  focusColor = '#000000',
+    focusColor = grey[700],
+    bgColor,
+        textColor,
   icon = <DoNotDisturbAltOutlinedIcon sx={{ color: grey[500] }} />,
   label = '',
   value = '',
@@ -21,6 +23,8 @@ export const CustomInput = ({
   invalid = false,
 }: {
   focusColor?: string;
+    bgColor?: string;
+    textColor?: string;
   icon?: ReactNode;
   label?: string;
   value?: string;
@@ -37,6 +41,12 @@ export const CustomInput = ({
 }) => {
     const theme = useTheme();
     const isDisabled = disabled || locked;
+    const resolvedBg = isDisabled
+      ? theme.palette.grey[200]
+      : invalid
+        ? alpha(theme.palette.error.main, 0.08)
+        : (bgColor ?? theme.palette.background.default);
+    const resolvedText = textColor ?? grey[700];
     return (
         <Box
             sx= {{
@@ -45,10 +55,10 @@ export const CustomInput = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 height: { xs: '32px', lg: '40px' },
-                bgcolor: isDisabled ? 'grey.200' : (invalid ? alpha(theme.palette.error.main, 0.08) : theme.palette.common.white),
+                bgcolor: resolvedBg,
                 mx: 0,
                 borderRadius: {xs:'12px', lg: '16px'},
-                color: 'grey.200',
+                color: resolvedText,
                 boxShadow: `0 3px 0 ${grey[300]}`,
                 px: {xs: 1, lg: 2},
                 py: {xs: 1, lg: 2},
@@ -80,7 +90,7 @@ export const CustomInput = ({
                     fontSize: {xs: '14px', lg: '16px'},
                     paddingLeft: 2,
                     flex: 1,
-                    color: isDisabled ? 'text.disabled' : 'text.primary',
+                    color: isDisabled ? 'text.disabled' : resolvedText,
                 }}
             />
             {endAdornment ? (
