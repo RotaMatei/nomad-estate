@@ -563,6 +563,9 @@ const MagicBento: React.FC<BentoProps> = ({
   const [budget, setBudget] = useState<number[]>([100000, 500000]);
   const [goals, setGoals] = useState<string[]>([]);
   const [benefits, setBenefits] = useState<string[]>([]);
+  // Mobile collapsible state for goals and benefits sections
+  const [showGoals, setShowGoals] = useState(true);
+  const [showBenefits, setShowBenefits] = useState(true);
   const [countryOptions, setCountryOptions] = useState<{ value: string | number; label: string }[]>([]);
   const [city, setCity] = useState<string | number | ''>('');
   const [cityOptions, setCityOptions] = useState<{ value: string | number; label: string }[]>([]);
@@ -660,6 +663,13 @@ const MagicBento: React.FC<BentoProps> = ({
     console.log('Search with filters:', payload);
   };
 
+  // Initialize collapsed states depending on breakpoint
+  useEffect(() => {
+    // Collapse by default on mobile, expand on md+ screens
+    setShowGoals(!isMobile);
+    setShowBenefits(!isMobile);
+  }, [isMobile]);
+
   return (
     <>
       {enableSpotlight && (
@@ -755,23 +765,53 @@ const MagicBento: React.FC<BentoProps> = ({
 
                         {/* Investment goals */}
                         <Box>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 500, mb: 1, color: 'grey.500' }}>Investment Goals</Typography>
-                        <CheckboxGroup
-                          options={goalOptions}
-                          values={goals}
-                          onChange={setGoals}
-                          focusColor="#003FC7"
-                        /></Box>
+                        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 500, color: 'grey.500' }}>Investment Goals</Typography>
+                          <KeyboardArrowDownOutlinedIcon
+                            onClick={() => setShowGoals((prev) => !prev)}
+                            sx={{
+                              display: { xs: 'block', sm: 'block', md: 'none' },
+                              cursor: 'pointer',
+                              transform: showGoals ? 'rotate(180deg)' : 'rotate(0deg)',
+                              transition: 'transform 0.2s ease',
+                              color: 'secondary.main'
+                            }}
+                          />
+                        </Stack>
+                        {showGoals && (
+                          <CheckboxGroup
+                            options={goalOptions}
+                            values={goals}
+                            onChange={setGoals}
+                            focusColor="#003FC7"
+                          />
+                        )}
+                        </Box>
 
                         {/* Location benefits */}
                          <Box>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 500, mb: 1, color: 'grey.500' }}>Location Benefits</Typography>
-                        <CheckboxGroup
-                          options={benefitOptions}
-                          values={benefits}
-                          onChange={setBenefits}
-                          focusColor="#003FC7"
-                        /></Box>
+                        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 500, color: 'grey.500' }}>Location Benefits</Typography>
+                          <KeyboardArrowDownOutlinedIcon
+                            onClick={() => setShowBenefits((prev) => !prev)}
+                            sx={{
+                              display: { xs: 'block', sm: 'block', md: 'none' },
+                              cursor: 'pointer',
+                              transform: showBenefits ? 'rotate(180deg)' : 'rotate(0deg)',
+                              transition: 'transform 0.2s ease',
+                              color: 'secondary.main'
+                            }}
+                          />
+                        </Stack>
+                        {showBenefits && (
+                          <CheckboxGroup
+                            options={benefitOptions}
+                            values={benefits}
+                            onChange={setBenefits}
+                            focusColor="#003FC7"
+                          />
+                        )}
+                        </Box>
                       
                         <CustomButton
                           color="primary"

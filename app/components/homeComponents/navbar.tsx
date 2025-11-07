@@ -39,7 +39,12 @@ export default function Navbar(
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
-  const pages = ['Home', 'About Us', 'Properties', 'Plans', 'Contact'];
+  const pages: { label: string; href: string }[] = [
+    { label: 'Home', href: '/' },
+    { label: 'Book a call', href: '/about' },
+    { label: 'Properties', href: '/propertiesDashboard' },
+    { label: 'Plans', href: '/plans' },
+  ];
 
   const handleLogout = () => {
     try {
@@ -100,7 +105,7 @@ export default function Navbar(
             >
               <SearchIcon sx={{ color: navColor, mr: 1 }} />
               <InputBase
-                placeholder="Search Properties"
+                placeholder="AI Search"
                 sx={{
                   width: '100%',
                   fontFamily: 'Montserrat, sans-serif',
@@ -118,6 +123,7 @@ export default function Navbar(
             <Grid>
               <Button
                 variant="text"
+                href={'/propertiesDashboard'}
                 sx={{
                   color: navColor,
                   fontWeight: 500,
@@ -127,7 +133,7 @@ export default function Navbar(
                   borderRadius: 3,
                 }}
               >
-                ABOUT US
+                PROPERTIES
               </Button>
             </Grid>
 
@@ -257,9 +263,10 @@ export default function Navbar(
             display: { xs: 'block', md: 'none' },
             '& .MuiDrawer-paper': {
               width: '100vw',
-              height: '100vh',
+              height: '100%',
               backgroundColor: 'background.default',
               padding: 4,
+              overflow: 'hidden'
             },
           }}
         >
@@ -277,8 +284,15 @@ export default function Navbar(
 
           <Box sx={{ mt: 10 }}>
             <List>
-              {pages.map((page, index) => (
-                <ListItem key={index} disableGutters>
+              {pages.map((page) => (
+                <ListItem
+                  key={page.label}
+                  disableGutters
+                  component={Link}
+                  href={page.href}
+                  sx={{ textDecoration: 'none' }}
+                  onClick={() => setDrawerOpen(false)}
+                >
                   <ListItemText
                     primary={
                       <Typography
@@ -286,19 +300,19 @@ export default function Navbar(
                           fontFamily: 'Montserrat, sans-serif',
                           fontSize: '18px',
                           fontWeight: 500,
-                          color: 'primary.main',
+                          color: 'text.primary',
                           ml: 2,
                         }}
                       >
-                        {page}
+                        {page.label}
                       </Typography>
                     }
                   />
                 </ListItem>
               ))}
             </List>
-            <Grid container sx={{ paddingTop: '42vh' }}>
-              <Grid size={{ xs: 2 }} sx={{ paddingTop: '24px' }}>
+            <Grid container sx={{ paddingTop: '32vh' }}>
+              <Grid size={{ xs: 2 }} sx={{ paddingTop: '21px' }}>
                 <img
                   src="logo.jpeg"
                   alt="Logo"
@@ -309,7 +323,7 @@ export default function Navbar(
                 <Typography
                   fontWeight="600"
                   textAlign={{ xs: 'left', md: 'left' }}
-                  fontSize={'20px'}
+                  fontSize={'16px'}
                   sx={{ paddingTop: '20px', color: 'primary.main' }}
                 >
                   Nomad Estate

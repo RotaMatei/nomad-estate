@@ -176,6 +176,7 @@ export default function ChoosePath() {
                 <Button
                   variant="contained"
                   endIcon={<ArrowForwardIcon />}
+                  href={'/register?role=investor'}
                   sx={{
                     mt: 5,
                     textTransform: 'none',
@@ -295,6 +296,7 @@ export default function ChoosePath() {
 
                 <Button
                   variant="contained"
+                  href={'/register?role=agency'}
                   endIcon={<Groups3OutlinedIcon />}
                   sx={{
                     mt: 5,
