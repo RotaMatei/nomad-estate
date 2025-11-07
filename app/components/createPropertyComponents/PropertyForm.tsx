@@ -25,7 +25,7 @@ export default function PropertyForm() {
       // TODO: navigate to details page if route exists
     } catch (err: unknown) {
       console.error(err);
-      const message = err && typeof err === 'object' && 'message' in err ? String((err as any).message) : 'Failed to create property';
+      const message = err instanceof Error ? err.message : 'Failed to create property';
       if (typeof window !== 'undefined') {
         alert(message);
       }

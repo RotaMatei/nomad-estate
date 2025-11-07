@@ -3,26 +3,55 @@
 import { Typography, Container, Divider } from '@mui/material';
 import SectionHeader from './SectionHeader';
 import InfoGrid from './InfoGrid';
-import {
-  PropertyTypeEnum,
-  StatusEnum,
-  EnergyRatingEnum,
-  OrientationEnum,
-  ParkingEnum,
-  BalconyTypeEnum,
-  HeatingSystemEnum,
-  CoolingSystemEnum,
-  KitchenEnum,
-  SecurityEnum,
-  UtilityEnum,
-  SmartHomeFeatureEnum,
-  OtherFeatureEnum,
-  InvestmentGoalTagEnum,
-  LocationBenefitTagEnum,
-} from './Enums';
+
+// Define a narrowed type for display (subset of full DTO)
+interface DisplayProperty {
+  title?: string;
+  description?: string;
+  type?: string;
+  status?: string;
+  price?: number;
+  yield?: number;
+  score?: number;
+  streetAddress?: string;
+  postalCode?: string;
+  cityId?: number;
+  stateId?: number;
+  countryId?: number;
+  latitude?: number;
+  longitude?: number;
+  builtArea?: number;
+  landArea?: number;
+  totalArea?: number;
+  rooms?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  floors?: number;
+  floorLevel?: number;
+  energyEfficiencyRating?: string;
+  orientation?: string;
+  parking?: string;
+  balconyType?: string;
+  balconyTotalSize?: number;
+  balconyNumber?: number;
+  ownershipStatus?: boolean;
+  availabilityDateStart?: string;
+  availabilityDateEnd?: string;
+  heatingSystem?: string;
+  coolingSystem?: string;
+  kitchen?: string;
+  security?: string;
+  utility?: string;
+  smartHomeFeature?: string;
+  investmentGoalTag?: string;
+  locationBenefitTag?: string;
+  otherFeature?: string;
+  propertyTaxes?: number;
+  HOAFees?: number;
+}
 
 interface PropertyDetailsProps {
-  property: any;
+  property: DisplayProperty;
 }
 
 export default function PropertyDetails({ property }: PropertyDetailsProps) {
