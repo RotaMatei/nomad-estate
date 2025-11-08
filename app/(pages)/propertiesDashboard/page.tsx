@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { Box, ThemeProvider, Typography } from '@mui/material';
+import { Box, ThemeProvider } from '@mui/material';
 import { lightTheme } from '@/app/theme';
 import GradientContainer from '@/app/components/propertyDashComponents/heroBackground';
 import Navbar from '@/app/components/homeComponents/navbar';

@@ -10,6 +10,7 @@ import VolumeGraph from '../../components/investorsDahsboardComponents/VolumeGra
 // Removed unused import PropertyListings (was pointing to topCities but unused)
 import { StaggeredMenu, StaggeredMenuItem, StaggeredMenuSection } from '@/app/reactDevBits/StaggeredMenu/staggeredMenu';
 import React from 'react';
+import axios from 'axios';
 import api from '@/app/lib/api';
 import TopCities from '../../components/investorsDahsboardComponents/topCities';
 
@@ -90,51 +91,82 @@ export default function InvestmentDashboard() {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     if (!token) return;
     let cancelled = false;
+
     (async () => {
-      try {
-        // Retrieve userId from localStorage or decode JWT as fallback
-        let userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
-        if (!userId) {
-          try {
-            const [, payload] = token.split('.');
-            const json = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
-            if (json?.sub) {
-              userId = String(json.sub);
-              localStorage.setItem('userId', userId);
-            }
-          } catch { }
-        }
-        if (!userId) return;
-        const res = await api.get(`/user/retrieve/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        // Narrow the expected shape of user response to avoid implicit any usage
-        interface FetchedUser {
-          firstName?: string;
-          lastName?: string;
-          email?: string;
-          role?: string;
-          avatarUrl?: string;
-          avatar?: string;
-          imageUrl?: string;
-          image?: string;
-          profilePictureUrl?: string;
-          profilePicture?: string;
-        }
-        const u: FetchedUser = (res.data || {}) as FetchedUser;
-        const name = (u.firstName || '') + (u.lastName ? ` ${u.lastName}` : '');
-        if (!cancelled) {
-          if (name.trim()) setProfileName(name.trim());
-          if (u.email) setProfileEmail(u.email);
-          if (u.role) setProfileRole(String(u.role));
-          const avatar = u.avatarUrl || u.avatar || u.imageUrl || u.image || u.profilePictureUrl || u.profilePicture;
-          if (avatar && typeof avatar === 'string') setProfileAvatarUrl(avatar);
-        }
-      } catch (e) {
-        // Silent fail; keep defaults
-        console.warn('Failed to fetch user profile', e);
+      // Resolve subjectId (could be userId or agencyId stored as JWT sub)
+      let subjectId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
+      if (!subjectId) {
+        try {
+          const [, payload] = token.split('.');
+          const json = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+          if (json?.sub) {
+            subjectId = String(json.sub);
+            localStorage.setItem('userId', subjectId);
+          }
+        } catch {}
       }
+      if (!subjectId) return;
+
+      const headers = { Authorization: `Bearer ${token}` };
+
+      interface BaseProfile {
+        firstName?: string;
+        lastName?: string;
+        email?: string;
+        role?: string;
+        avatarUrl?: string;
+        avatar?: string;
+        imageUrl?: string;
+        image?: string;
+        profilePictureUrl?: string;
+        profilePicture?: string;
+      }
+      interface AgencyProfile extends BaseProfile {
+        companyName?: string;
+        companyType?: string;
+        licenseNumber?: string;
+        companyWebsite?: string;
+      }
+
+      let profile: BaseProfile | AgencyProfile | null = null;
+      let isAgency = false;
+
+      // NEW ORDER: try agency first; if 404/4xx then try user.
+      try {
+        const agencyRes = await api.get(`/agency/retrieve/${subjectId}`, { headers });
+        profile = (agencyRes.data || {}) as AgencyProfile;
+        isAgency = true;
+      } catch (agencyErr) {
+        const status = axios.isAxiosError(agencyErr) ? agencyErr.response?.status : undefined;
+        if (status && status >= 400) {
+          // Fallback to user profile
+          try {
+            const userRes = await api.get(`/user/retrieve/${subjectId}`, { headers });
+            profile = (userRes.data || {}) as BaseProfile;
+            isAgency = false;
+          } catch (userErr) {
+            console.warn('Failed to fetch both agency and user profile', userErr);
+          }
+        } else {
+          console.warn('Agency profile fetch failed', agencyErr);
+        }
+      }
+
+      if (!profile || cancelled) return;
+      const name = (profile.firstName || '') + (profile.lastName ? ` ${profile.lastName}` : '');
+      if (name.trim()) setProfileName(name.trim());
+      if (profile.email) setProfileEmail(profile.email);
+      if (!isAgency && profile.role) setProfileRole(String(profile.role));
+      const avatar =
+        profile.avatarUrl ||
+        profile.avatar ||
+        profile.imageUrl ||
+        profile.image ||
+        profile.profilePictureUrl ||
+        profile.profilePicture;
+      if (avatar && typeof avatar === 'string') setProfileAvatarUrl(avatar);
     })();
+
     return () => { cancelled = true; };
   }, []);
 

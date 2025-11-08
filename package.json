@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
+    "build:classic": "next build",
+    "build:notrace": "next build",
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",

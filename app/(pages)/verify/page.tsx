@@ -25,7 +25,7 @@ function VerifyContent() {
         });
         setStatus('success');
         setMessage('Your account has been verified. You can now log in.');
-      } catch (_e1) {
+  } catch {
         try {
           // Fallback: try agency confirm
           await api.post('/auth/agency/confirm', token, {
@@ -33,7 +33,7 @@ function VerifyContent() {
           });
           setStatus('success');
           setMessage('Your agency account has been verified. You can now log in.');
-        } catch (_e2) {
+  } catch {
           setStatus('error');
           setMessage('Verification failed. The link may be invalid or expired.');
         }

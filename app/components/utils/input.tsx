@@ -12,6 +12,7 @@ export const CustomInput = ({
   label = '',
   value = '',
   onChange = () => {},
+    onKeyDown,
   onFocus,
   onBlur,
   placeholder = '',
@@ -29,6 +30,7 @@ export const CustomInput = ({
   label?: string;
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   placeholder?: string;
@@ -79,6 +81,7 @@ export const CustomInput = ({
                 disableUnderline
                 value={value}
                 onChange={onChange}
+                onKeyDown={onKeyDown}
                 onFocus={onFocus}
                 onBlur={onBlur}
                 placeholder={placeholder}

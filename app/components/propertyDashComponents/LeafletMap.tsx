@@ -1,10 +1,5 @@
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
-import { Location, MapProps } from "./location";
-
-interface Props {
-  locations: Location[];
-  zoom: number;
-}
+import { MapProps } from "./location";
 
 const LeafletMap = ({ locations, zoom }: MapProps) => {
   const center: [number, number] = [

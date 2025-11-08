@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Box, Grid, Typography, Card, CardContent, Button, Divider, Chip, Stack, Avatar } from '@mui/material';
+import { Box, Grid, Typography, Card, CardContent, Button, Chip, Stack, Avatar } from '@mui/material';
 import Navbar from '@/app/components/homeComponents/navbar';
 import { useRouter } from 'next/navigation';
 import { alpha, useTheme } from '@mui/material/styles';
@@ -12,6 +12,7 @@ import MarkEmailUnreadOutlinedIcon from '@mui/icons-material/MarkEmailUnreadOutl
 import TravelExploreOutlinedIcon from '@mui/icons-material/TravelExploreOutlined';
 import WorkspacePremiumOutlinedIcon from '@mui/icons-material/WorkspacePremiumOutlined';
 import api from '@/app/lib/api';
+import axios from 'axios';
 
 export default function UserDashboardPage() {
   const router = useRouter();
@@ -69,61 +70,153 @@ export default function UserDashboardPage() {
         return;
       }
       try {
-        // Get user profile
-        const userRes = await api.get<UserProfile>(`/user/retrieve/${userId}`, {
+        // Try agency profile first (sub may represent agency id); fallback to user profile.
+        const agResPrimary = await api.get<AgencyProfile>(`/agency/retrieve/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const u = userRes.data as Partial<UserProfile>;
-        const normalized: UserProfile = {
-          firstName: u.firstName ?? null,
-          lastName: u.lastName ?? null,
-          role: (u.role as string) ?? null,
-          email: u.email ?? null,
-          emailVerified: typeof u.emailVerified === 'boolean' ? u.emailVerified : null,
-          phoneNumber: u.phoneNumber ?? null,
+        const aPrimary = agResPrimary.data as Partial<AgencyProfile>;
+        const normalizedAgencyPrimary: AgencyProfile = {
+          id: userId,
+          email: aPrimary.email ?? null,
+          emailVerified: typeof aPrimary.emailVerified === 'boolean' ? aPrimary.emailVerified : null,
+          phoneNumber: aPrimary.phoneNumber ?? null,
           phoneNumberVerified:
-            typeof u.phoneNumberVerified === 'boolean' ? u.phoneNumberVerified : null,
-          birthDate: u.birthDate ?? null,
-          createdAt: u.createdAt ?? null,
-          profilePictureData: u.profilePictureData ?? null,
+            typeof aPrimary.phoneNumberVerified === 'boolean' ? aPrimary.phoneNumberVerified : null,
+          companyName: aPrimary.companyName ?? null,
+          companyType: aPrimary.companyType ?? null,
+          licenseNumber: aPrimary.licenseNumber ?? null,
+          companyWebsite: aPrimary.companyWebsite ?? null,
+          profilePictureData: aPrimary.profilePictureData ?? null,
         };
-        setProfile(normalized);
-        setName(normalized.firstName || storedName);
-        if (normalized.firstName && !storedName) localStorage.setItem('user', normalized.firstName);
+        setAgency(normalizedAgencyPrimary);
+        if (normalizedAgencyPrimary.companyName) {
+          setName(normalizedAgencyPrimary.companyName);
+          localStorage.setItem('user', normalizedAgencyPrimary.companyName);
+        }
 
-        // If user is an AGENT, attempt to retrieve agency info
-        if (normalized.role === 'AGENT') {
-          try {
-            const agList = await api.get<Array<{ agencyId: string }>>(
-              `/agent/retrieve/agencies-for-agent/${userId}`,
-            );
-            const agencyId = agList.data?.[0]?.agencyId;
-            if (agencyId) {
-              const agRes = await api.get<AgencyProfile>(`/agency/retrieve/${agencyId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-              });
-              const a = agRes.data as Partial<AgencyProfile>;
-              const normalizedAgency: AgencyProfile = {
-                id: agencyId,
-                email: a.email ?? null,
-                emailVerified: typeof a.emailVerified === 'boolean' ? a.emailVerified : null,
-                phoneNumber: a.phoneNumber ?? null,
-                phoneNumberVerified:
-                  typeof a.phoneNumberVerified === 'boolean' ? a.phoneNumberVerified : null,
-                companyName: a.companyName ?? null,
-                companyType: a.companyType ?? null,
-                licenseNumber: a.licenseNumber ?? null,
-                companyWebsite: a.companyWebsite ?? null,
-                profilePictureData: a.profilePictureData ?? null,
-              };
-              setAgency(normalizedAgency);
+        // Attempt user mapping if role inference needed (agency may also have linked agents)
+        try {
+          const userRes = await api.get<UserProfile>(`/user/retrieve/${userId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const u = userRes.data as Partial<UserProfile>;
+          const normalized: UserProfile = {
+            firstName: u.firstName ?? null,
+            lastName: u.lastName ?? null,
+            role: (u.role as string) ?? null,
+            email: u.email ?? null,
+            emailVerified: typeof u.emailVerified === 'boolean' ? u.emailVerified : null,
+            phoneNumber: u.phoneNumber ?? null,
+            phoneNumberVerified:
+              typeof u.phoneNumberVerified === 'boolean' ? u.phoneNumberVerified : null,
+            birthDate: u.birthDate ?? null,
+            createdAt: u.createdAt ?? null,
+            profilePictureData: u.profilePictureData ?? null,
+          };
+          setProfile(normalized);
+          if (normalized.firstName) {
+            setName(normalized.firstName);
+            localStorage.setItem('user', normalized.firstName);
+          }
+
+          if (normalized.role === 'AGENT') {
+            try {
+              const agList = await api.get<Array<{ agencyId: string }>>(
+                `/agent/retrieve/agencies-for-agent/${userId}`,
+              );
+              const agencyId = agList.data?.[0]?.agencyId;
+              if (agencyId) {
+                const agRes = await api.get<AgencyProfile>(`/agency/retrieve/${agencyId}`, {
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+                const a = agRes.data as Partial<AgencyProfile>;
+                const normalizedAgency: AgencyProfile = {
+                  id: agencyId,
+                  email: a.email ?? null,
+                  emailVerified: typeof a.emailVerified === 'boolean' ? a.emailVerified : null,
+                  phoneNumber: a.phoneNumber ?? null,
+                  phoneNumberVerified:
+                    typeof a.phoneNumberVerified === 'boolean' ? a.phoneNumberVerified : null,
+                  companyName: a.companyName ?? null,
+                  companyType: a.companyType ?? null,
+                  licenseNumber: a.licenseNumber ?? null,
+                  companyWebsite: a.companyWebsite ?? null,
+                  profilePictureData: a.profilePictureData ?? null,
+                };
+                setAgency(normalizedAgency);
+              }
+            } catch {
+              // ignore nested agency fetch failures
             }
-          } catch {
-            // ignore agency fetch failures and keep page usable
+          }
+        } catch (userFetchErr) {
+          const statusUser = axios.isAxiosError(userFetchErr) ? userFetchErr.response?.status : undefined;
+          if (statusUser && statusUser >= 400) {
+            // keep agency data only
           }
         }
-      } catch {
-        setName(storedName);
+      } catch (agencyPrimaryErr: unknown) {
+        // If agency primary fetch fails 4xx, fallback to user profile
+        const status = axios.isAxiosError(agencyPrimaryErr) ? agencyPrimaryErr.response?.status : undefined;
+        if (status && status >= 400) {
+          try {
+            const userRes = await api.get<UserProfile>(`/user/retrieve/${userId}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            const u = userRes.data as Partial<UserProfile>;
+            const normalized: UserProfile = {
+              firstName: u.firstName ?? null,
+              lastName: u.lastName ?? null,
+              role: (u.role as string) ?? null,
+              email: u.email ?? null,
+              emailVerified: typeof u.emailVerified === 'boolean' ? u.emailVerified : null,
+              phoneNumber: u.phoneNumber ?? null,
+              phoneNumberVerified:
+                typeof u.phoneNumberVerified === 'boolean' ? u.phoneNumberVerified : null,
+              birthDate: u.birthDate ?? null,
+              createdAt: u.createdAt ?? null,
+              profilePictureData: u.profilePictureData ?? null,
+            };
+            setProfile(normalized);
+            setName(normalized.firstName || storedName);
+            if (normalized.firstName && !storedName) localStorage.setItem('user', normalized.firstName);
+
+            if (normalized.role === 'AGENT') {
+              try {
+                const agList = await api.get<Array<{ agencyId: string }>>(
+                  `/agent/retrieve/agencies-for-agent/${userId}`,
+                );
+                const agencyId = agList.data?.[0]?.agencyId;
+                if (agencyId) {
+                  const agRes = await api.get<AgencyProfile>(`/agency/retrieve/${agencyId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                  });
+                  const a = agRes.data as Partial<AgencyProfile>;
+                  const normalizedAgency: AgencyProfile = {
+                    id: agencyId,
+                    email: a.email ?? null,
+                    emailVerified: typeof a.emailVerified === 'boolean' ? a.emailVerified : null,
+                    phoneNumber: a.phoneNumber ?? null,
+                    phoneNumberVerified:
+                      typeof a.phoneNumberVerified === 'boolean' ? a.phoneNumberVerified : null,
+                    companyName: a.companyName ?? null,
+                    companyType: a.companyType ?? null,
+                    licenseNumber: a.licenseNumber ?? null,
+                    companyWebsite: a.companyWebsite ?? null,
+                    profilePictureData: a.profilePictureData ?? null,
+                  };
+                  setAgency(normalizedAgency);
+                }
+              } catch {
+                // ignore nested agency fetch failures
+              }
+            }
+          } catch {
+            setName(storedName);
+          }
+        } else {
+          setName(storedName);
+        }
       }
     };
     fetchData();

@@ -1,9 +1,9 @@
 import React from 'react';
-import { Grid, Paper, Typography, Box } from '@mui/material';
+import { Grid, Typography, Box } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import BusinessIcon from '@mui/icons-material/Business';
 import HandshakeIcon from '@mui/icons-material/Handshake';
-import FadeContent from '../../reactDevBits/FadeContent/FadeContent';
+// Removed unused FadeContent import
 import AnimatedContent from '../../reactDevBits/AnimatedContent/AnimatedContent';
 
 const features = [

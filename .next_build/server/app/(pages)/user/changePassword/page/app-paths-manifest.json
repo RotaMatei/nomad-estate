@@ -1,0 +1,3 @@
+{
+  "/(pages)/user/changePassword/page": "app/(pages)/user/changePassword/page.js"
+}

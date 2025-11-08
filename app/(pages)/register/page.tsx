@@ -11,7 +11,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
-import CustomButton from '@/app/components/utils/button';
 import ChooseAgency from '@/app/components/register/chooseAgency';
 import ChooseInvestor from '@/app/components/register/chooseInvestor';
 import SignUpAsAgency from '@/app/components/register/signUpAsAgency';
@@ -39,8 +38,8 @@ export default function RegisterPage() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [birthDate, setBirthDate] = useState(''); // YYYY-MM-DD for investors
-  const [role, setRole] = useState<RoleEnum>(RoleEnum.INVESTOR);
-  const [error, setError] = useState('');
+  // Role is constant for investor form; agency has its own flow
+  const role: RoleEnum = RoleEnum.INVESTOR;
   // Inline confirm now handled inside each form
 
   type Country = { id: number; name: string };
@@ -171,11 +170,8 @@ export default function RegisterPage() {
       localStorage.setItem('user', res.data.firstName + ' ' + res.data.lastName);
       router.push('/');
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('Registration failed');
-      }
+      // Log and keep UI simple; surface errors via toasts in the future
+      console.error('Investor registration failed', err);
     }
   };
 
@@ -264,8 +260,7 @@ export default function RegisterPage() {
       // Fire and forget; no need to block prompt
       Promise.allSettled([...pmReqs, ...spReqs, ...apiReqs]).catch(() => {});
     } catch (e: unknown) {
-      if (e instanceof Error) setError(e.message);
-      else setError('Agency registration failed');
+      console.error('Agency registration failed', e);
     }
   };
 
@@ -469,18 +464,53 @@ export default function RegisterPage() {
         </Box>
       </Box>
       {/* Inline confirm handled inside forms; modal removed */}
-      <Dialog open={showAgencyPrompt} onClose={() => setShowAgencyPrompt(false)} maxWidth="xs" fullWidth>
-        <DialogTitle>Complete your agency portfolio?</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" sx={{ mt: 1 }}>
+      <Dialog
+        open={showAgencyPrompt}
+        onClose={(_e, reason) => {
+          // Prevent closing the dialog when clicking outside or pressing Escape
+          if (reason === 'backdropClick' || reason === 'escapeKeyDown') return;
+          setShowAgencyPrompt(false);
+        }}
+        maxWidth="xs"
+        fullWidth
+        disableEscapeKeyDown
+        PaperProps={{
+          sx: {
+            bgcolor: 'background.default',
+            backgroundColor: 'background.default',
+            fontFamily: 'Montserrat, sans-serif',
+            borderRadius: '16px',
+            overflow: 'hidden',
+          },
+        }}
+      >
+        {/* Non-dismissible modal: backdrop & ESC ignored intentionally to force explicit choice */}
+        <DialogTitle sx={{ fontFamily: 'Montserrat, sans-serif' }}>
+          Complete your agency portfolio?
+        </DialogTitle>
+        <DialogContent sx={{ fontFamily: 'Montserrat, sans-serif' }}>
+          <Typography variant="body2" sx={{ mt: 1, fontFamily: 'Montserrat, sans-serif' }}>
             Your agency account was created successfully. Would you like to complete your portfolio now?
           </Typography>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => { setShowAgencyPrompt(false); router.push('/'); }}>
+        <DialogActions sx={{ fontFamily: 'Montserrat, sans-serif' }}>
+          <Button
+            onClick={() => {
+              setShowAgencyPrompt(false);
+              router.push('/');
+            }}
+            sx={{ fontFamily: 'Montserrat, sans-serif' }}
+          >
             No, maybe later
           </Button>
-          <Button variant="contained" onClick={() => { setShowAgencyPrompt(false); router.push('/agencyDashboard'); }}>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setShowAgencyPrompt(false);
+              router.push('/agencyDashboard');
+            }}
+            sx={{ fontFamily: 'Montserrat, sans-serif' }}
+          >
             Yes, take me there
           </Button>
         </DialogActions>

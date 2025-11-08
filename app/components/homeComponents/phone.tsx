@@ -1,7 +1,8 @@
-import { Box, Typography, TextField } from '@mui/material';
+/* eslint-disable @next/next/no-img-element */
+import { Box, Typography } from '@mui/material';
 import EmailIcon from '@mui/icons-material/Email';
 import LockIcon from '@mui/icons-material/Lock';
-import GoogleIcon from '@mui/icons-material/Google';
+// Removed unused GoogleIcon import
 import AppleIcon from '@mui/icons-material/Apple';
 
 export default function Phone() {

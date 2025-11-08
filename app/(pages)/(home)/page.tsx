@@ -1,8 +1,6 @@
 'use client';
 import React from 'react';
 import { ThemeProvider } from '@emotion/react';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import { lightTheme } from '../../theme';
 import Box from '@mui/material/Box';
 import HeroSection from '../../components/homeComponents/heroSection';
@@ -12,8 +10,6 @@ import GlobalTrustGrid from '../../components/homeComponents/globalTrustGrid';
 import ChoosePath from '../../components/homeComponents/choosePath';
 
 export default function Home() {
-  const router = useRouter();
-
   return (
     <ThemeProvider theme={lightTheme}>
       <HeroSection />

@@ -21,7 +21,7 @@ interface RealEstateCardProps {
   baths: number;
   area: number;
   yield: number;
-  company: string;
+  company?: string;
   onViewDetails?: () => void;
 }
 
@@ -81,9 +81,11 @@ const RealEstateCard: React.FC<RealEstateCardProps> = ({
           </Box>
         </Typography>
 
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-          {company}
-        </Typography>
+        {company && (
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+            {company}
+          </Typography>
+        )}
 
         <Button
           variant="contained"

@@ -1,4 +1,6 @@
 'use client';
+/* eslint-disable @next/next/no-img-element */
+'use client';
 import { Box, Button, Grid, InputBase, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CreditCardOutlinedIcon from '@mui/icons-material/CreditCardOutlined';

@@ -1,0 +1,137 @@
+{
+  "version": 3,
+  "pages404": true,
+  "caseSensitive": false,
+  "basePath": "",
+  "redirects": [
+    {
+      "source": "/:path+/",
+      "destination": "/:path+",
+      "internal": true,
+      "statusCode": 308,
+      "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
+    }
+  ],
+  "headers": [],
+  "rewrites": {
+    "beforeFiles": [],
+    "afterFiles": [],
+    "fallback": []
+  },
+  "dynamicRoutes": [],
+  "staticRoutes": [
+    {
+      "page": "/",
+      "regex": "^/(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/(?:/)?$"
+    },
+    {
+      "page": "/_not-found",
+      "regex": "^/_not\\-found(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_not\\-found(?:/)?$"
+    },
+    {
+      "page": "/agency/changePassword",
+      "regex": "^/agency/changePassword(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/agency/changePassword(?:/)?$"
+    },
+    {
+      "page": "/agency/logOut",
+      "regex": "^/agency/logOut(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/agency/logOut(?:/)?$"
+    },
+    {
+      "page": "/agencyDashboard",
+      "regex": "^/agencyDashboard(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/agencyDashboard(?:/)?$"
+    },
+    {
+      "page": "/createProperty",
+      "regex": "^/createProperty(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/createProperty(?:/)?$"
+    },
+    {
+      "page": "/details",
+      "regex": "^/details(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/details(?:/)?$"
+    },
+    {
+      "page": "/favicon.ico",
+      "regex": "^/favicon\\.ico(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/favicon\\.ico(?:/)?$"
+    },
+    {
+      "page": "/investorsDashboard",
+      "regex": "^/investorsDashboard(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/investorsDashboard(?:/)?$"
+    },
+    {
+      "page": "/login",
+      "regex": "^/login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/login(?:/)?$"
+    },
+    {
+      "page": "/propertiesDashboard",
+      "regex": "^/propertiesDashboard(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/propertiesDashboard(?:/)?$"
+    },
+    {
+      "page": "/register",
+      "regex": "^/register(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/register(?:/)?$"
+    },
+    {
+      "page": "/user",
+      "regex": "^/user(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/user(?:/)?$"
+    },
+    {
+      "page": "/user/changePassword",
+      "regex": "^/user/changePassword(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/user/changePassword(?:/)?$"
+    },
+    {
+      "page": "/user/logOut",
+      "regex": "^/user/logOut(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/user/logOut(?:/)?$"
+    },
+    {
+      "page": "/verify",
+      "regex": "^/verify(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/verify(?:/)?$"
+    }
+  ],
+  "dataRoutes": [],
+  "rsc": {
+    "header": "rsc",
+    "varyHeader": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+    "prefetchHeader": "next-router-prefetch",
+    "didPostponeHeader": "x-nextjs-postponed",
+    "contentTypeHeader": "text/x-component",
+    "suffix": ".rsc",
+    "prefetchSuffix": ".prefetch.rsc",
+    "prefetchSegmentHeader": "next-router-segment-prefetch",
+    "prefetchSegmentSuffix": ".segment.rsc",
+    "prefetchSegmentDirSuffix": ".segments"
+  },
+  "rewriteHeaders": {
+    "pathHeader": "x-nextjs-rewritten-path",
+    "queryHeader": "x-nextjs-rewritten-query"
+  }
+}

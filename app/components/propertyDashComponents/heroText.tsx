@@ -1,6 +1,6 @@
 'use client';
 import GradientText from '@/app/GradientText/GradientText';
-import { Box, Button, Grid, InputBase, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 
 export default function HeroText() {
     return (

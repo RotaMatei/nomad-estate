@@ -1,54 +1,30 @@
 import PropertyDetails from '../../components/detailsComponents/PropertyDetails';
+import api from '@/app/lib/api';
 
-async function getProperty(id: string) {
-  // Replace with actual API call
-  return {
-    title: 'Downtown Tineretului-Poppy',
-    description: 'Self Check-in, Tram & Metro access, cozy and clean.',
-    type: 'APARTMENT',
-    status: 'AVAILABLE',
-    price: 65000,
-    yield: 6.5,
-    score: 8,
-    streetAddress: 'Strada Tineretului 12',
-    postalCode: '040353',
-    cityId: 1,
-    stateId: 10,
-    countryId: 40,
-    latitude: 44.4167,
-    longitude: 26.1000,
-    builtArea: 45,
-    landArea: 0,
-    totalArea: 45,
-    rooms: 2,
-    bedrooms: 1,
-    bathrooms: 1,
-    floors: 10,
-    floorLevel: 4,
-    energyEfficiencyRating: 'B',
-    orientation: 'SE',
-    parking: 'STREET_PARKING',
-    balconyType: 'BALCONY',
-    balconyTotalSize: 5,
-    balconyNumber: 1,
-    ownershipStatus: true,
-    propertyTaxes: 120,
-    HOAFees: 30,
-    availabilityDateStart: '2023-01-01',
-    availabilityDateEnd: '2023-12-31',
-    heatingSystem: 'CENTRAL',
-    coolingSystem: 'AC',
-    kitchen: 'FURNISHED',
-    security: 'CAMERAS',
-    utility: 'WATER',
-    smartHomeFeature: 'LOCKS',
-    otherFeature: 'BBQ_AREA',
-    investmentGoalTag: 'SHORT_TERM_RENTAL_READY',
-    locationBenefitTag: 'TOURIST_HOTSPOT',
-  };
+interface PropertyDto {
+  title?: string; description?: string; type?: string; status?: string; price?: number; yield?: number; score?: number;
+  streetAddress?: string; postalCode?: string; cityId?: number; stateId?: number; countryId?: number; latitude?: number; longitude?: number;
+  builtArea?: number; landArea?: number; totalArea?: number; rooms?: number; bedrooms?: number; bathrooms?: number; floors?: number; floorLevel?: number;
+  energyEfficiencyRating?: string; orientation?: string; parking?: string; balconyType?: string; balconyTotalSize?: number; balconyNumber?: number;
+  ownershipStatus?: boolean; propertyTaxes?: number; HOAFees?: number; availabilityDateStart?: string; availabilityDateEnd?: string;
+  heatingSystem?: string; coolingSystem?: string; kitchen?: string; security?: string; utility?: string; smartHomeFeature?: string; otherFeature?: string;
+  investmentGoalTag?: string; locationBenefitTag?: string;
 }
 
-export default async function PropertyPage({ params }: { params: { id: string } }) {
-  const property = await getProperty(params.id);
+async function fetchProperty(id: string): Promise<PropertyDto | null> {
+  try {
+    const res = await api.get(`/property/retrieve-details/${id}`);
+    return res.data || null;
+  } catch {
+    return null;
+  }
+}
+
+export default async function PropertyPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const property = await fetchProperty(id);
+  if (!property) {
+    return <div style={{ padding: 32 }}>Failed to load property details.</div>;
+  }
   return <PropertyDetails property={property} />;
 }

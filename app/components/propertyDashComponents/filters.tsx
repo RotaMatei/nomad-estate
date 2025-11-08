@@ -1,5 +1,5 @@
 'use client';
-import { Box, Button, Grid, InputBase, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import MagicBento from '@/app/reactDevBits/MagicBento/MagicBento';
 
 export default function Filters() {

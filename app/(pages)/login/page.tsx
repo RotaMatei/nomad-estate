@@ -6,7 +6,7 @@ import api from '../../lib/api';
 import axios from 'axios';
 import '@/app/GradientText/GradientText.css';
 import { Box, Typography, IconButton } from '@mui/material';
-import { useTheme, alpha } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import GoogleIcon from '@mui/icons-material/Google';
@@ -27,11 +27,13 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const [glareRun, setGlareRun] = useState(false);
   const router = useRouter();
 
+  const emailSanitized = email.trim().toLowerCase();
   const isEmail = (val: string) => /.+@.+\..+/.test(val);
-  const isValid = isEmail(email) && password.length > 0;
+  const isValid = isEmail(emailSanitized) && password.length > 0;
 
   // Play glare when the button transitions from disabled -> enabled
   const prevValidRef = useRef(isValid);
@@ -60,6 +62,7 @@ export default function LoginPage() {
 
   const handleUserLogin = async () => {
     if (!isValid) return;
+    if (loading) return;
     // trigger glare sweep on valid attempt
     setGlareRun(false);
     requestAnimationFrame(() => setGlareRun(true));
@@ -80,8 +83,9 @@ export default function LoginPage() {
     };
 
     try {
+      setLoading(true);
       // Attempt user login first
-      const resUser = await api.post<LoginResponse>('/auth/user/login', { email, password });
+      const resUser = await api.post<LoginResponse>('/auth/user/login', { email: emailSanitized, password });
       persistAndRedirect(resUser.data);
       return;
     } catch (err: unknown) {
@@ -89,7 +93,7 @@ export default function LoginPage() {
       // Only fallback to agency on HTTP error codes
       if (status && status >= 400) {
         try {
-          const resAgency = await api.post<LoginResponse>('/auth/agency/login', { email, password });
+          const resAgency = await api.post<LoginResponse>('/auth/agency/login', { email: emailSanitized, password });
           persistAndRedirect(resAgency.data);
           return;
         } catch (err2: unknown) {
@@ -107,6 +111,8 @@ export default function LoginPage() {
       } else {
         setError('Login failed');
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -236,9 +242,12 @@ export default function LoginPage() {
                 label="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleUserLogin();
+                }}
                 placeholder="Investor Or Agency Email"
                 type="email"
-                invalid={email.length > 0 && !isEmail(email)}
+                invalid={email.length > 0 && !isEmail(emailSanitized)}
               />
             </Box>
             <Box sx={{ width: '100%' }}>
@@ -253,6 +262,9 @@ export default function LoginPage() {
                 label="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleUserLogin();
+                }}
                 placeholder="Password"
                 type="password"
               />
@@ -266,9 +278,9 @@ export default function LoginPage() {
                 glareOpacity={0.45}
               >
                 <GradientButton
-                  label="Log in"
+                  label={loading ? 'Logging in…' : 'Log in'}
                   onClick={handleUserLogin}
-                  disabled={!isValid}
+                  disabled={!isValid || loading}
                   width={220}
                   colors={['#e80000', '#BC2DFF', '#121de6', '#BC2DFF', '#E80000']}
                   sx={{ boxShadow: '0 6px 0 #e0e0e0' }}
@@ -276,9 +288,9 @@ export default function LoginPage() {
               </Glare>
             ) : (
               <GradientButton
-                label="Log in"
+                label={loading ? 'Logging in…' : 'Log in'}
                 onClick={handleUserLogin}
-                disabled={!isValid}
+                disabled={!isValid || loading}
                 width={220}
                 colors={['#e80000', '#BC2DFF', '#121de6', '#BC2DFF', '#E80000']}
                 sx={{ boxShadow: '0 6px 0 #e0e0e0' }}

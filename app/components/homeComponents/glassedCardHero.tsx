@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Card, Grid, Typography, IconButton, Paper } from '@mui/material';
+import { Box, Card, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
 const images = [
