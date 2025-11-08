@@ -987,8 +987,8 @@ export default function SignUpAsAgency(props: Props) {
                 startIcon={<ArrowBackIosNewIcon sx={{ color: '#fff' }} />}
                 disableElevation
                 sx={{
-                  height: { xs: 42, md: 48, lg: 56 },
-                  width: { xs: 42, md: 48, lg: 56 },
+                  height: { xs: 42, md: 48 },
+                  width: { xs: 42, md: 48 },
                   minWidth: 0,
                   px: 1.25,
                   border: 'none',

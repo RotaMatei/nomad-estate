@@ -18,7 +18,7 @@ import GradientIcon from '@/app/GradientText/GradientIcon';
 import Glare from '@/app/reactDevBits/Glare/Glare';
 import dynamic from 'next/dynamic';
 
-const WorldMap = dynamic(() => import('@/app/components/login/WorldMap'), {
+const WorldMap = dynamic(() => import('@/app/components/loginComponents/WorldMap'), {
   ssr: false,
 });
 

@@ -6,6 +6,11 @@ import api from '../../lib/api';
 import { jwtDecode } from 'jwt-decode';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button';
 import CustomButton from '@/app/components/utils/button';
 import ChooseAgency from '@/app/components/register/chooseAgency';
 import ChooseInvestor from '@/app/components/register/chooseInvestor';
@@ -52,6 +57,7 @@ export default function RegisterPage() {
   const [selectedCityId, setSelectedCityId] = useState<number | ''>('');
 
   const router = useRouter();
+  const [showAgencyPrompt, setShowAgencyPrompt] = useState(false);
 
   // Prevent slide transition from replaying on zoom/resize by disabling it briefly
   useEffect(() => {
@@ -224,6 +230,10 @@ export default function RegisterPage() {
   }) => {
     try {
       const res = await api.post('/auth/agency/register', data.payload);
+      // Show prompt only for successful 2xx responses
+      if (res.status >= 200 && res.status < 300) {
+        setShowAgencyPrompt(true);
+      }
       // Persist tokens
       localStorage.setItem('token', res.data.accessToken);
       localStorage.setItem('refreshToken', res.data.refreshToken);
@@ -251,10 +261,8 @@ export default function RegisterPage() {
         }),
       );
 
-      await Promise.allSettled([...pmReqs, ...spReqs, ...apiReqs]);
-
-      // Navigate home
-      router.push('/');
+      // Fire and forget; no need to block prompt
+      Promise.allSettled([...pmReqs, ...spReqs, ...apiReqs]).catch(() => {});
     } catch (e: unknown) {
       if (e instanceof Error) setError(e.message);
       else setError('Agency registration failed');
@@ -461,6 +469,22 @@ export default function RegisterPage() {
         </Box>
       </Box>
       {/* Inline confirm handled inside forms; modal removed */}
+      <Dialog open={showAgencyPrompt} onClose={() => setShowAgencyPrompt(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Complete your agency portfolio?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mt: 1 }}>
+            Your agency account was created successfully. Would you like to complete your portfolio now?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => { setShowAgencyPrompt(false); router.push('/'); }}>
+            No, maybe later
+          </Button>
+          <Button variant="contained" onClick={() => { setShowAgencyPrompt(false); router.push('/agencyDashboard'); }}>
+            Yes, take me there
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
