@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import TopMetrics from '../../components/investorsDahsboardComponents/TopMetrics';
 import YieldGraph from '../../components/investorsDahsboardComponents/YieldGraph';
 import VolumeGraph from '../../components/investorsDahsboardComponents/VolumeGraph';
-import PropertyListings from '../../components/investorsDahsboardComponents/topCities';
+// Removed unused import PropertyListings (was pointing to topCities but unused)
 import { StaggeredMenu, StaggeredMenuItem, StaggeredMenuSection } from '@/app/reactDevBits/StaggeredMenu/staggeredMenu';
 import React from 'react';
 import api from '@/app/lib/api';
@@ -108,7 +108,20 @@ export default function InvestmentDashboard() {
         const res = await api.get(`/user/retrieve/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const u: any = res.data || {};
+        // Narrow the expected shape of user response to avoid implicit any usage
+        interface FetchedUser {
+          firstName?: string;
+          lastName?: string;
+          email?: string;
+          role?: string;
+          avatarUrl?: string;
+          avatar?: string;
+          imageUrl?: string;
+          image?: string;
+          profilePictureUrl?: string;
+          profilePicture?: string;
+        }
+        const u: FetchedUser = (res.data || {}) as FetchedUser;
         const name = (u.firstName || '') + (u.lastName ? ` ${u.lastName}` : '');
         if (!cancelled) {
           if (name.trim()) setProfileName(name.trim());
