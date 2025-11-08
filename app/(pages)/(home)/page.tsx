@@ -31,9 +31,6 @@ export default function Home() {
           alignItems: 'center',
         }}
       >
-        {/* <button onClick={() => router.push('/login')} className={styles.secondary}>Login</button>
-        
-        <button onClick={() => router.push('/user/changePassword')} className={styles.secondary}>Change Password</button> */}
       </Box>
     </ThemeProvider>
   );

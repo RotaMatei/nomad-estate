@@ -15,7 +15,7 @@ interface Props {
 export default function PropertyCard({ city, roi, appreciation, yield: rentalYield, price, income }: Props) {
   const theme = useTheme();
   return (
-    <Card elevation={4} sx={{ borderRadius: 4 , backgroundColor: theme.palette.background.default }}>
+    <Card elevation={4} sx={{ borderRadius: 4 , backgroundColor: theme.palette.background.default, boxShadow:'none', justifyContent:'center' }}>
       <CardContent>
   <Typography variant="h6" sx={{ color: 'secondary.main' }}>{city}</Typography>
         <Typography variant="body2">ROI: {roi}</Typography>

@@ -11,7 +11,7 @@ export default function HeroText() {
             position: 'relative',
             zIndex: 2, // above background, below filters/navbar
             pointerEvents: 'none',
-            mt: { xs: 15, sm:20}, // push text lower on sm+
+            mt: { xs: 5, sm: 3}, // push text lower on sm+
         }}>
             <Typography variant="h1" sx={{textAlign:'center'}}>
                 <GradientText
@@ -24,7 +24,7 @@ export default function HeroText() {
                     Properties Search Dashboard
                 </GradientText>
             </Typography>
-            <Typography variant="h6" sx={{ fontFamily: 'Montserrat, sans-serif', fontSize: { xs: '16px', md: '18px' }, color: 'grey.200', textAlign: 'center', mb: 4, fontWeight:'400' }}>
+            <Typography variant="h6" sx={{ fontFamily: 'Montserrat, sans-serif', fontSize: { xs: '16px', md: '18px' }, color: 'text.secondary', textAlign: 'center', mb: 4, fontWeight:'400' }}>
                 Start investing in properties around the globe
             </Typography>
 

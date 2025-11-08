@@ -10,7 +10,7 @@ interface HeaderBarProps {
 export default function HeaderBar({ renderMenuButton }: HeaderBarProps) {
   const theme = useTheme();
   return (
-    <AppBar position="static" sx={{ backgroundColor: theme.palette.background.default }} elevation={1}>
+    <AppBar position="fixed" sx={{ backgroundColor: theme.palette.background.default }} elevation={1}>
       <Toolbar sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', gap: 1.5 }}>
         <Box sx={{display: 'flex', justifyContent: 'space-between', width: '15vw', px:1, py: 0, my: 0, alignItems: 'center'}}>
           <Typography sx={{ fontSize: '16px', fontWeight: 600 }} color="primary">

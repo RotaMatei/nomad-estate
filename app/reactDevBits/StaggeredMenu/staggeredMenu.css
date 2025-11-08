@@ -115,15 +115,13 @@
   top: 0;
   right: 0;
   width: clamp(260px, 38vw, 420px);
-  height: 100%;
-  /* use accent color (set via --sm-accent) to make panel match theme secondary */
+  height: 100vh; /* lock to viewport height */
   background: var(--sm-accent, #b71c1c);
   display: flex;
   flex-direction: column;
   padding: 6em 2em 2em 2em;
-  overflow-y: auto;
+  overflow: hidden; /* prevent any scrolling inside sidebar */
   z-index: 10;
-  /* Match HeaderBar's subtle elevation (MUI elevation=1) */
   box-shadow: 0px 2px 4px rgba(0,0,0,0.08);
 }
 
@@ -198,7 +196,8 @@
 }
 
 .sm-panel-section .sm-panel-item {
-  padding: 6px 0; /* reduce per-item vertical padding a touch */
+  /* ensure consistent left text alignment across sections */
+  padding: 6px 14px; /* match DASHBOARD chip left/right padding */
 }
 
 .sm-panel-list {
@@ -237,7 +236,7 @@
   display: inline-block;
   will-change: transform;
   transform-origin: 50% 100%;
-  margin-left: 0.75rem; /* requested text indent inside the item */
+  margin-left: 0; /* align label text start uniformly for all sections */
   font-family: 'Montserrat', sans-serif;
 }
 

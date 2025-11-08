@@ -3,7 +3,7 @@ import React from 'react';
 import { Box, ThemeProvider, Typography } from '@mui/material';
 import { lightTheme } from '@/app/theme';
 import GradientContainer from '@/app/components/propertyDashComponents/heroBackground';
-import Navbar from '@/app/components/propertyDashComponents/navbarDasboard';
+import Navbar from '@/app/components/homeComponents/navbar';
 import HeroText from '@/app/components/propertyDashComponents/heroText';
 import Filters from '@/app/components/propertyDashComponents/filters';
 import Properties from '@/app/components/propertyDashComponents/properties';
@@ -11,8 +11,8 @@ import Properties from '@/app/components/propertyDashComponents/properties';
 export default function PropertiesDashboard() {
   return (
     <ThemeProvider theme={lightTheme}>
-      <Box sx={{ backgroundColor: 'background.default', minHeight: '190vh', position: 'relative', justifyContent: 'center', alignItems: 'center' }}>
-        <Navbar />
+      <Box sx={{ backgroundColor: 'background.default', minHeight: '150vh', position: 'relative', justifyContent: 'center', alignItems: 'center' }}>
+        <Navbar navColor='secondary.main' mobileNavColor='secondary.main'/>
         <GradientContainer>
           <HeroText />
         </GradientContainer>
