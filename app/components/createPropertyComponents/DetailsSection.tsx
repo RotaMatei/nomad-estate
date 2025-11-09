@@ -6,6 +6,20 @@ import CustomInput from '../../components/utils/input';
 import CustomTextArea from '../../components/utils/textarea';
 import CustomSelect from '../../components/utils/select';
 import { PropertyFormData } from './types';
+import BusinessIcon from '@mui/icons-material/Business';
+import TitleIcon from '@mui/icons-material/Title';
+import DescriptionIcon from '@mui/icons-material/Description';
+import LayersIcon from '@mui/icons-material/Layers';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import EuroIcon from '@mui/icons-material/Euro';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import StarsIcon from '@mui/icons-material/Stars';
+import DoorSlidingIcon from '@mui/icons-material/DoorSliding';
+import BedroomParentIcon from '@mui/icons-material/BedroomParent';
+import BathroomIcon from '@mui/icons-material/Bathroom';
+import ApartmentIcon from '@mui/icons-material/Apartment';
+import { useEffect, useState } from 'react';
+import { getAgentsForAgency } from '@/app/lib/propertyApi';
 
 interface DetailsProps {
   formData: PropertyFormData;
@@ -17,17 +31,34 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
   const focusColor = theme.palette.primary.main;
   const bgColor = theme.palette.background.default;
   const textColor = grey[700];
+  const [agents, setAgents] = useState<any[]>([]);
 
   const numberFloat = (v: string) => (v === '' ? undefined : parseFloat(v));
   const numberInt = (v: string) => (v === '' ? undefined : parseInt(v, 10));
 
   const enumOptions = (values: readonly string[]) => values.map(v => ({ value: v, label: v }));
 
+  // Fetch agents when agencyId changes
+  useEffect(() => {
+    if (formData.agencyId) {
+      getAgentsForAgency(formData.agencyId).then(data => {
+        console.log('Fetched agents:', JSON.stringify(data, null, 2));
+        setAgents(data || []);
+        // Auto-select first agent if available
+        if (data && data.length > 0 && !formData.agentId) {
+          const firstAgentId = data[0].userId;
+          console.log('Auto-selecting first agent, userId:', firstAgentId);
+          setFormData(prev => ({ ...prev, agentId: firstAgentId }));
+        }
+      });
+    }
+  }, [formData.agencyId]);
+
   return (
-    <Box component="fieldset" sx={{ display: 'flex', flexDirection: 'column', gap: 3, my: '1px' }}>
-      <Typography component="legend" variant="h6" sx={{ fontWeight: 600 }}>Details</Typography>
+    <Box component="fieldset" sx={{ display: 'flex', flexDirection: 'column', gap: 3, my: '1px', p:2, borderRadius:4, border: '1px solid', borderColor: '#c2c2c265' }}>
+      <Typography variant="subtitle1" sx={{ fontWeight: 600, color:'primary.main' }}> General Details</Typography>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
-        <Typography variant="body2" color={grey[700]}>Agency identifier linked to your organization</Typography>
+        <Typography variant="body2" color={grey[700]}>Agency identifier (auto-filled from your account)</Typography>
         <CustomInput
           placeholder="Agency ID"
           value={formData.agencyId || ''}
@@ -35,18 +66,45 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
+          icon={<BusinessIcon sx={{ color: grey[500] }} />}
+          disabled={true}
         />
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
-        <Typography variant="body2" color={grey[700]}>Agent identifier managing this listing</Typography>
-        <CustomInput
-          placeholder="Agent ID"
-          value={formData.agentId || ''}
-          onChange={(e) => setFormData({ ...formData, agentId: e.target.value })}
-          focusColor={focusColor}
-          bgColor={bgColor}
-          textColor={textColor}
-        />
+        <Typography variant="body2" color={grey[700]}>Agent managing this listing</Typography>
+        {agents.length > 0 ? (
+          <CustomSelect
+            label="Select Agent"
+            value={formData.agentId || ''}
+            onChange={(value) => {
+              console.log('Agent selected:', value, 'Type:', typeof value);
+              setFormData({ ...formData, agentId: String(value) });
+            }}
+            options={agents.map(agent => {
+              const firstName = agent.user?.firstName || 'Unknown';
+              const lastName = agent.user?.lastName || 'Agent';
+              const userId = agent.userId;
+              console.log('Agent option - userId:', userId, 'Type:', typeof userId);
+              return {
+                value: userId,
+                label: `${firstName} ${lastName} (${agent.user?.email || userId})`
+              };
+            })}
+            focusColor={focusColor}
+            bgColor={bgColor}
+            textColor={textColor}
+          />
+        ) : (
+          <CustomInput
+            placeholder="Agent ID"
+            value={formData.agentId || ''}
+            onChange={(e) => setFormData({ ...formData, agentId: e.target.value })}
+            focusColor={focusColor}
+            bgColor={bgColor}
+            textColor={textColor}
+            icon={<BusinessIcon sx={{ color: grey[500] }} />}
+          />
+        )}
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
         <Typography variant="body2" color={grey[700]}>Listing title shown publicly</Typography>
@@ -57,6 +115,7 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
+          icon={<TitleIcon sx={{ color: grey[500] }} />}
         />
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
@@ -70,6 +129,7 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
           textColor={textColor}
           minRows={3}
           maxRows={6}
+          icon={<DescriptionIcon sx={{ color: grey[500] }} />}
         />
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
@@ -106,6 +166,7 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
+          icon={<EuroIcon sx={{ color: grey[500] }} />}
         />
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
@@ -118,20 +179,63 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
+          icon={<TrendingUpIcon sx={{ color: grey[500] }} />}
         />
       </Box>
+
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
-        <Typography variant="body2" color={grey[700]}>Nomad internal score (0-100)</Typography>
+        <Typography variant="body2" color={grey[700]}>Number of rooms</Typography>
         <CustomInput
           type="number"
-          placeholder="Score"
-          value={formData.score !== undefined ? String(formData.score) : ''}
-          onChange={(e) => setFormData({ ...formData, score: numberInt(e.target.value) })}
+          placeholder="Rooms"
+          value={formData.rooms !== undefined ? String(formData.rooms) : ''}
+          onChange={(e) => setFormData({ ...formData, rooms: numberInt(e.target.value) })}
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
+          icon={<DoorSlidingIcon sx={{ color: grey[500] }} />}
         />
       </Box>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
+        <Typography variant="body2" color={grey[700]}>Number of bedrooms</Typography>
+        <CustomInput
+          type="number"
+          placeholder="Bedrooms"
+          value={formData.bedrooms !== undefined ? String(formData.bedrooms) : ''}
+          onChange={(e) => setFormData({ ...formData, bedrooms: numberInt(e.target.value) })}
+          focusColor={focusColor}
+          bgColor={bgColor}
+          textColor={textColor}
+          icon={<BedroomParentIcon sx={{ color: grey[500] }} />}
+        />
+      </Box>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
+        <Typography variant="body2" color={grey[700]}>Number of bathrooms</Typography>
+        <CustomInput
+          type="number"
+          placeholder="Bathrooms"
+          value={formData.bathrooms !== undefined ? String(formData.bathrooms) : ''}
+          onChange={(e) => setFormData({ ...formData, bathrooms: numberInt(e.target.value) })}
+          focusColor={focusColor}
+          bgColor={bgColor}
+          textColor={textColor}
+          icon={<BathroomIcon sx={{ color: grey[500] }} />}
+        />
+      </Box>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
+        <Typography variant="body2" color={grey[700]}>Floor level of the property</Typography>
+        <CustomInput
+          type="number"
+          placeholder="Floor Level"
+          value={formData.floorLevel !== undefined ? String(formData.floorLevel) : ''}
+          onChange={(e) => setFormData({ ...formData, floorLevel: numberInt(e.target.value) })}
+          focusColor={focusColor}
+          bgColor={bgColor}
+          textColor={textColor}
+          icon={<ApartmentIcon sx={{ color: grey[500] }} />}
+        />
+      </Box>
+
     </Box>
   );
 }

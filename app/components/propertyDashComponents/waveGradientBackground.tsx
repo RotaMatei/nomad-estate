@@ -3,17 +3,21 @@ import { useEffect, useRef, ReactNode } from 'react';
 import { WaveGradient } from 'wave-gradient';
 import { Box } from '@mui/material';
 
-interface GradientContainerProps {
+interface WaveGradientBackgroundProps {
   children?: ReactNode;
   borderRadius?: number | string;
   padding?: number | string;
+  height?: number | string;
+  colors?: string[];
 }
 
-const GradientContainer: React.FC<GradientContainerProps> = ({
+export default function WaveGradientBackground({
   children,
   borderRadius = '16px',
   padding = '24px',
-}) => {
+  height = 'auto',
+  colors = ['#E80000', '#6ec3f4', '#7038ff', '#ffba27'],
+}: WaveGradientBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -21,7 +25,7 @@ const GradientContainer: React.FC<GradientContainerProps> = ({
 
     try {
       new WaveGradient(canvasRef.current, {
-        colors: ['#E80000', '#6ec3f4', '#7038ff', '#ffba27'],
+        colors,
         fps: 60,
         seed: 0,
         speed: 1.25,
@@ -31,7 +35,7 @@ const GradientContainer: React.FC<GradientContainerProps> = ({
     } catch (e) {
       console.error('WebGL not supported', e);
     }
-  }, []);
+  }, [colors]);
 
   return (
     <Box
@@ -41,13 +45,13 @@ const GradientContainer: React.FC<GradientContainerProps> = ({
         mx: 'auto',
         mt: { xs: 2, sm: 3, md: 4 },
         mb: { xs: 4, md: 6 },
-        minHeight: 'auto',
-        borderRadius: `0 0 ${typeof borderRadius === 'string' ? borderRadius : `${borderRadius}px`} ${typeof borderRadius === 'string' ? borderRadius : `${borderRadius}px`}`,
+        borderRadius,
         display: 'flex',
         flexDirection: 'column',
         p: padding,
         pb: { xs: '150px', sm: '220px', md: '300px', lg: '350px' },
         overflow: 'hidden',
+        height: height === 'auto' ? 'auto' : height,
       }}
     >
       <canvas
@@ -58,21 +62,7 @@ const GradientContainer: React.FC<GradientContainerProps> = ({
           left: 0,
           width: '100%',
           height: '100%',
-          borderRadius: `0 0 ${typeof borderRadius === 'string' ? borderRadius : `${borderRadius}px`} ${typeof borderRadius === 'string' ? borderRadius : `${borderRadius}px`}`,
-          opacity: 0.85,
-        }}
-      />
-      {/* White to transparent gradient overlay (top to bottom) */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          background: 'linear-gradient(to bottom, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.2), transparent)',
-          pointerEvents: 'none',
-          borderRadius: `0 0 ${typeof borderRadius === 'string' ? borderRadius : `${borderRadius}px`} ${typeof borderRadius === 'string' ? borderRadius : `${borderRadius}px`}`,
+          borderRadius: typeof borderRadius === 'string' ? borderRadius : `${borderRadius}px`,
         }}
       />
       <Box
@@ -87,6 +77,4 @@ const GradientContainer: React.FC<GradientContainerProps> = ({
       </Box>
     </Box>
   );
-};
-
-export default GradientContainer;
+}

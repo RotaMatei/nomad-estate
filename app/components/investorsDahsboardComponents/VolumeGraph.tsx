@@ -21,13 +21,18 @@ const data = [
   { quarter: 'Q4', volume: 200 },
 ];
 
-export default function VolumeGraph() {
+interface VolumeGraphProps {
+  colorScheme?: 'primary' | 'secondary';
+}
+
+export default function VolumeGraph({ colorScheme = 'secondary' }: VolumeGraphProps) {
   const theme = useTheme();
+  const mainColor = colorScheme === 'primary' ? theme.palette.primary.main : theme.palette.secondary.main;
   const avgVolume = data.reduce((sum, d) => sum + d.volume, 0) / data.length;
   const highestVolume = Math.max(...data.map(d => d.volume));
   return (
     <Paper elevation={3} sx={{ p: 3, borderRadius: 4, backgroundColor: 'background.default', boxShadow: 'none', border: '1px solid', borderColor: '#c2c2c265' }}>
-      <Typography variant="subtitle2" gutterBottom sx={{ color: 'secondary.main', mb: 2 }}>
+      <Typography variant="subtitle2" gutterBottom sx={{ color: mainColor, mb: 2 }}>
         Investment Volume
       </Typography>
       <Grid container sx={{ alignItems: 'flex-start' }}>
@@ -42,8 +47,8 @@ export default function VolumeGraph() {
                 <Area
                   type="monotone"
                   dataKey="volume"
-                  stroke={theme.palette.secondary.main}
-                  fill={alpha(theme.palette.secondary.main, 0.16)}
+                  stroke={mainColor}
+                  fill={alpha(mainColor, 0.16)}
                   strokeWidth={3}
                   activeDot={{ r: 5 }}
                 />
@@ -58,7 +63,7 @@ export default function VolumeGraph() {
         >
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', p: 1, borderBottom: '1px solid', borderColor: '#c2c2c265', pb: 3, mb: 2 }}>
             <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-              <CalculateOutlinedIcon sx={{ color: 'secondary.main' }} />
+              <CalculateOutlinedIcon sx={{ color: mainColor }} />
               <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}> Avg Volume</Typography>
             </Stack>
             <Typography sx={{ fontWeight: 600, color: 'text.primary', lineHeight: 1, fontSize: { xs: 30 } }}>
@@ -67,7 +72,7 @@ export default function VolumeGraph() {
           </Box>
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', p: 1 }}>
             <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-              <WorkspacePremiumOutlinedIcon sx={{ color: 'secondary.main' }} />
+              <WorkspacePremiumOutlinedIcon sx={{ color: mainColor }} />
               <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}> Highest Volume</Typography>
             </Stack>
             <Typography sx={{ fontWeight: 600, color: 'text.primary', lineHeight: 1, fontSize: { xs: 30 } }}>

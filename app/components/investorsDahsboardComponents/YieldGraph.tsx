@@ -28,8 +28,13 @@ const data = [
   { month: 'Dec', yield: 5.9 },
 ];
 
-export default function YieldGraph() {
+interface YieldGraphProps {
+  colorScheme?: 'primary' | 'secondary';
+}
+
+export default function YieldGraph({ colorScheme = 'secondary' }: YieldGraphProps) {
   const theme = useTheme();
+  const mainColor = colorScheme === 'primary' ? theme.palette.primary.main : theme.palette.secondary.main;
   const avgYield = data.reduce((sum, d) => sum + d.yield, 0) / data.length;
   const avgText = `${avgYield.toFixed(1)}%`;
   // Highest yield across all data points
@@ -37,7 +42,7 @@ export default function YieldGraph() {
   const highestYieldText = `${highestYield.toFixed(1)}%`;
   return (
     <Paper elevation={3} sx={{ p: 3, borderRadius: 4, backgroundColor: 'background.default', boxShadow: 'none', border: '1px solid', borderColor: '#c2c2c265' }}>
-      <Typography variant="subtitle2" gutterBottom sx={{ color: 'secondary.main', mb: 2 }}>
+      <Typography variant="subtitle2" gutterBottom sx={{ color: mainColor, mb: 2 }}>
         Average Yield
       </Typography>
       <Grid container sx={{ alignItems: 'flex-start' }}>
@@ -52,7 +57,7 @@ export default function YieldGraph() {
                 <Line
                   type="monotone"
                   dataKey="yield"
-                  stroke={theme.palette.secondary.main}
+                  stroke={mainColor}
                   strokeWidth={3}
                   dot={{ r: 4 }}
                 />
@@ -67,7 +72,7 @@ export default function YieldGraph() {
         >
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', p: 1, borderBottom: '1px solid', borderColor: '#c2c2c265', pb:3,mb: 2 }}>
             <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-              <InsightsOutlinedIcon sx={{ color: 'secondary.main' }} />
+              <InsightsOutlinedIcon sx={{ color: mainColor }} />
               <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}> Total Average</Typography>
             </Stack>
             <Typography sx={{ fontWeight: 600, color: 'text.primary', lineHeight: 1, fontSize: { xs: 30 } }}>
@@ -76,7 +81,7 @@ export default function YieldGraph() {
           </Box>
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', p: 1 }}>
             <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-              <WorkspacePremiumOutlinedIcon sx={{ color: 'secondary.main' }} />
+              <WorkspacePremiumOutlinedIcon sx={{ color: mainColor }} />
               <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}> Highest Yield</Typography>
             </Stack>
             <Typography sx={{ fontWeight: 600, color: 'text.primary', lineHeight: 1, fontSize: { xs: 30} }}>

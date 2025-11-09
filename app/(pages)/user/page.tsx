@@ -68,11 +68,16 @@ export default function UserDashboardPage() {
         setName(storedName);
         return;
       }
-      try {
-        // Get user profile
+      const fetchUser = async () => {
         const userRes = await api.get<UserProfile>(`/user/retrieve/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        
+        // Check if data is empty string or empty object
+        if (!userRes.data || (typeof userRes.data === 'string' && userRes.data === '') || Object.keys(userRes.data || {}).length === 0) {
+          throw new Error('Empty user data received');
+        }
+        
         const u = userRes.data as Partial<UserProfile>;
         const normalized: UserProfile = {
           firstName: u.firstName ?? null,
@@ -90,40 +95,42 @@ export default function UserDashboardPage() {
         setProfile(normalized);
         setName(normalized.firstName || storedName);
         if (normalized.firstName && !storedName) localStorage.setItem('user', normalized.firstName);
+      };
 
-        // If user is an AGENT, attempt to retrieve agency info
-        if (normalized.role === 'AGENT') {
-          try {
-            const agList = await api.get<Array<{ agencyId: string }>>(
-              `/agent/retrieve/agencies-for-agent/${userId}`,
-            );
-            const agencyId = agList.data?.[0]?.agencyId;
-            if (agencyId) {
-              const agRes = await api.get<AgencyProfile>(`/agency/retrieve/${agencyId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-              });
-              const a = agRes.data as Partial<AgencyProfile>;
-              const normalizedAgency: AgencyProfile = {
-                id: agencyId,
-                email: a.email ?? null,
-                emailVerified: typeof a.emailVerified === 'boolean' ? a.emailVerified : null,
-                phoneNumber: a.phoneNumber ?? null,
-                phoneNumberVerified:
-                  typeof a.phoneNumberVerified === 'boolean' ? a.phoneNumberVerified : null,
-                companyName: a.companyName ?? null,
-                companyType: a.companyType ?? null,
-                licenseNumber: a.licenseNumber ?? null,
-                companyWebsite: a.companyWebsite ?? null,
-                profilePictureData: a.profilePictureData ?? null,
-              };
-              setAgency(normalizedAgency);
-            }
-          } catch {
-            // ignore agency fetch failures and keep page usable
-          }
+      const fetchAgency = async () => {
+        const agRes = await api.get<AgencyProfile>(`/agency/retrieve/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const a = agRes.data as Partial<AgencyProfile>;
+        const normalizedAgency: AgencyProfile = {
+          id: userId,
+          email: a.email ?? null,
+          emailVerified: typeof a.emailVerified === 'boolean' ? a.emailVerified : null,
+          phoneNumber: a.phoneNumber ?? null,
+          phoneNumberVerified:
+            typeof a.phoneNumberVerified === 'boolean' ? a.phoneNumberVerified : null,
+          companyName: a.companyName ?? null,
+          companyType: a.companyType ?? null,
+          licenseNumber: a.licenseNumber ?? null,
+          companyWebsite: a.companyWebsite ?? null,
+          profilePictureData: a.profilePictureData ?? null,
+        };
+        setAgency(normalizedAgency);
+        setName(normalizedAgency.companyName || storedName);
+        if (normalizedAgency.companyName && !storedName) localStorage.setItem('user', normalizedAgency.companyName);
+      };
+
+      // Try user first (covers both regular users and agent users)
+      try {
+        await fetchUser();
+      } catch (userErr) {
+        // If user fetch fails or returns empty, try agency (for direct agency login)
+        try {
+          await fetchAgency();
+        } catch (agErr) {
+          console.warn('Both user and agency endpoints failed');
+          setName(storedName);
         }
-      } catch {
-        setName(storedName);
       }
     };
     fetchData();

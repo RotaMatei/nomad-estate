@@ -11,10 +11,10 @@ import { useTheme } from '@mui/material/styles';
 type Option = { value: string | number; label: string };
 
 export const CustomSelect = ({
-  focusColor = grey[700],
+  focusColor = grey[500],
   bgColor,
   textColor,
-  icon = <PersonOutlineOutlinedIcon sx={{ color: grey[700] }} />,
+  icon = <PersonOutlineOutlinedIcon sx={{ color: grey[500] }} />,
   selectIcon: SelectIcon = ArrowDropDownIcon,
   label = '',
   value = '',
@@ -113,7 +113,7 @@ export const CustomSelect = ({
           pl: 0,
           fontFamily: 'Montserrat, sans-serif',
           fontSize: { xs: '14px', lg: '16px' },
-          color: isDisabled ? 'text.disabled' : resolvedText,
+          color: (value === '' || value === undefined) ? grey[500] : (isDisabled ? 'text.disabled' : resolvedText),
           '&:before, &:after': { display: 'none' },
           '& .MuiSvgIcon-root': {
             color: isDisabled ? grey[700] : focusColor,

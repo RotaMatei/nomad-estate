@@ -8,6 +8,11 @@ import CustomInput from '../../components/utils/input';
 import CustomSelect from '../../components/utils/select';
 import { PropertyFormData } from './types';
 import { getCitiesByState, getCountries, getStates, City, Country, State } from '../../lib/locationApi';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import MailIcon from '@mui/icons-material/Mail';
+import PublicIcon from '@mui/icons-material/Public';
+import MapIcon from '@mui/icons-material/Map';
+import MyLocationIcon from '@mui/icons-material/MyLocation';
 
 interface Props {
   formData: PropertyFormData;
@@ -99,9 +104,9 @@ export default function AddressSection({ formData, setFormData }: Props) {
   const cityOptions = useMemo(() => cities.map(c => ({ value: c.id, label: c.name })), [cities]);
 
   return (
-    <Box component="fieldset" sx={{ display: 'flex', flexDirection: 'column', gap: 3, my: '1px' }}>
-      <Typography component="legend" variant="h6" sx={{ fontWeight: 600 }}>
-        📍 Address & Location
+    <Box component="fieldset" sx={{ display: 'flex', flexDirection: 'column', gap: 3, my: '1px', p:2, borderRadius:4, border: '1px solid', borderColor: '#c2c2c265' }}>
+      <Typography variant="subtitle1" sx={{ fontWeight: 600, color:'primary.main' }}>
+        Address & Location
       </Typography>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
@@ -113,6 +118,7 @@ export default function AddressSection({ formData, setFormData }: Props) {
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
+          icon={<LocationOnIcon sx={{ color: grey[500] }} />}
         />
       </Box>
 
@@ -125,6 +131,7 @@ export default function AddressSection({ formData, setFormData }: Props) {
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
+          icon={<MailIcon sx={{ color: grey[500] }} />}
         />
       </Box>
 
@@ -188,6 +195,7 @@ export default function AddressSection({ formData, setFormData }: Props) {
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
+          icon={<MyLocationIcon sx={{ color: grey[500] }} />}
         />
       </Box>
 
@@ -201,6 +209,7 @@ export default function AddressSection({ formData, setFormData }: Props) {
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
+          icon={<MyLocationIcon sx={{ color: grey[500] }} />}
         />
       </Box>
     </Box>
