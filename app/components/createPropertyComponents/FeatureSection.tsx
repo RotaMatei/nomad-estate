@@ -21,6 +21,16 @@ import CustomInput from '../../components/utils/input';
 import DateInput from '../../components/utils/dateInput';
 import CheckboxGroup from '../../components/utils/checkboxGroup';
 import { PropertyFormData } from './types';
+import StraightenIcon from '@mui/icons-material/Straighten';
+import BalconyIcon from '@mui/icons-material/Balcony';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import AcUnitIcon from '@mui/icons-material/AcUnit';
+import RestaurantIcon from '@mui/icons-material/Restaurant';
+import SecurityIcon from '@mui/icons-material/Security';
+import EmojiObjectsIcon from '@mui/icons-material/EmojiObjects';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
+import EuroIcon from '@mui/icons-material/Euro';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 
 interface FeatureProps {
   formData: PropertyFormData;
@@ -38,8 +48,8 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
   const toFloat = (v: string) => (v === '' ? undefined : parseFloat(v));
 
   return (
-    <Box component="fieldset" sx={{ display: 'flex', flexDirection: 'column', gap: 3, my: '1px' }}>
-      <Typography component="legend" variant="h6" sx={{ fontWeight: 600 }}>Features</Typography>
+    <Box component="fieldset" sx={{ display: 'flex', flexDirection: 'column', gap: 3, my: '1px', p:2, borderRadius:4, border: '1px solid', borderColor: '#c2c2c265' }}>
+      <Typography variant="subtitle1" sx={{ fontWeight: 600, color:'primary.main' }}>Features</Typography>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
         <Typography variant="body2" color={grey[700]}>Energy efficiency classification</Typography>
         <CustomSelect
@@ -98,6 +108,7 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
+          icon={<StraightenIcon sx={{ color: grey[500] }} />}
         />
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
@@ -110,6 +121,7 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
+          icon={<BalconyIcon sx={{ color: grey[500] }} />}
         />
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
@@ -221,13 +233,15 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
         />
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
-        <Typography variant="body2" color={grey[700]}>Ownership status flag</Typography>
-        <CheckboxGroup
+        <Typography variant="body2" color={grey[700]}>Property ownership and status</Typography>
+        <CustomSelect
           label="Ownership Status"
-          options={[{ value: 'owned', label: 'Owned' }]}
-          values={(formData.ownershipStatus ? ['owned'] : [])}
-          onChange={(vals) => setFormData({ ...formData, ownershipStatus: vals.includes('owned') })}
+          value={formData.ownershipStatus ? 'owned' : ''}
+          onChange={(value) => setFormData({ ...formData, ownershipStatus: value === 'owned' })}
+          options={[{ value: 'owned', label: 'Owned' }, { value: 'leased', label: 'Leased' }]}
           focusColor={focusColor}
+          bgColor={bgColor}
+          textColor={textColor}
         />
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
@@ -240,6 +254,7 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
+          icon={<EuroIcon sx={{ color: grey[500] }} />}
         />
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
@@ -252,6 +267,7 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
+          icon={<EuroIcon sx={{ color: grey[500] }} />}
         />
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>

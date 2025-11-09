@@ -45,6 +45,8 @@ export interface PropertyFormData {
   bathrooms?: number;
   floors?: number;
   floorLevel?: number;
+  // Image URLs or File objects
+  images?: string[] | File[];
   // Allow additional dynamically added fields without using 'any'
   [key: string]: unknown;
 }

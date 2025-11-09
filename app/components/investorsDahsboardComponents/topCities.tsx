@@ -11,15 +11,20 @@ const listings = [
   { city: 'Athens, Greece', roi: '7%', appreciation: '3%', yield: '5%', price: '$220K', income: '$1,000' },
 ];
 
-export default function TopCities() {
+interface TopCitiesProps {
+  colorScheme?: 'primary' | 'secondary';
+}
+
+export default function TopCities({ colorScheme = 'secondary' }: TopCitiesProps) {
   const theme = useTheme();
+  const mainColor = colorScheme === 'primary' ? theme.palette.primary.main : theme.palette.secondary.main;
   const isLgUp = useMediaQuery(theme.breakpoints.up('lg'));
   const isSmUp = useMediaQuery(theme.breakpoints.up('sm'));
   const cols = isLgUp ? 4 : isSmUp ? 2 : 1;
   return (
     <Box sx={{ mt: 2, boxShadow: 'none', mb: 4, border: '1px solid', borderColor: '#c2c2c265', borderRadius: 4, p: 3 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-        <Typography variant="subtitle2" sx={{ color: 'secondary.main', m: 0 }}>
+        <Typography variant="subtitle2" sx={{ color: mainColor, m: 0 }}>
           Places to Invest In Right Now
         </Typography>
         <Chip
@@ -49,7 +54,7 @@ export default function TopCities() {
               }}
             >
               <Box sx={{ width: '100%' }}>
-                <PropertyCard {...props} />
+                <PropertyCard {...props} colorScheme={colorScheme} />
               </Box>
             </Grid>
           );

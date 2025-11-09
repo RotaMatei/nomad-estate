@@ -1,7 +1,7 @@
 import api from './api';
 import { PropertyFormData } from '../components/createPropertyComponents/types';
 
-// Keys required by backend PropertyDto. All must be present and with correct types.
+// Only these fields are MANDATORY for property creation
 const REQUIRED_FIELDS = [
   'agencyId',
   'agentId',
@@ -10,44 +10,33 @@ const REQUIRED_FIELDS = [
   'type',
   'status',
   'price',
-  'yield',
-  'score',
-  'streetAddress',
-  'stateId',
-  'postalCode',
   'countryId',
   'cityId',
+  'streetAddress',
   'latitude',
   'longitude',
-  'constructionDate',
-  'builtArea',
-  'landArea',
-  'totalArea',
   'rooms',
   'bedrooms',
   'bathrooms',
-  'floors',
   'floorLevel',
-  'energyEfficiencyRating',
   'orientation',
-  'parking',
-  'balconyType',
-  'balconyTotalSize',
-  'balconyNumber',
-  'ownershipStatus',
-  'propertyTaxes',
-  'HOAFees',
-  'availabilityDateStart',
-  'availabilityDateEnd',
 ] as const;
 
-type RequiredField = (typeof REQUIRED_FIELDS)[number];
-
-function isValidDateString(value: unknown): value is string {
-  if (typeof value !== 'string' || !value) return false;
-  const d = new Date(value);
-  return !isNaN(d.getTime());
+/**
+ * Fetch available agents for an agency
+ */
+export async function getAgentsForAgency(agencyId: string) {
+  try {
+    const { data } = await api.get(`/agent/retrieve/agents-for-agency/${agencyId}`);
+    console.log('Raw agent data from backend:', JSON.stringify(data, null, 2));
+    return data;
+  } catch (err) {
+    console.error('Failed to fetch agents:', err);
+    return [];
+  }
 }
+
+type RequiredField = (typeof REQUIRED_FIELDS)[number];
 
 function ensureNumber(n: unknown): n is number {
   return typeof n === 'number' && !isNaN(n);
@@ -57,48 +46,78 @@ function ensureString(s: unknown): s is string {
   return typeof s === 'string' && s.trim().length > 0;
 }
 
-function ensureBoolean(b: unknown): b is boolean {
-  return typeof b === 'boolean';
+/**
+ * Convert a File object or data URL to base64 string
+ */
+async function fileToBase64(file: File | string): Promise<string> {
+  if (typeof file === 'string') {
+    // Already a URL/data URL, extract base64 part if it's a data URL
+    if (file.startsWith('data:')) {
+      return file.split(',')[1] || '';
+    }
+    return file;
+  }
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      // Extract base64 from data URL
+      const base64 = result.split(',')[1] || '';
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 export function validateAndMapPropertyDto(form: PropertyFormData) {
   const missing: string[] = [];
 
-  // Validate primitives according to expected types
+  // Validate only required fields
   const checkString = (key: RequiredField) => {
     if (!ensureString(form[key])) missing.push(key);
   };
   const checkNumber = (key: RequiredField) => {
     if (!ensureNumber(form[key])) missing.push(key);
   };
-  const checkBoolean = (key: RequiredField) => {
-    if (!ensureBoolean(form[key])) missing.push(key);
-  };
-  const checkDate = (key: RequiredField) => {
-    if (!isValidDateString(form[key])) missing.push(key);
-  };
 
-  // Strings / enums
-  ['agencyId', 'agentId', 'title', 'description', 'type', 'status', 'streetAddress', 'postalCode', 'energyEfficiencyRating', 'orientation', 'parking', 'balconyType']
-    .forEach((k) => checkString(k as RequiredField));
+  // String fields
+  ['agencyId', 'agentId', 'title', 'description', 'type', 'status', 'streetAddress', 'orientation'].forEach((k) => checkString(k as RequiredField));
 
-  // Numbers (ints/decimals)
-  ['price', 'yield', 'score', 'stateId', 'countryId', 'cityId', 'latitude', 'longitude', 'builtArea', 'landArea', 'totalArea', 'rooms', 'bedrooms', 'bathrooms', 'floors', 'floorLevel', 'balconyTotalSize', 'balconyNumber', 'propertyTaxes', 'HOAFees']
-    .forEach((k) => checkNumber(k as RequiredField));
-
-  // Boolean
-  checkBoolean('ownershipStatus');
-
-  // Dates
-  ['constructionDate', 'availabilityDateStart', 'availabilityDateEnd']
-    .forEach((k) => checkDate(k as RequiredField));
+  // Number fields
+  ['price', 'countryId', 'cityId', 'latitude', 'longitude', 'rooms', 'bedrooms', 'bathrooms', 'floorLevel'].forEach((k) => checkNumber(k as RequiredField));
 
   if (missing.length) {
     return { ok: false as const, missing };
   }
 
-  // Safe to map now (type assertions because we've validated)
-  const dto = {
+  // Validate floorLevel is not negative
+  const floorLevel = form.floorLevel as number;
+  if (floorLevel < 0) {
+    return { ok: false as const, missing: ['floorLevel (cannot be negative)'] };
+  }
+
+  // Helper to safely parse optional fields
+  const optionalNumber = (v: unknown): number | undefined => {
+    return typeof v === 'number' && !isNaN(v) && v >= 0 ? v : undefined;
+  };
+
+  const optionalString = (v: unknown): string | undefined => {
+    return typeof v === 'string' && v.trim().length > 0 ? v : undefined;
+  };
+
+  const optionalDate = (v: unknown): string | undefined => {
+    if (typeof v === 'string' && v.trim().length > 0) {
+      const d = new Date(v);
+      return !isNaN(d.getTime()) ? d.toISOString() : undefined;
+    }
+    return undefined;
+  };
+
+  // Map to DTO - send all fields that backend expects, with defaults for optional ones
+  // NOTE: Date fields are sent as ISO strings; backend converts them to Date objects
+  const dto: Record<string, unknown> = {
     agencyId: form.agencyId as string,
     agentId: form.agentId as string,
     title: form.title as string,
@@ -106,35 +125,36 @@ export function validateAndMapPropertyDto(form: PropertyFormData) {
     type: form.type as string,
     status: form.status as string,
     price: form.price as number,
-    yield: form.yield as number,
-    score: form.score as number,
-    streetAddress: form.streetAddress as string,
-    stateId: form.stateId as number,
-    postalCode: form.postalCode as string,
     countryId: form.countryId as number,
     cityId: form.cityId as number,
+    streetAddress: form.streetAddress as string,
     latitude: form.latitude as number,
     longitude: form.longitude as number,
-    constructionDate: new Date(form.constructionDate as string).toISOString(),
-    builtArea: form.builtArea as number,
-    landArea: form.landArea as number,
-    totalArea: form.totalArea as number,
     rooms: form.rooms as number,
     bedrooms: form.bedrooms as number,
     bathrooms: form.bathrooms as number,
-    floors: form.floors as number,
     floorLevel: form.floorLevel as number,
-    energyEfficiencyRating: form.energyEfficiencyRating as string,
     orientation: form.orientation as string,
-    parking: form.parking as string,
-    balconyType: form.balconyType as string,
-    balconyTotalSize: form.balconyTotalSize as number,
-    balconyNumber: form.balconyNumber as number,
-    ownershipStatus: form.ownershipStatus as boolean,
-    propertyTaxes: form.propertyTaxes as number,
-    HOAFees: form.HOAFees as number,
-    availabilityDateStart: new Date(form.availabilityDateStart as string).toISOString(),
-    availabilityDateEnd: new Date(form.availabilityDateEnd as string).toISOString(),
+    // Provide defaults for non-required fields
+    yield: optionalNumber(form.yield) ?? 0,
+    score: optionalNumber(form.score) ?? 0,
+    stateId: optionalNumber(form.stateId),  // nullable in schema - send undefined if not provided
+    postalCode: optionalString(form.postalCode) ?? '',
+    constructionDate: optionalDate(form.constructionDate) ?? new Date().toISOString(),
+    builtArea: optionalNumber(form.builtArea) ?? 0,
+    landArea: optionalNumber(form.landArea) ?? 0,
+    totalArea: optionalNumber(form.totalArea) ?? 0,
+    floors: optionalNumber(form.floors),  // nullable in schema
+    energyEfficiencyRating: optionalString(form.energyEfficiencyRating) ?? 'A',
+    parking: optionalString(form.parking) ?? 'NONE',
+    balconyType: optionalString(form.balconyType) ?? 'NONE',
+    balconyTotalSize: optionalNumber(form.balconyTotalSize) ?? 0,
+    balconyNumber: optionalNumber(form.balconyNumber) ?? 0,
+    ownershipStatus: form.ownershipStatus ?? true,
+    propertyTaxes: optionalNumber(form.propertyTaxes) ?? 0,
+    HOAFees: optionalNumber(form.HOAFees) ?? 0,
+    availabilityDateStart: optionalDate(form.availabilityDateStart) ?? new Date().toISOString(),
+    availabilityDateEnd: optionalDate(form.availabilityDateEnd),  // nullable in schema
   };
 
   return { ok: true as const, dto };
@@ -147,6 +167,62 @@ export async function createProperty(form: PropertyFormData) {
     throw new Error(msg);
   }
   const { dto } = result;
-  const { data } = await api.post('/property/create', dto);
-  return data;
+
+  console.log('=== PROPERTY CREATION DEBUG ===');
+  console.log('Form Data:', form);
+  console.log('Submitting DTO:', JSON.stringify(dto, null, 2));
+  console.log('DTO Keys:', Object.keys(dto));
+  console.log('DTO Values Types:', Object.entries(dto).map(([k, v]) => `${k}: ${typeof v}`));
+
+  try {
+    // Create the property first
+    const { data: createdProperty } = await api.post('/property/create', dto);
+
+    console.log('✅ Property created successfully:', createdProperty);
+
+    // Upload images if any exist
+    if (form.images && form.images.length > 0) {
+      const propertyId = createdProperty.id;
+      
+      try {
+        for (let i = 0; i < form.images.length; i++) {
+          const imageFile = form.images[i];
+          const base64 = await fileToBase64(imageFile as File | string);
+
+          if (!base64) {
+            console.warn(`Image ${i + 1} could not be converted to base64`);
+            continue;
+          }
+
+          await api.post('/property/picture/create', {
+            propertyId,
+            imageData: base64,
+            altText: `Property image ${i + 1}`,
+            isPrimary: i === 0, // First image is primary
+          });
+        }
+      } catch (imgErr) {
+        console.error('Error uploading images:', imgErr);
+        // Don't throw - property was created successfully, just images failed
+        // You might want to notify the user about partial failure
+      }
+    }
+
+    console.log('✅ Property created successfully:', createdProperty);
+    return createdProperty;
+  } catch (err: unknown) {
+    console.error('❌ Error creating property');
+    if (err instanceof Error) {
+      console.error('Error message:', err.message);
+      console.error('Error stack:', err.stack);
+      // Check if it's an Axios error with response data
+      const axiosErr = err as any;
+      if (axiosErr.response?.data) {
+        console.error('Backend error response (data):', JSON.stringify(axiosErr.response.data, null, 2));
+        console.error('Backend error status:', axiosErr.response.status);
+        console.error('Backend error statusText:', axiosErr.response.statusText);
+      }
+    }
+    throw err;
+  }
 }

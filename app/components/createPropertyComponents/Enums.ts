@@ -7,9 +7,10 @@ export enum PropertyTypeEnum {
 }
 
 export enum StatusEnum {
-  AVAILABLE = 'AVAILABLE',
-  SOLD = 'SOLD',
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
   PENDING = 'PENDING',
+  DRAFT = 'DRAFT',
 }
 
 export enum EnergyRatingEnum {
@@ -28,9 +29,9 @@ export enum OrientationEnum {
   E = 'E',
   SE = 'SE',
   S = 'S',
-  SV = 'SV',
-  V = 'V',
-  NV = 'NV',
+  SW = 'SW',
+  W = 'W',
+  NW = 'NW',
 }
 
 export enum ParkingEnum {

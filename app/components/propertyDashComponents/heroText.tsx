@@ -21,7 +21,7 @@ export default function HeroText() {
                     className="custom-class font-class"
                     
                 >
-                    Properties Search Dashboard
+                    Properties Search
                 </GradientText>
             </Typography>
             <Typography variant="h6" sx={{ fontFamily: 'Montserrat, sans-serif', fontSize: { xs: '16px', md: '18px' }, color: 'text.secondary', textAlign: 'center', mb: 4, fontWeight:'400' }}>
