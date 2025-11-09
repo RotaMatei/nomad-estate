@@ -584,8 +584,7 @@ const MagicBento: React.FC<BentoProps> = ({
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
   useEffect(() => {
-    // Log selected location id when it changes (move console.log out of JSX)
-    console.log('Selected Location ID:', selectedId);
+    // Selected location id is tracked
   }, [selectedId]);
 
   useEffect(() => {
@@ -673,12 +672,9 @@ const MagicBento: React.FC<BentoProps> = ({
     // Placeholder: you can wire this to your router or API call
     // Example payload
   const payload = { country, city, budgetMin: budget[0], budgetMax: budget[1], goals, benefits };
-    // eslint-disable-next-line no-console
-    console.log('Search with filters:', payload);
   };
 
   const handleReload = () => {
-    console.log("Reloading data...");
   };
   // Initialize collapsed states depending on breakpoint
   useEffect(() => {

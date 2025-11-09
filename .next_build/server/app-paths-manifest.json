@@ -1,18 +1,4 @@
 {
   "/(pages)/(home)/page": "app/(pages)/(home)/page.js",
-  "/(pages)/agency/changePassword/page": "app/(pages)/agency/changePassword/page.js",
-  "/(pages)/agency/logOut/page": "app/(pages)/agency/logOut/page.js",
-  "/(pages)/agencyDashboard/page": "app/(pages)/agencyDashboard/page.js",
-  "/(pages)/createProperty/page": "app/(pages)/createProperty/page.js",
-  "/(pages)/details/page": "app/(pages)/details/page.js",
-  "/(pages)/investorsDashboard/page": "app/(pages)/investorsDashboard/page.js",
-  "/(pages)/login/page": "app/(pages)/login/page.js",
-  "/(pages)/propertiesDashboard/page": "app/(pages)/propertiesDashboard/page.js",
-  "/(pages)/register/page": "app/(pages)/register/page.js",
-  "/(pages)/user/changePassword/page": "app/(pages)/user/changePassword/page.js",
-  "/(pages)/user/logOut/page": "app/(pages)/user/logOut/page.js",
-  "/(pages)/user/page": "app/(pages)/user/page.js",
-  "/(pages)/verify/page": "app/(pages)/verify/page.js",
-  "/_not-found/page": "app/_not-found/page.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js"
+  "/(pages)/investorsDashboard/page": "app/(pages)/investorsDashboard/page.js"
 }

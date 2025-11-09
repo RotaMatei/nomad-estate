@@ -42,12 +42,10 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
   useEffect(() => {
     if (formData.agencyId) {
       getAgentsForAgency(formData.agencyId).then(data => {
-        console.log('Fetched agents:', JSON.stringify(data, null, 2));
         setAgents(data || []);
         // Auto-select first agent if available
         if (data && data.length > 0 && !formData.agentId) {
           const firstAgentId = data[0].userId;
-          console.log('Auto-selecting first agent, userId:', firstAgentId);
           setFormData(prev => ({ ...prev, agentId: firstAgentId }));
         }
       });
@@ -77,14 +75,12 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
             label="Select Agent"
             value={formData.agentId || ''}
             onChange={(value) => {
-              console.log('Agent selected:', value, 'Type:', typeof value);
               setFormData({ ...formData, agentId: String(value) });
             }}
             options={agents.map(agent => {
               const firstName = agent.user?.firstName || 'Unknown';
               const lastName = agent.user?.lastName || 'Agent';
               const userId = agent.userId;
-              console.log('Agent option - userId:', userId, 'Type:', typeof userId);
               return {
                 value: userId,
                 label: `${firstName} ${lastName} (${agent.user?.email || userId})`

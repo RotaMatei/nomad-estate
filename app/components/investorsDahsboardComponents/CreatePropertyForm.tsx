@@ -27,7 +27,6 @@ export default function CreatePropertyForm({ onCancel, onSuccess }: CreateProper
         ...prev,
         agencyId: agencyId,
       }));
-      console.log('Auto-filled agencyId from token:', agencyId);
     }
   }, []);
 
@@ -36,7 +35,6 @@ export default function CreatePropertyForm({ onCancel, onSuccess }: CreateProper
     try {
       setSubmitting(true);
       const res = await createProperty(formData);
-      console.log('Property created:', res);
       if (typeof window !== 'undefined') {
         alert('Property created successfully.');
       }
@@ -44,7 +42,6 @@ export default function CreatePropertyForm({ onCancel, onSuccess }: CreateProper
         onSuccess();
       }
     } catch (err: unknown) {
-      console.error(err);
       const message = err instanceof Error ? err.message : 'Failed to create property';
       if (typeof window !== 'undefined') {
         alert(message);

@@ -2039,7 +2039,6 @@ api.interceptors.response.use((response)=>response, async (error)=>{
     var _error_response;
     if (((_error_response = error.response) === null || _error_response === void 0 ? void 0 : _error_response.status) === 401) {
         try {
-            console.log('Refreshing Token...');
             const refreshToken = ("TURBOPACK compile-time truthy", 1) ? localStorage.getItem('refreshToken') : "TURBOPACK unreachable";
             const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].post('https://api.nomadestatehub.com/refresh', {
                 refreshToken
@@ -2050,7 +2049,6 @@ api.interceptors.response.use((response)=>response, async (error)=>{
                 localStorage.setItem('token', data.accessToken);
                 localStorage.setItem('refreshToken', data.refreshToken);
             }
-            console.log(data.accessToken, data.refreshToken);
             error.config.headers = error.config.headers || {};
             error.config.headers['Authorization'] = "Bearer ".concat(data.accessToken);
             return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].request(error.config);
@@ -3306,10 +3304,8 @@ const REQUIRED_FIELDS = [
 async function getAgentsForAgency(agencyId) {
     try {
         const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].get("/agent/retrieve/agents-for-agency/".concat(agencyId));
-        console.log('Raw agent data from backend:', JSON.stringify(data, null, 2));
         return data;
     } catch (err) {
-        console.error('Failed to fetch agents:', err);
         return [];
     }
 }
@@ -3457,18 +3453,9 @@ async function createProperty(form) {
         throw new Error(msg);
     }
     const { dto } = result;
-    console.log('=== PROPERTY CREATION DEBUG ===');
-    console.log('Form Data:', form);
-    console.log('Submitting DTO:', JSON.stringify(dto, null, 2));
-    console.log('DTO Keys:', Object.keys(dto));
-    console.log('DTO Values Types:', Object.entries(dto).map((param)=>{
-        let [k, v] = param;
-        return "".concat(k, ": ").concat(typeof v);
-    }));
     try {
         // Create the property first
         const { data: createdProperty } = await __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].post('/property/create', dto);
-        console.log('✅ Property created successfully:', createdProperty);
         // Upload images if any exist
         if (form.images && form.images.length > 0) {
             const propertyId = createdProperty.id;
@@ -3477,7 +3464,6 @@ async function createProperty(form) {
                     const imageFile = form.images[i];
                     const base64 = await fileToBase64(imageFile);
                     if (!base64) {
-                        console.warn("Image ".concat(i + 1, " could not be converted to base64"));
                         continue;
                     }
                     await __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].post('/property/picture/create', {
@@ -3488,27 +3474,12 @@ async function createProperty(form) {
                     });
                 }
             } catch (imgErr) {
-                console.error('Error uploading images:', imgErr);
             // Don't throw - property was created successfully, just images failed
             // You might want to notify the user about partial failure
             }
         }
-        console.log('✅ Property created successfully:', createdProperty);
         return createdProperty;
     } catch (err) {
-        console.error('❌ Error creating property');
-        if (err instanceof Error) {
-            var _axiosErr_response;
-            console.error('Error message:', err.message);
-            console.error('Error stack:', err.stack);
-            // Check if it's an Axios error with response data
-            const axiosErr = err;
-            if ((_axiosErr_response = axiosErr.response) === null || _axiosErr_response === void 0 ? void 0 : _axiosErr_response.data) {
-                console.error('Backend error response (data):', JSON.stringify(axiosErr.response.data, null, 2));
-                console.error('Backend error status:', axiosErr.response.status);
-                console.error('Backend error statusText:', axiosErr.response.statusText);
-            }
-        }
         throw err;
     }
 }
@@ -3583,12 +3554,10 @@ function DetailsSection(param) {
             if (formData.agencyId) {
                 (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$lib$2f$propertyApi$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["getAgentsForAgency"])(formData.agencyId).then({
                     "DetailsSection.useEffect": (data)=>{
-                        console.log('Fetched agents:', JSON.stringify(data, null, 2));
                         setAgents(data || []);
                         // Auto-select first agent if available
                         if (data && data.length > 0 && !formData.agentId) {
                             const firstAgentId = data[0].userId;
-                            console.log('Auto-selecting first agent, userId:', firstAgentId);
                             setFormData({
                                 "DetailsSection.useEffect": (prev)=>({
                                         ...prev,
@@ -3625,7 +3594,7 @@ function DetailsSection(param) {
                 children: " General Details"
             }, void 0, false, {
                 fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                lineNumber: 59,
+                lineNumber: 57,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$Box$2f$Box$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Box$3e$__["Box"], {
@@ -3642,7 +3611,7 @@ function DetailsSection(param) {
                         children: "Agency identifier (auto-filled from your account)"
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 61,
+                        lineNumber: 59,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$utils$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -3661,19 +3630,19 @@ function DetailsSection(param) {
                             }
                         }, void 0, false, {
                             fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                            lineNumber: 69,
+                            lineNumber: 67,
                             columnNumber: 17
                         }, void 0),
                         disabled: true
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 62,
+                        lineNumber: 60,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                lineNumber: 60,
+                lineNumber: 58,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$Box$2f$Box$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Box$3e$__["Box"], {
@@ -3690,14 +3659,13 @@ function DetailsSection(param) {
                         children: "Agent managing this listing"
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 74,
+                        lineNumber: 72,
                         columnNumber: 9
                     }, this),
                     agents.length > 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$utils$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                         label: "Select Agent",
                         value: formData.agentId || '',
                         onChange: (value)=>{
-                            console.log('Agent selected:', value, 'Type:', typeof value);
                             setFormData({
                                 ...formData,
                                 agentId: String(value)
@@ -3708,7 +3676,6 @@ function DetailsSection(param) {
                             const firstName = ((_agent_user = agent.user) === null || _agent_user === void 0 ? void 0 : _agent_user.firstName) || 'Unknown';
                             const lastName = ((_agent_user1 = agent.user) === null || _agent_user1 === void 0 ? void 0 : _agent_user1.lastName) || 'Agent';
                             const userId = agent.userId;
-                            console.log('Agent option - userId:', userId, 'Type:', typeof userId);
                             return {
                                 value: userId,
                                 label: "".concat(firstName, " ").concat(lastName, " (").concat(((_agent_user2 = agent.user) === null || _agent_user2 === void 0 ? void 0 : _agent_user2.email) || userId, ")")
@@ -3719,7 +3686,7 @@ function DetailsSection(param) {
                         textColor: textColor
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 76,
+                        lineNumber: 74,
                         columnNumber: 11
                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$utils$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                         placeholder: "Agent ID",
@@ -3737,18 +3704,18 @@ function DetailsSection(param) {
                             }
                         }, void 0, false, {
                             fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                            lineNumber: 105,
+                            lineNumber: 101,
                             columnNumber: 19
                         }, void 0)
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 98,
+                        lineNumber: 94,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                lineNumber: 73,
+                lineNumber: 71,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$Box$2f$Box$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Box$3e$__["Box"], {
@@ -3765,7 +3732,7 @@ function DetailsSection(param) {
                         children: "Listing title shown publicly"
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 110,
+                        lineNumber: 106,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$utils$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -3784,18 +3751,18 @@ function DetailsSection(param) {
                             }
                         }, void 0, false, {
                             fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                            lineNumber: 118,
+                            lineNumber: 114,
                             columnNumber: 17
                         }, void 0)
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 111,
+                        lineNumber: 107,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                lineNumber: 109,
+                lineNumber: 105,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$Box$2f$Box$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Box$3e$__["Box"], {
@@ -3812,7 +3779,7 @@ function DetailsSection(param) {
                         children: "Detailed description to highlight key features"
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 122,
+                        lineNumber: 118,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$utils$2f$textarea$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -3833,18 +3800,18 @@ function DetailsSection(param) {
                             }
                         }, void 0, false, {
                             fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                            lineNumber: 132,
+                            lineNumber: 128,
                             columnNumber: 17
                         }, void 0)
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 123,
+                        lineNumber: 119,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                lineNumber: 121,
+                lineNumber: 117,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$Box$2f$Box$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Box$3e$__["Box"], {
@@ -3861,7 +3828,7 @@ function DetailsSection(param) {
                         children: "Property type classification"
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 136,
+                        lineNumber: 132,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$utils$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -3877,13 +3844,13 @@ function DetailsSection(param) {
                         textColor: textColor
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 137,
+                        lineNumber: 133,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                lineNumber: 135,
+                lineNumber: 131,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$Box$2f$Box$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Box$3e$__["Box"], {
@@ -3900,7 +3867,7 @@ function DetailsSection(param) {
                         children: "Availability status for buyers"
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 148,
+                        lineNumber: 144,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$utils$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -3916,13 +3883,13 @@ function DetailsSection(param) {
                         textColor: textColor
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 149,
+                        lineNumber: 145,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                lineNumber: 147,
+                lineNumber: 143,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$Box$2f$Box$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Box$3e$__["Box"], {
@@ -3939,7 +3906,7 @@ function DetailsSection(param) {
                         children: "Asking price in euros"
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 160,
+                        lineNumber: 156,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$utils$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -3959,18 +3926,18 @@ function DetailsSection(param) {
                             }
                         }, void 0, false, {
                             fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                            lineNumber: 169,
+                            lineNumber: 165,
                             columnNumber: 17
                         }, void 0)
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 161,
+                        lineNumber: 157,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                lineNumber: 159,
+                lineNumber: 155,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$Box$2f$Box$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Box$3e$__["Box"], {
@@ -3987,7 +3954,7 @@ function DetailsSection(param) {
                         children: "Net yield as a percentage"
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 173,
+                        lineNumber: 169,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$utils$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -4007,18 +3974,18 @@ function DetailsSection(param) {
                             }
                         }, void 0, false, {
                             fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                            lineNumber: 182,
+                            lineNumber: 178,
                             columnNumber: 17
                         }, void 0)
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 174,
+                        lineNumber: 170,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                lineNumber: 172,
+                lineNumber: 168,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$Box$2f$Box$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Box$3e$__["Box"], {
@@ -4035,7 +4002,7 @@ function DetailsSection(param) {
                         children: "Number of rooms"
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 187,
+                        lineNumber: 183,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$utils$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -4055,18 +4022,18 @@ function DetailsSection(param) {
                             }
                         }, void 0, false, {
                             fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                            lineNumber: 196,
+                            lineNumber: 192,
                             columnNumber: 17
                         }, void 0)
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 188,
+                        lineNumber: 184,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                lineNumber: 186,
+                lineNumber: 182,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$Box$2f$Box$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Box$3e$__["Box"], {
@@ -4083,7 +4050,7 @@ function DetailsSection(param) {
                         children: "Number of bedrooms"
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 200,
+                        lineNumber: 196,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$utils$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -4103,18 +4070,18 @@ function DetailsSection(param) {
                             }
                         }, void 0, false, {
                             fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                            lineNumber: 209,
+                            lineNumber: 205,
                             columnNumber: 17
                         }, void 0)
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 201,
+                        lineNumber: 197,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                lineNumber: 199,
+                lineNumber: 195,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$Box$2f$Box$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Box$3e$__["Box"], {
@@ -4131,7 +4098,7 @@ function DetailsSection(param) {
                         children: "Number of bathrooms"
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 213,
+                        lineNumber: 209,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$utils$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -4151,18 +4118,18 @@ function DetailsSection(param) {
                             }
                         }, void 0, false, {
                             fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                            lineNumber: 222,
+                            lineNumber: 218,
                             columnNumber: 17
                         }, void 0)
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 214,
+                        lineNumber: 210,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                lineNumber: 212,
+                lineNumber: 208,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$Box$2f$Box$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Box$3e$__["Box"], {
@@ -4179,7 +4146,7 @@ function DetailsSection(param) {
                         children: "Floor level of the property"
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 226,
+                        lineNumber: 222,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$utils$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -4199,24 +4166,24 @@ function DetailsSection(param) {
                             }
                         }, void 0, false, {
                             fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                            lineNumber: 235,
+                            lineNumber: 231,
                             columnNumber: 17
                         }, void 0)
                     }, void 0, false, {
                         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                        lineNumber: 227,
+                        lineNumber: 223,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-                lineNumber: 225,
+                lineNumber: 221,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/app/components/createPropertyComponents/DetailsSection.tsx",
-        lineNumber: 58,
+        lineNumber: 56,
         columnNumber: 5
     }, this);
 }
@@ -6288,7 +6255,6 @@ function CreatePropertyForm(param) {
                             agencyId: agencyId
                         })
                 }["CreatePropertyForm.useEffect"]);
-                console.log('Auto-filled agencyId from token:', agencyId);
             }
         }
     }["CreatePropertyForm.useEffect"], []);
@@ -6297,7 +6263,6 @@ function CreatePropertyForm(param) {
         try {
             setSubmitting(true);
             const res = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$lib$2f$propertyApi$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["createProperty"])(formData);
-            console.log('Property created:', res);
             if ("TURBOPACK compile-time truthy", 1) {
                 alert('Property created successfully.');
             }
@@ -6305,7 +6270,6 @@ function CreatePropertyForm(param) {
                 onSuccess();
             }
         } catch (err) {
-            console.error(err);
             const message = err instanceof Error ? err.message : 'Failed to create property';
             if ("TURBOPACK compile-time truthy", 1) {
                 alert(message);
@@ -6332,7 +6296,7 @@ function CreatePropertyForm(param) {
                 children: "Create New Property"
             }, void 0, false, {
                 fileName: "[project]/app/components/investorsDahsboardComponents/CreatePropertyForm.tsx",
-                lineNumber: 59,
+                lineNumber: 56,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$createPropertyComponents$2f$DetailsSection$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -6340,7 +6304,7 @@ function CreatePropertyForm(param) {
                 setFormData: setFormData
             }, void 0, false, {
                 fileName: "[project]/app/components/investorsDahsboardComponents/CreatePropertyForm.tsx",
-                lineNumber: 62,
+                lineNumber: 59,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$createPropertyComponents$2f$AddressSection$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -6348,7 +6312,7 @@ function CreatePropertyForm(param) {
                 setFormData: setFormData
             }, void 0, false, {
                 fileName: "[project]/app/components/investorsDahsboardComponents/CreatePropertyForm.tsx",
-                lineNumber: 63,
+                lineNumber: 60,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$createPropertyComponents$2f$FeatureSection$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -6356,7 +6320,7 @@ function CreatePropertyForm(param) {
                 setFormData: setFormData
             }, void 0, false, {
                 fileName: "[project]/app/components/investorsDahsboardComponents/CreatePropertyForm.tsx",
-                lineNumber: 64,
+                lineNumber: 61,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$createPropertyComponents$2f$ImageUploadSection$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -6364,7 +6328,7 @@ function CreatePropertyForm(param) {
                 setFormData: setFormData
             }, void 0, false, {
                 fileName: "[project]/app/components/investorsDahsboardComponents/CreatePropertyForm.tsx",
-                lineNumber: 65,
+                lineNumber: 62,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$Box$2f$Box$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Box$3e$__["Box"], {
@@ -6383,7 +6347,7 @@ function CreatePropertyForm(param) {
                         children: submitting ? 'Submitting…' : 'Submit'
                     }, void 0, false, {
                         fileName: "[project]/app/components/investorsDahsboardComponents/CreatePropertyForm.tsx",
-                        lineNumber: 67,
+                        lineNumber: 64,
                         columnNumber: 9
                     }, this),
                     onCancel && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$Button$2f$Button$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Button$3e$__["Button"], {
@@ -6394,19 +6358,19 @@ function CreatePropertyForm(param) {
                         children: "Cancel"
                     }, void 0, false, {
                         fileName: "[project]/app/components/investorsDahsboardComponents/CreatePropertyForm.tsx",
-                        lineNumber: 76,
+                        lineNumber: 73,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/components/investorsDahsboardComponents/CreatePropertyForm.tsx",
-                lineNumber: 66,
+                lineNumber: 63,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/app/components/investorsDahsboardComponents/CreatePropertyForm.tsx",
-        lineNumber: 58,
+        lineNumber: 55,
         columnNumber: 5
     }, this);
 }
@@ -6441,7 +6405,6 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$investo
 var __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$investorsDahsboardComponents$2f$VolumeGraph$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/app/components/investorsDahsboardComponents/VolumeGraph.tsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$reactDevBits$2f$StaggeredMenu$2f$staggeredMenu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/app/reactDevBits/StaggeredMenu/staggeredMenu.tsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/axios/lib/axios.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/app/lib/api.ts [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$investorsDahsboardComponents$2f$topCities$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/app/components/investorsDahsboardComponents/topCities.tsx [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$investorsDahsboardComponents$2f$ListingCard$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/app/components/investorsDahsboardComponents/ListingCard.tsx [app-client] (ecmascript)");
@@ -6450,7 +6413,6 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$ico
 ;
 var _s = __turbopack_context__.k.signature();
 'use client';
-;
 ;
 ;
 ;
@@ -6709,44 +6671,6 @@ function InvestmentDashboard() {
                             console.warn('Both user and agency endpoints failed');
                         }
                     }
-                    if (!subjectId) return;
-                    const headers = {
-                        Authorization: "Bearer ".concat(token)
-                    };
-                    let profile = null;
-                    let isAgency = false;
-                    // NEW ORDER: try agency first; if 404/4xx then try user.
-                    try {
-                        const agencyRes = await __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].get("/agency/retrieve/".concat(subjectId), {
-                            headers
-                        });
-                        profile = agencyRes.data || {};
-                        isAgency = true;
-                    } catch (agencyErr) {
-                        var _agencyErr_response;
-                        const status = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].isAxiosError(agencyErr) ? (_agencyErr_response = agencyErr.response) === null || _agencyErr_response === void 0 ? void 0 : _agencyErr_response.status : undefined;
-                        if (status && status >= 400) {
-                            // Fallback to user profile
-                            try {
-                                const userRes = await __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$lib$2f$api$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].get("/user/retrieve/".concat(subjectId), {
-                                    headers
-                                });
-                                profile = userRes.data || {};
-                                isAgency = false;
-                            } catch (userErr) {
-                                console.warn('Failed to fetch both agency and user profile', userErr);
-                            }
-                        } else {
-                            console.warn('Agency profile fetch failed', agencyErr);
-                        }
-                    }
-                    if (!profile || cancelled) return;
-                    const name = (profile.firstName || '') + (profile.lastName ? " ".concat(profile.lastName) : '');
-                    if (name.trim()) setProfileName(name.trim());
-                    if (profile.email) setProfileEmail(profile.email);
-                    if (!isAgency && profile.role) setProfileRole(String(profile.role));
-                    const avatar = profile.avatarUrl || profile.avatar || profile.imageUrl || profile.image || profile.profilePictureUrl || profile.profilePicture;
-                    if (avatar && typeof avatar === 'string') setProfileAvatarUrl(avatar);
                 }
             })["InvestmentDashboard.useEffect"]();
             return ({
@@ -6774,7 +6698,7 @@ function InvestmentDashboard() {
                 children: !sidebarVisible && headerMenuButton
             }, void 0, false, {
                 fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                lineNumber: 275,
+                lineNumber: 215,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$Grid$2f$Grid$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Grid$3e$__["Grid"], {
@@ -6872,17 +6796,17 @@ function InvestmentDashboard() {
                                 onAfterClose: ()=>setSidebarVisible(false)
                             }, void 0, false, {
                                 fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                lineNumber: 298,
+                                lineNumber: 238,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                            lineNumber: 287,
+                            lineNumber: 227,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                        lineNumber: 281,
+                        lineNumber: 221,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$Grid$2f$Grid$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Grid$3e$__["Grid"], {
@@ -6933,7 +6857,7 @@ function InvestmentDashboard() {
                                                 children: "Market Insights"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                                lineNumber: 354,
+                                                lineNumber: 294,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$IconButton$2f$IconButton$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__IconButton$3e$__["IconButton"], {
@@ -6954,25 +6878,25 @@ function InvestmentDashboard() {
                                                     children: !profileAvatarUrl ? ((profileName === null || profileName === void 0 ? void 0 : (_profileName_trim = profileName.trim()) === null || _profileName_trim === void 0 ? void 0 : _profileName_trim.charAt(0)) || 'U').toUpperCase() : null
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                                    lineNumber: 358,
+                                                    lineNumber: 298,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                                lineNumber: 357,
+                                                lineNumber: 297,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                        lineNumber: 353,
+                                        lineNumber: 293,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$investorsDahsboardComponents$2f$topCities$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                                         colorScheme: isAgent ? 'primary' : 'secondary'
                                     }, void 0, false, {
                                         fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                        lineNumber: 373,
+                                        lineNumber: 313,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$Grid$2f$Grid$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Grid$3e$__["Grid"], {
@@ -6990,24 +6914,24 @@ function InvestmentDashboard() {
                                                 colorScheme: isAgent ? 'primary' : 'secondary'
                                             }, void 0, false, {
                                                 fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                                lineNumber: 376,
+                                                lineNumber: 316,
                                                 columnNumber: 21
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                            lineNumber: 375,
+                                            lineNumber: 315,
                                             columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                        lineNumber: 374,
+                                        lineNumber: 314,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$investorsDahsboardComponents$2f$TopMetrics$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                                         colorScheme: isAgent ? 'primary' : 'secondary'
                                     }, void 0, false, {
                                         fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                        lineNumber: 379,
+                                        lineNumber: 319,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$Grid$2f$Grid$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Grid$3e$__["Grid"], {
@@ -7025,17 +6949,17 @@ function InvestmentDashboard() {
                                                 colorScheme: isAgent ? 'primary' : 'secondary'
                                             }, void 0, false, {
                                                 fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                                lineNumber: 382,
+                                                lineNumber: 322,
                                                 columnNumber: 21
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                            lineNumber: 381,
+                                            lineNumber: 321,
                                             columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                        lineNumber: 380,
+                                        lineNumber: 320,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$Box$2f$Box$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Box$3e$__["Box"], {
@@ -7061,7 +6985,7 @@ function InvestmentDashboard() {
                                                 children: "Real Time Data Provided By"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                                lineNumber: 386,
+                                                lineNumber: 326,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$Typography$2f$Typography$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Typography$3e$__["Typography"], {
@@ -7075,13 +6999,13 @@ function InvestmentDashboard() {
                                                 children: "Nomad Estate"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                                lineNumber: 389,
+                                                lineNumber: 329,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                        lineNumber: 385,
+                                        lineNumber: 325,
                                         columnNumber: 17
                                     }, this)
                                 ]
@@ -7105,7 +7029,7 @@ function InvestmentDashboard() {
                                                 children: "Listings"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                                lineNumber: 398,
+                                                lineNumber: 338,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$IconButton$2f$IconButton$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__IconButton$3e$__["IconButton"], {
@@ -7126,18 +7050,18 @@ function InvestmentDashboard() {
                                                     children: !profileAvatarUrl ? ((profileName === null || profileName === void 0 ? void 0 : (_profileName_trim1 = profileName.trim()) === null || _profileName_trim1 === void 0 ? void 0 : _profileName_trim1.charAt(0)) || 'U').toUpperCase() : null
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                                    lineNumber: 402,
+                                                    lineNumber: 342,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                                lineNumber: 401,
+                                                lineNumber: 341,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                        lineNumber: 397,
+                                        lineNumber: 337,
                                         columnNumber: 17
                                     }, this),
                                     !showCreateProperty ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
@@ -7152,7 +7076,7 @@ function InvestmentDashboard() {
                                                 children: "Portofolio"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                                lineNumber: 419,
+                                                lineNumber: 359,
                                                 columnNumber: 21
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$Grid$2f$Grid$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Grid$3e$__["Grid"], {
@@ -7176,12 +7100,12 @@ function InvestmentDashboard() {
                                                             onAddClick: ()=>setShowCreateProperty(true)
                                                         }, void 0, false, {
                                                             fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                                            lineNumber: 426,
+                                                            lineNumber: 366,
                                                             columnNumber: 25
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                                        lineNumber: 425,
+                                                        lineNumber: 365,
                                                         columnNumber: 23
                                                     }, this),
                                                     listingsSampleData.map((listing)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$Grid$2f$Grid$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Grid$3e$__["Grid"], {
@@ -7200,18 +7124,18 @@ function InvestmentDashboard() {
                                                                 colorScheme: isAgent ? 'primary' : 'secondary'
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                                                lineNumber: 441,
+                                                                lineNumber: 381,
                                                                 columnNumber: 27
                                                             }, this)
                                                         }, listing.id, false, {
                                                             fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                                            lineNumber: 440,
+                                                            lineNumber: 380,
                                                             columnNumber: 25
                                                         }, this))
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                                lineNumber: 423,
+                                                lineNumber: 363,
                                                 columnNumber: 21
                                             }, this)
                                         ]
@@ -7229,7 +7153,7 @@ function InvestmentDashboard() {
                                                     onClick: ()=>setShowCreateProperty(false),
                                                     startIcon: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$icons$2d$material$2f$esm$2f$ArrowBack$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {}, void 0, false, {
                                                         fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                                        lineNumber: 460,
+                                                        lineNumber: 400,
                                                         columnNumber: 36
                                                     }, void 0),
                                                     sx: {
@@ -7238,12 +7162,12 @@ function InvestmentDashboard() {
                                                     children: "Back to Listings"
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                                    lineNumber: 457,
+                                                    lineNumber: 397,
                                                     columnNumber: 23
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                                lineNumber: 456,
+                                                lineNumber: 396,
                                                 columnNumber: 21
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$app$2f$components$2f$investorsDahsboardComponents$2f$CreatePropertyForm$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -7254,7 +7178,7 @@ function InvestmentDashboard() {
                                                 }
                                             }, void 0, false, {
                                                 fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                                lineNumber: 466,
+                                                lineNumber: 406,
                                                 columnNumber: 21
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$Box$2f$Box$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Box$3e$__["Box"], {
@@ -7280,7 +7204,7 @@ function InvestmentDashboard() {
                                                         children: "Global Investment Platform"
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                                        lineNumber: 474,
+                                                        lineNumber: 414,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$mui$2f$material$2f$esm$2f$Typography$2f$Typography$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Typography$3e$__["Typography"], {
@@ -7294,19 +7218,19 @@ function InvestmentDashboard() {
                                                         children: "Nomad Estate"
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                                        lineNumber: 477,
+                                                        lineNumber: 417,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                                lineNumber: 473,
+                                                lineNumber: 413,
                                                 columnNumber: 21
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                        lineNumber: 455,
+                                        lineNumber: 395,
                                         columnNumber: 19
                                     }, this)
                                 ]
@@ -7322,29 +7246,29 @@ function InvestmentDashboard() {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                                lineNumber: 486,
+                                lineNumber: 426,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                            lineNumber: 349,
+                            lineNumber: 289,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                        lineNumber: 345,
+                        lineNumber: 285,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-                lineNumber: 279,
+                lineNumber: 219,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/app/(pages)/investorsDashboard/page.tsx",
-        lineNumber: 273,
+        lineNumber: 213,
         columnNumber: 5
     }, this);
 }

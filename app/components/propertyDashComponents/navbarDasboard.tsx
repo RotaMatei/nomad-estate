@@ -188,7 +188,7 @@ export default function Navbar() {
           </Box>
         </Grid>
         <Grid size={{ xs: 2, sm: 1 }} sx={{ display: { xs: 'flex', md: 'none' }, justifyContent: 'center', }}>
-          <IconButton aria-label="login" onClick={() => console.log('Login clicked')}>
+          <IconButton aria-label="login">
             <PersonOutlineOutlinedIcon sx={{ color: 'secondary.main' }} />
           </IconButton>
         </Grid>

@@ -28,10 +28,8 @@ const REQUIRED_FIELDS = [
 export async function getAgentsForAgency(agencyId: string) {
   try {
     const { data } = await api.get(`/agent/retrieve/agents-for-agency/${agencyId}`);
-    console.log('Raw agent data from backend:', JSON.stringify(data, null, 2));
     return data;
   } catch (err) {
-    console.error('Failed to fetch agents:', err);
     return [];
   }
 }
@@ -168,17 +166,9 @@ export async function createProperty(form: PropertyFormData) {
   }
   const { dto } = result;
 
-  console.log('=== PROPERTY CREATION DEBUG ===');
-  console.log('Form Data:', form);
-  console.log('Submitting DTO:', JSON.stringify(dto, null, 2));
-  console.log('DTO Keys:', Object.keys(dto));
-  console.log('DTO Values Types:', Object.entries(dto).map(([k, v]) => `${k}: ${typeof v}`));
-
   try {
     // Create the property first
     const { data: createdProperty } = await api.post('/property/create', dto);
-
-    console.log('✅ Property created successfully:', createdProperty);
 
     // Upload images if any exist
     if (form.images && form.images.length > 0) {
@@ -190,7 +180,6 @@ export async function createProperty(form: PropertyFormData) {
           const base64 = await fileToBase64(imageFile as File | string);
 
           if (!base64) {
-            console.warn(`Image ${i + 1} could not be converted to base64`);
             continue;
           }
 
@@ -202,27 +191,13 @@ export async function createProperty(form: PropertyFormData) {
           });
         }
       } catch (imgErr) {
-        console.error('Error uploading images:', imgErr);
         // Don't throw - property was created successfully, just images failed
         // You might want to notify the user about partial failure
       }
     }
 
-    console.log('✅ Property created successfully:', createdProperty);
     return createdProperty;
   } catch (err: unknown) {
-    console.error('❌ Error creating property');
-    if (err instanceof Error) {
-      console.error('Error message:', err.message);
-      console.error('Error stack:', err.stack);
-      // Check if it's an Axios error with response data
-      const axiosErr = err as any;
-      if (axiosErr.response?.data) {
-        console.error('Backend error response (data):', JSON.stringify(axiosErr.response.data, null, 2));
-        console.error('Backend error status:', axiosErr.response.status);
-        console.error('Backend error statusText:', axiosErr.response.statusText);
-      }
-    }
     throw err;
   }
 }

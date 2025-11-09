@@ -22,7 +22,6 @@ api.interceptors.response.use(
   async (error) => {
     if (error.response?.status === 401) {
       try {
-        console.log('Refreshing Token...');
         const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
         const { data } = await axios.post(
           'https://api.nomadestatehub.com/refresh',
@@ -35,7 +34,6 @@ api.interceptors.response.use(
           localStorage.setItem('token', data.accessToken);
           localStorage.setItem('refreshToken', data.refreshToken);
         }
-        console.log(data.accessToken, data.refreshToken);
         error.config.headers = error.config.headers || {};
         error.config.headers['Authorization'] = `Bearer ${data.accessToken}`;
         return axios.request(error.config);
