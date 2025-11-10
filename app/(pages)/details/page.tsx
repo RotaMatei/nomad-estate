@@ -1,6 +1,14 @@
 import PropertyDetails from '../../components/detailsComponents/PropertyDetails';
 import api from '@/app/lib/api';
 
+interface PropertyPictureDto {
+  id: string;
+  propertyId: string;
+  imageData: string; // base64 from backend
+  altText?: string | null;
+  isPrimary: boolean;
+}
+
 interface PropertyDto {
   title?: string; description?: string; type?: string; status?: string; price?: number; yield?: number; score?: number;
   streetAddress?: string; postalCode?: string; cityId?: number; stateId?: number; countryId?: number; latitude?: number; longitude?: number;
@@ -9,6 +17,7 @@ interface PropertyDto {
   ownershipStatus?: boolean; propertyTaxes?: number; HOAFees?: number; availabilityDateStart?: string; availabilityDateEnd?: string;
   heatingSystem?: string; coolingSystem?: string; kitchen?: string; security?: string; utility?: string; smartHomeFeature?: string; otherFeature?: string;
   investmentGoalTag?: string; locationBenefitTag?: string;
+  picture?: PropertyPictureDto[];
 }
 
 async function fetchProperty(id: string): Promise<PropertyDto | null> {

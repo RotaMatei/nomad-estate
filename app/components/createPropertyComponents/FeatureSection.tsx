@@ -19,18 +19,13 @@ import { Box, Typography } from '@mui/material';
 import CustomSelect from '../../components/utils/select';
 import CustomInput from '../../components/utils/input';
 import DateInput from '../../components/utils/dateInput';
-import CheckboxGroup from '../../components/utils/checkboxGroup';
+// Removed unused CheckboxGroup
 import { PropertyFormData } from './types';
 import StraightenIcon from '@mui/icons-material/Straighten';
 import BalconyIcon from '@mui/icons-material/Balcony';
-import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
-import AcUnitIcon from '@mui/icons-material/AcUnit';
-import RestaurantIcon from '@mui/icons-material/Restaurant';
-import SecurityIcon from '@mui/icons-material/Security';
-import EmojiObjectsIcon from '@mui/icons-material/EmojiObjects';
-import SmartToyIcon from '@mui/icons-material/SmartToy';
+// Removed unused icons
 import EuroIcon from '@mui/icons-material/Euro';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+// Removed unused CalendarMonthIcon
 
 interface FeatureProps {
   formData: PropertyFormData;

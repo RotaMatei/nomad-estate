@@ -74,11 +74,6 @@ export default function LoginPage() {
       localStorage.setItem('refreshToken', data.refreshToken);
       if (data.RefreshJTI) localStorage.setItem('jti', data.RefreshJTI);
       if (data.sub) localStorage.setItem('userId', data.sub);
-      // set username if present (not guaranteed by API)
-      if (data.firstName || data.lastName) {
-        const username = `${data.firstName ?? ''} ${data.lastName ?? ''}`.trim();
-        if (username) localStorage.setItem('user', username);
-      }
       router.push('/');
     };
 

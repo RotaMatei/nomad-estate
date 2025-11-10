@@ -10,8 +10,7 @@ import { PropertyFormData } from './types';
 import { getCitiesByState, getCountries, getStates, City, Country, State } from '../../lib/locationApi';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import MailIcon from '@mui/icons-material/Mail';
-import PublicIcon from '@mui/icons-material/Public';
-import MapIcon from '@mui/icons-material/Map';
+// Removed unused icons PublicIcon and MapIcon
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 
 interface Props {

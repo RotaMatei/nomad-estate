@@ -9,7 +9,7 @@ import YieldGraph from '../../components/investorsDahsboardComponents/YieldGraph
 import VolumeGraph from '../../components/investorsDahsboardComponents/VolumeGraph';
 import { StaggeredMenu, StaggeredMenuItem, StaggeredMenuSection } from '@/app/reactDevBits/StaggeredMenu/staggeredMenu';
 import React from 'react';
-import axios from 'axios';
+// Removed unused axios import (using api client instead)
 import api from '@/app/lib/api';
 import TopCities from '../../components/investorsDahsboardComponents/topCities';
 import ListingCard from '../../components/investorsDahsboardComponents/ListingCard';
@@ -128,7 +128,7 @@ export default function InvestmentDashboard() {
     let cancelled = false;
 
     (async () => {
-      interface JwtPayload { sub?: string; role?: string; [k: string]: any }
+      interface JwtPayload { sub?: string; role?: string; [k: string]: unknown }
       let payload: JwtPayload | null = null;
       try {
         const parts = token.split('.');
@@ -197,11 +197,12 @@ export default function InvestmentDashboard() {
       try {
         await fetchUser();
       } catch (usrErr) {
+        // User fetch failed; fall back to agency fetch
         // If user fetch fails or returns empty, try agency (for direct agency login)
         try {
           await fetchAgency();
         } catch (agErr) {
-          console.warn('Both user and agency endpoints failed');
+          console.warn('Both user and agency endpoints failed', { userError: usrErr, agencyError: agErr });
         }
       }
     })();

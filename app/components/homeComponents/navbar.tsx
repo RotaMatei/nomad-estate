@@ -22,8 +22,7 @@ export default function Navbar(
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
   const mColor = mobileNavColor ?? navColor;
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
+  // Removed unused user/userId state to satisfy lint; kept logged-in flag based on token
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
@@ -40,8 +39,7 @@ export default function Navbar(
       setIsLoggedIn(!!token);
 
       if (!token) {
-        setUserId(null);
-        setUser(null);
+  // user state removed
         return;
       }
 
@@ -51,20 +49,10 @@ export default function Navbar(
         const payload = parts[1] ? JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))) : null;
         const id = payload ? String(payload.sub) : null;
         if (!mounted) return;
-        setUserId(id);
-
-        if (id) {
-          // fetch user profile and set the state with the response data
-          const res = await api.get<UserProfile>(`users/retrieve/${id}`);
-          if (!mounted) return;
-          setUser(res.data as UserProfile);
-        } else {
-          setUser(null);
-        }
+        // user state removed; id currently unused
       } catch {
         if (!mounted) return;
-        setUserId(null);
-        setUser(null);
+  // user state removed
       }
     };
 
