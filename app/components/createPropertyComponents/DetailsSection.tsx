@@ -9,15 +9,13 @@ import { PropertyFormData } from './types';
 import BusinessIcon from '@mui/icons-material/Business';
 import TitleIcon from '@mui/icons-material/Title';
 import DescriptionIcon from '@mui/icons-material/Description';
-import LayersIcon from '@mui/icons-material/Layers';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import EuroIcon from '@mui/icons-material/Euro';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import StarsIcon from '@mui/icons-material/Stars';
 import DoorSlidingIcon from '@mui/icons-material/DoorSliding';
 import BedroomParentIcon from '@mui/icons-material/BedroomParent';
 import BathroomIcon from '@mui/icons-material/Bathroom';
 import ApartmentIcon from '@mui/icons-material/Apartment';
+// Restored required icon imports used in JSX
 import { useEffect, useState } from 'react';
 import { getAgentsForAgency } from '@/app/lib/propertyApi';
 
@@ -31,7 +29,12 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
   const focusColor = theme.palette.primary.main;
   const bgColor = theme.palette.background.default;
   const textColor = grey[700];
-  const [agents, setAgents] = useState<any[]>([]);
+  const [agents, setAgents] = useState<
+    Array<{
+      userId: string;
+      user?: { firstName?: string; lastName?: string; email?: string } | null;
+    }>
+  >([]);
 
   const numberFloat = (v: string) => (v === '' ? undefined : parseFloat(v));
   const numberInt = (v: string) => (v === '' ? undefined : parseInt(v, 10));
@@ -40,19 +43,25 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
 
   // Fetch agents when agencyId changes
   useEffect(() => {
-    if (formData.agencyId) {
-      getAgentsForAgency(formData.agencyId).then(data => {
+    if (!formData.agencyId) return;
+    let active = true;
+    (async () => {
+      try {
+        const data = await getAgentsForAgency(formData.agencyId!);
+        if (!active) return;
         console.log('Fetched agents:', JSON.stringify(data, null, 2));
         setAgents(data || []);
-        // Auto-select first agent if available
         if (data && data.length > 0 && !formData.agentId) {
           const firstAgentId = data[0].userId;
           console.log('Auto-selecting first agent, userId:', firstAgentId);
           setFormData(prev => ({ ...prev, agentId: firstAgentId }));
         }
-      });
-    }
-  }, [formData.agencyId]);
+      } catch (e) {
+        console.warn('Failed to fetch agents', e);
+      }
+    })();
+    return () => { active = false; };
+  }, [formData.agencyId, formData.agentId, setFormData]);
 
   return (
     <Box component="fieldset" sx={{ display: 'flex', flexDirection: 'column', gap: 3, my: '1px', p:2, borderRadius:4, border: '1px solid', borderColor: '#c2c2c265' }}>

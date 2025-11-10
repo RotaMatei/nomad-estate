@@ -216,7 +216,7 @@ export async function createProperty(form: PropertyFormData) {
       console.error('Error message:', err.message);
       console.error('Error stack:', err.stack);
       // Check if it's an Axios error with response data
-      const axiosErr = err as any;
+      const axiosErr = err as { response?: { data?: unknown; status?: number; statusText?: string } };
       if (axiosErr.response?.data) {
         console.error('Backend error response (data):', JSON.stringify(axiosErr.response.data, null, 2));
         console.error('Backend error status:', axiosErr.response.status);

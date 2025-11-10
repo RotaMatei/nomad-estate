@@ -1,16 +1,23 @@
 {
-  "62424": {
-    "id": 62424,
+  "[project]/app/components/propertyDashComponents/GlobeView.tsx [app-client] (ecmascript, next/dynamic entry)": {
+    "id": "[project]/app/components/propertyDashComponents/GlobeView.tsx [app-client] (ecmascript, next/dynamic entry)",
     "files": [
-      "static/chunks/ef377c836d0bf43b.js",
-      "static/chunks/dac1e1ba70ac7246.js"
+      "static/chunks/node_modules_react-reconciler_dd58c996._.js",
+      "static/chunks/node_modules_three_build_three_core_996ef05a.js",
+      "static/chunks/node_modules_three_build_three_module_0c59ee63.js",
+      "static/chunks/node_modules_three_build_three_module_f7d46d9b.js",
+      "static/chunks/node_modules_@react-three_fiber_dist_120cff1c._.js",
+      "static/chunks/node_modules_e06e11a7._.js",
+      "static/chunks/app_components_propertyDashComponents_a6cb9b1d._.js",
+      "static/chunks/app_components_propertyDashComponents_GlobeView_tsx_9616a4dd._.js"
     ]
   },
-  "1097": {
-    "id": 1097,
+  "[project]/app/components/propertyDashComponents/LeafletMap.tsx [app-client] (ecmascript, next/dynamic entry)": {
+    "id": "[project]/app/components/propertyDashComponents/LeafletMap.tsx [app-client] (ecmascript, next/dynamic entry)",
     "files": [
-      "static/chunks/4df71e3601a8d8ce.js",
-      "static/chunks/732c1471d9cda286.js"
+      "static/chunks/node_modules_bbab28fe._.js",
+      "static/chunks/app_components_propertyDashComponents_LeafletMap_tsx_ac31695f._.js",
+      "static/chunks/app_components_propertyDashComponents_LeafletMap_tsx_9616a4dd._.js"
     ]
   }
 }

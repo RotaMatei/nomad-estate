@@ -1,48 +1,6 @@
 {
   "app": {
-    "[project]/app/(pages)/(home)/page": [
-      "static/media/e8f2fbee2754df70-s.p.9b7a96b4.woff2"
-    ],
-    "[project]/app/(pages)/agency/changePassword/page": [
-      "static/media/e8f2fbee2754df70-s.p.9b7a96b4.woff2"
-    ],
-    "[project]/app/(pages)/agency/logOut/page": [
-      "static/media/e8f2fbee2754df70-s.p.9b7a96b4.woff2"
-    ],
-    "[project]/app/(pages)/agencyDashboard/page": [
-      "static/media/e8f2fbee2754df70-s.p.9b7a96b4.woff2"
-    ],
-    "[project]/app/(pages)/createProperty/page": [
-      "static/media/e8f2fbee2754df70-s.p.9b7a96b4.woff2"
-    ],
-    "[project]/app/(pages)/details/page": [
-      "static/media/e8f2fbee2754df70-s.p.9b7a96b4.woff2"
-    ],
-    "[project]/app/(pages)/investorsDashboard/page": [
-      "static/media/e8f2fbee2754df70-s.p.9b7a96b4.woff2"
-    ],
-    "[project]/app/(pages)/login/page": [
-      "static/media/e8f2fbee2754df70-s.p.9b7a96b4.woff2"
-    ],
     "[project]/app/(pages)/propertiesDashboard/page": [
-      "static/media/e8f2fbee2754df70-s.p.9b7a96b4.woff2"
-    ],
-    "[project]/app/(pages)/register/page": [
-      "static/media/e8f2fbee2754df70-s.p.9b7a96b4.woff2"
-    ],
-    "[project]/app/(pages)/user/changePassword/page": [
-      "static/media/e8f2fbee2754df70-s.p.9b7a96b4.woff2"
-    ],
-    "[project]/app/(pages)/user/logOut/page": [
-      "static/media/e8f2fbee2754df70-s.p.9b7a96b4.woff2"
-    ],
-    "[project]/app/(pages)/user/page": [
-      "static/media/e8f2fbee2754df70-s.p.9b7a96b4.woff2"
-    ],
-    "[project]/app/(pages)/verify/page": [
-      "static/media/e8f2fbee2754df70-s.p.9b7a96b4.woff2"
-    ],
-    "[project]/app/_not-found/page": [
       "static/media/e8f2fbee2754df70-s.p.9b7a96b4.woff2"
     ]
   },

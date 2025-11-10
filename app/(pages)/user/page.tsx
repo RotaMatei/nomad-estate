@@ -12,7 +12,6 @@ import MarkEmailUnreadOutlinedIcon from '@mui/icons-material/MarkEmailUnreadOutl
 import TravelExploreOutlinedIcon from '@mui/icons-material/TravelExploreOutlined';
 import WorkspacePremiumOutlinedIcon from '@mui/icons-material/WorkspacePremiumOutlined';
 import api from '@/app/lib/api';
-import axios from 'axios';
 
 export default function UserDashboardPage() {
   const router = useRouter();
