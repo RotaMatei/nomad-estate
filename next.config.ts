@@ -1,8 +1,12 @@
 import type { NextConfig } from 'next';
 
-// Mitigate Windows EPERM lock on .next/trace by moving distDir (avoid the default .next path)
-const nextConfig: NextConfig = {
-  distDir: '.next_build',
-};
+// Use default .next on Vercel to ensure deployment detection works
+const isVercel = !!process.env.VERCEL;
+const nextConfig: NextConfig = isVercel
+  ? {}
+  : {
+      // Local/dev: mitigate Windows EPERM lock on .next/trace by moving distDir
+      distDir: '.next_build',
+    };
 
 export default nextConfig;

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+  "build": "next build",
     "build:classic": "next build",
     "build:notrace": "next build",
     "start": "next start",
