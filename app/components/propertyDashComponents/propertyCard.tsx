@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Card,
   CardMedia,
@@ -49,6 +50,7 @@ export interface PropertySummaryCardProps {
 
 // Component
 const RealEstateCard: React.FC<PropertySummaryCardProps> = ({ property, onViewDetails }) => {
+  const router = useRouter();
   const pics = property.propertyPictures || (property as unknown as { picture?: PropertyPictureDto[] }).picture || [];
   console.log('[propertyCard] Full property object:', JSON.stringify(property, null, 2));
   console.log('[propertyCard] Picture count:', pics.length);
@@ -136,7 +138,14 @@ const RealEstateCard: React.FC<PropertySummaryCardProps> = ({ property, onViewDe
           variant="contained"
           fullWidth
           sx={{ mt: 2, borderRadius: 2 }}
-          onClick={() => onViewDetails?.(property.id)}
+          onClick={() => {
+            // Prefer passed handler, fallback to router navigation
+            if (onViewDetails) {
+              onViewDetails(property.id);
+            } else {
+              router.push(`/details/${property.id}`);
+            }
+          }}
         >
           View Details
         </Button>

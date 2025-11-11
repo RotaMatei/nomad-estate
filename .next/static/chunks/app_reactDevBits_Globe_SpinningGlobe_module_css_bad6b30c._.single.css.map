@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["turbopack:///[project]/app/reactDevBits/Globe/SpinningGlobe.module.css"],"sourcesContent":[".globeWrap {\r\n  position: relative;\r\n  width: 100%;\r\n  height: 100%;\r\n  overflow: hidden;\r\n}\r\n\r\n.globeRoot {\r\n  width: 100%;\r\n  height: 100%;\r\n  will-change: transform;\r\n  /* Ensure no accidental transitions/animations on initial render */\r\n  animation: none !important;\r\n  transition: none !important;\r\n}\r\n\r\n/* Prevent any canvas inside from animating or transitioning size */\r\n.globeRoot canvas {\r\n  animation: none !important;\r\n  transition: none !important;\r\n}\r\n"],"names":[],"mappings":"AAAA;;;;;;;AAOA;;;;;;;;AAUA"}}]
-}
