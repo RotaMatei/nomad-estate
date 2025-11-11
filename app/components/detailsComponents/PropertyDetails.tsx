@@ -3,6 +3,7 @@
 import { Typography, Container, Divider } from '@mui/material';
 import SectionHeader from './SectionHeader';
 import InfoGrid from './InfoGrid';
+// imageData now is a direct URL string from backend
 
 // Define a narrowed type for display (subset of full DTO)
 interface DisplayProperty {
@@ -58,38 +59,9 @@ interface PropertyDetailsProps {
 export default function PropertyDetails({ property }: PropertyDetailsProps) {
   const pics = property.picture || [];
   const primary = pics.find(p => p.isPrimary) || pics[0];
-  const toBase64FromArray = (data: number[]) => {
-    let binary = '';
-    const bytes = new Uint8Array(data);
-    const chunkSize = 0x8000;
-    for (let i = 0; i < bytes.length; i += chunkSize) {
-      const chunk = bytes.subarray(i, i + chunkSize);
-      binary += String.fromCharCode.apply(null, Array.from(chunk) as unknown as number[]);
-    }
-    return btoa(binary);
-  };
-  let imageUrl: string | undefined = undefined;
-  if (primary?.imageData) {
-    if (typeof primary.imageData === 'string') {
-      const s = primary.imageData.trim();
-      if (/^blobhttps?\/\//i.test(s.replace(':', ''))) {
-        console.warn('[Details] Detected malformed blob URL, skipping image:', s.slice(0, 64));
-      } else
-      if (/^data:/i.test(s) || /^(blob:|https?:\/\/|\/|\.\.?\/)/i.test(s)) {
-        imageUrl = s;
-      } else {
-        imageUrl = `data:image/jpeg;base64,${s}`;
-      }
-    } else if (Array.isArray(primary.imageData)) {
-      const base64 = toBase64FromArray(primary.imageData as number[]);
-      imageUrl = `data:image/jpeg;base64,${base64}`;
-    } else if (
-      typeof primary.imageData === 'object' && Array.isArray((primary.imageData as { data?: unknown }).data)
-    ) {
-      const base64 = toBase64FromArray(((primary.imageData as { data: number[] }).data));
-      imageUrl = `data:image/jpeg;base64,${base64}`;
-    }
-  }
+  const imageUrl = typeof primary?.imageData === 'string' && primary.imageData.trim().length > 0
+    ? primary.imageData
+    : undefined;
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       {imageUrl && (

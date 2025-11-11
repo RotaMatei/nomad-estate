@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["turbopack:///[project]/app/components/propertyDashComponents/mapGlobe.module.css"],"sourcesContent":[".mapContainer {\r\n  position: relative;\r\n  height: 400px;\r\n  width: 100%;\r\n}\r\n\r\n.controls {\r\n  position: absolute;\r\n  top: 10px;\r\n  left: 10px;\r\n  display: flex;\r\n  flex-direction: column;\r\n  gap: 5px;\r\n  z-index: 1000;\r\n}"],"names":[],"mappings":"AAAA;;;;;;AAMA"}}]
-}
