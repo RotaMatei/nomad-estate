@@ -20,6 +20,7 @@ const REQUIRED_FIELDS = [
   'bathrooms',
   'floorLevel',
   'orientation',
+  'totalArea',
 ] as const;
 
 /**
@@ -84,7 +85,7 @@ export function validateAndMapPropertyDto(form: PropertyFormData) {
   ['agencyId', 'agentId', 'title', 'description', 'type', 'status', 'streetAddress', 'orientation'].forEach((k) => checkString(k as RequiredField));
 
   // Number fields
-  ['price', 'countryId', 'cityId', 'latitude', 'longitude', 'rooms', 'bedrooms', 'bathrooms', 'floorLevel'].forEach((k) => checkNumber(k as RequiredField));
+  ['price', 'countryId', 'cityId', 'latitude', 'longitude', 'rooms', 'bedrooms', 'bathrooms', 'floorLevel', 'totalArea'].forEach((k) => checkNumber(k as RequiredField));
 
   if (missing.length) {
     return { ok: false as const, missing };
@@ -102,6 +103,14 @@ export function validateAndMapPropertyDto(form: PropertyFormData) {
   };
 
   const optionalString = (v: unknown): string | undefined => {
+    return typeof v === 'string' && v.trim().length > 0 ? v : undefined;
+  };
+
+  const optionalStringOrArray = (v: unknown): string | undefined => {
+    if (Array.isArray(v)) {
+      // For arrays, take the first element if it exists and is a string
+      return v.length > 0 && typeof v[0] === 'string' && v[0].trim().length > 0 ? v[0] : undefined;
+    }
     return typeof v === 'string' && v.trim().length > 0 ? v : undefined;
   };
 
@@ -153,6 +162,15 @@ export function validateAndMapPropertyDto(form: PropertyFormData) {
     HOAFees: optionalNumber(form.HOAFees) ?? 0,
     availabilityDateStart: optionalDate(form.availabilityDateStart) ?? new Date().toISOString(),
     availabilityDateEnd: optionalDate(form.availabilityDateEnd),  // nullable in schema
+    // Multi-select fields (take first value if array)
+    heatingSystem: optionalStringOrArray(form.heatingSystem) ?? 'NATURAL_GAS',
+    coolingSystem: optionalString(form.coolingSystem) ?? 'NO_COOLING',
+    security: optionalStringOrArray(form.security),
+    utility: optionalStringOrArray(form.utility),
+    smartHomeFeature: optionalStringOrArray(form.smartHomeFeature),
+    otherFeature: optionalStringOrArray(form.otherFeature),
+    investmentGoalTag: optionalStringOrArray(form.investmentGoalTag),
+    locationBenefitTag: optionalStringOrArray(form.locationBenefitTag),
   };
 
   return { ok: true as const, dto };

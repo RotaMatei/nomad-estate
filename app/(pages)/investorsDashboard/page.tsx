@@ -358,7 +358,7 @@ export default function InvestmentDashboard() {
                 {!showCreateProperty ? (
                   <>
                     <Typography variant="subtitle2" gutterBottom sx={{ color: isAgent ? theme.palette.primary.main : theme.palette.text.secondary, mb: 2 }}>
-                      Portofolio
+                      Portfolio
                     </Typography>
                     {/* Listings Grid */}
                     <Grid container spacing={3}>

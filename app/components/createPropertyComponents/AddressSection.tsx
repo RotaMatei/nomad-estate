@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useEffect as ReactEffect } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Box, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
@@ -22,9 +22,81 @@ export default function AddressSection({ formData, setFormData }: Props) {
   const theme = useTheme();
   const focusColor = theme.palette.primary.main;
   const bgColor = theme.palette.background.default;
-  const textColor = grey[700];
+  const textColor = grey[500];
 
+  // Parsing helper kept for other numeric fields (not used now for lat/lon which have custom format)
   const toFloat = (v: string) => (v === '' ? undefined : parseFloat(v));
+
+  // Local controlled strings for latitude/longitude formatted as sign + DDD,dddddd
+  const [latitudeInput, setLatitudeInput] = useState<string>('');
+  const [longitudeInput, setLongitudeInput] = useState<string>('');
+  const [latValid, setLatValid] = useState<boolean>(true);
+  const [lonValid, setLonValid] = useState<boolean>(true);
+
+  // Regex: optional + or -, 1-3 digits, comma, 1-6 digits
+  const coordRegex = /^[+-]?\d{1,3},\d{1,6}$/;
+
+  // Initialize from formData if numbers exist (convert dot to comma)
+  useEffect(() => {
+    if (formData.latitude !== undefined) {
+      const latStr = formData.latitude.toFixed(6).replace('.', ',').replace(/0+$/,'').replace(/,$/,'');
+      setLatitudeInput(latStr);
+    }
+    if (formData.longitude !== undefined) {
+      const lonStr = formData.longitude.toFixed(6).replace('.', ',').replace(/0+$/,'').replace(/,$/,'');
+      setLongitudeInput(lonStr);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleLatChange = (raw: string) => {
+    // Allow user to build value: restrict characters first
+    // Permit: digits, leading +/-, single comma
+    if (/[^0-9+\-,]/.test(raw)) return; // ignore invalid chars
+    // Enforce single sign at start
+    if ((raw.match(/[+-]/g)?.length || 0) > 1) return;
+    if (raw.length > 1 && /[+-]/.test(raw.slice(1))) return;
+    // Enforce single comma
+    if ((raw.match(/,/g)?.length || 0) > 1) return;
+    // Split check lengths
+    const [intPart, fracPart] = raw.split(',');
+    if (intPart) {
+      const digits = intPart.replace(/[+-]/,'');
+      if (digits.length > 3) return;
+    }
+    if (fracPart && fracPart.length > 6) return;
+    setLatitudeInput(raw);
+    const isValid = coordRegex.test(raw);
+    setLatValid(isValid);
+    if (isValid) {
+      const numeric = parseFloat(raw.replace(',', '.'));
+      setFormData({ ...formData, latitude: numeric });
+    } else {
+      setFormData({ ...formData, latitude: undefined });
+    }
+  };
+
+  const handleLonChange = (raw: string) => {
+    if (/[^0-9+\-,]/.test(raw)) return;
+    if ((raw.match(/[+-]/g)?.length || 0) > 1) return;
+    if (raw.length > 1 && /[+-]/.test(raw.slice(1))) return;
+    if ((raw.match(/,/g)?.length || 0) > 1) return;
+    const [intPart, fracPart] = raw.split(',');
+    if (intPart) {
+      const digits = intPart.replace(/[+-]/,'');
+      if (digits.length > 3) return;
+    }
+    if (fracPart && fracPart.length > 6) return;
+    setLongitudeInput(raw);
+    const isValid = coordRegex.test(raw);
+    setLonValid(isValid);
+    if (isValid) {
+      const numeric = parseFloat(raw.replace(',', '.'));
+      setFormData({ ...formData, longitude: numeric });
+    } else {
+      setFormData({ ...formData, longitude: undefined });
+    }
+  };
 
   const [countries, setCountries] = useState<Country[]>([]);
   const [states, setStates] = useState<State[]>([]);
@@ -109,7 +181,7 @@ export default function AddressSection({ formData, setFormData }: Props) {
       </Typography>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
-        <Typography variant="body2" color={grey[700]}>Street Address used for display and geocoding</Typography>
+        <Typography variant="body2" color={grey[500]}>Street Address used for display and geocoding *</Typography>
         <CustomInput
           placeholder="Street Address"
           value={formData.streetAddress || ''}
@@ -117,12 +189,12 @@ export default function AddressSection({ formData, setFormData }: Props) {
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
-          icon={<LocationOnIcon sx={{ color: grey[500] }} />}
+          icon={<LocationOnIcon sx={{ color: textColor }} />}
         />
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
-        <Typography variant="body2" color={grey[700]}>Postal Code for address validation and search</Typography>
+        <Typography variant="body2" color={grey[500]}>Postal Code for address validation and search *</Typography>
         <CustomInput
           placeholder="Postal Code"
           value={formData.postalCode || ''}
@@ -130,12 +202,12 @@ export default function AddressSection({ formData, setFormData }: Props) {
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
-          icon={<MailIcon sx={{ color: grey[500] }} />}
+          icon={<MailIcon sx={{ color: textColor }} />}
         />
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
-        <Typography variant="body2" color={grey[700]}>Country (select to load states)</Typography>
+        <Typography variant="body2" color={grey[500]}>Country (select to load states) *</Typography>
         <CustomSelect
           label={loadingCountry ? 'Loading countries…' : 'Country'}
           value={formData.countryId ?? ''}
@@ -151,7 +223,7 @@ export default function AddressSection({ formData, setFormData }: Props) {
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
-        <Typography variant="body2" color={grey[700]}>State/Region (loads after country)</Typography>
+        <Typography variant="body2" color={grey[500]}>State/Region (loads after country)</Typography>
         <CustomSelect
           label={loadingState ? 'Loading states…' : 'State'}
           value={formData.stateId ?? ''}
@@ -167,7 +239,7 @@ export default function AddressSection({ formData, setFormData }: Props) {
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
-        <Typography variant="body2" color={grey[700]}>City (loads after state)</Typography>
+        <Typography variant="body2" color={grey[500]}>City (loads after state) *</Typography>
         <CustomSelect
           label={loadingCity ? 'Loading cities…' : 'City'}
           value={formData.cityId ?? ''}
@@ -185,31 +257,41 @@ export default function AddressSection({ formData, setFormData }: Props) {
       
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
-        <Typography variant="body2" color={grey[700]}>Latitude coordinate for map placement</Typography>
+        <Typography variant="body2" color={grey[500]}>Latitude coordinate for map placement (format ±DDD,DDDDDD) *</Typography>
         <CustomInput
-          type="number"
-          placeholder="Latitude"
-          value={formData.latitude !== undefined ? String(formData.latitude) : ''}
-          onChange={(e) => setFormData({ ...formData, latitude: toFloat(e.target.value) })}
+          placeholder="e.g. +45,123456"
+          value={latitudeInput}
+          onChange={(e) => handleLatChange(e.target.value)}
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
-          icon={<MyLocationIcon sx={{ color: grey[500] }} />}
+          invalid={!latValid && latitudeInput.length > 0}
+          icon={<MyLocationIcon sx={{ color: textColor }} />}
         />
+        {!latValid && latitudeInput.length > 0 && (
+          <Typography variant="caption" sx={{ color: theme.palette.error.main, mt: 0.5 }}>
+            Invalid latitude format. Use ±DDD,DDDDDD (max 3 digits before, 6 after comma).
+          </Typography>
+        )}
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
-        <Typography variant="body2" color={grey[700]}>Longitude coordinate for map placement</Typography>
+        <Typography variant="body2" color={grey[500]}>Longitude coordinate for map placement (format ±DDD,DDDDDD) *</Typography>
         <CustomInput
-          type="number"
-          placeholder="Longitude"
-          value={formData.longitude !== undefined ? String(formData.longitude) : ''}
-          onChange={(e) => setFormData({ ...formData, longitude: toFloat(e.target.value) })}
+          placeholder="e.g. -120,98765"
+          value={longitudeInput}
+          onChange={(e) => handleLonChange(e.target.value)}
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
-          icon={<MyLocationIcon sx={{ color: grey[500] }} />}
+          invalid={!lonValid && longitudeInput.length > 0}
+          icon={<MyLocationIcon sx={{ color: textColor }} />}
         />
+        {!lonValid && longitudeInput.length > 0 && (
+          <Typography variant="caption" sx={{ color: theme.palette.error.main, mt: 0.5 }}>
+            Invalid longitude format. Use ±DDD,DDDDDD (max 3 digits before, 6 after comma).
+          </Typography>
+        )}
       </Box>
     </Box>
   );

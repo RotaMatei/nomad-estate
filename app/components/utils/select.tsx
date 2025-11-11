@@ -14,7 +14,7 @@ export const CustomSelect = ({
   focusColor = grey[500],
   bgColor,
   textColor,
-  icon = <PersonOutlineOutlinedIcon sx={{ color: grey[500] }} />,
+  icon = <PersonOutlineOutlinedIcon sx={{ color: 'currentColor' }} />,
   selectIcon: SelectIcon = ArrowDropDownIcon,
   label = '',
   value = '',
@@ -71,7 +71,7 @@ export const CustomSelect = ({
         opacity: isDisabled ? 0.95 : 1,
       }}
     >
-      <Box sx={{ mr: 1, display: 'flex', alignItems: 'center', color: isDisabled ? grey[700]: focusColor }}>{icon}</Box>
+  <Box sx={{ mr: 1, display: 'flex', alignItems: 'center', color: resolvedText }}>{icon}</Box>
 
       <Select
         value={value}
@@ -85,7 +85,7 @@ export const CustomSelect = ({
             sx: {
               bgcolor: 'background.default',
               '& .MuiMenuItem-root': {
-                color: grey[700],
+                color: resolvedText,
               },
               ...(selectedColor
                 ? {
@@ -113,7 +113,7 @@ export const CustomSelect = ({
           pl: 0,
           fontFamily: 'Montserrat, sans-serif',
           fontSize: { xs: '14px', lg: '16px' },
-          color: (value === '' || value === undefined) ? grey[500] : (isDisabled ? 'text.disabled' : resolvedText),
+          color: (isDisabled ? 'text.disabled' : resolvedText),
           '&:before, &:after': { display: 'none' },
           '& .MuiSvgIcon-root': {
             color: isDisabled ? grey[700] : focusColor,
