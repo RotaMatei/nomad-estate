@@ -137,8 +137,8 @@ const RealEstateCard: React.FC<PropertySummaryCardProps> = ({ property, onViewDe
       return;
     }
 
-    const style = getComputedStyle(measurer);
-    const gapStr = (style as any).columnGap || style.getPropertyValue?.('column-gap') || '0';
+  const style = getComputedStyle(measurer) as CSSStyleDeclaration;
+  const gapStr = style.columnGap || style.getPropertyValue('column-gap') || '0';
     const gapPx = parseFloat(gapStr) || 0;
     const children = Array.from(measurer.children) as HTMLElement[];
     let used = 0;

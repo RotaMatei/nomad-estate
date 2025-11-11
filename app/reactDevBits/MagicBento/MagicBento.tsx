@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { gsap } from 'gsap';
 import './MagicBento.css';
-import { Box, Slider, Typography, Stack, Divider } from '@mui/material';
+import { Box, Slider, Typography, Stack } from '@mui/material';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import MonetizationOnOutlinedIcon from '@mui/icons-material/MonetizationOnOutlined';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
@@ -633,7 +633,7 @@ const MagicBento: React.FC<BentoProps> = ({
           label: c.name ?? String(c.code ?? c.id),
         }));
         setCountryOptions(mapped);
-      } catch (e) {
+      } catch {
         // Fallback to a minimal list if API fails, to keep UX working
         if (!cancelled) {
           setCountryOptions([
@@ -667,7 +667,7 @@ const MagicBento: React.FC<BentoProps> = ({
           label: ct.name ?? String(ct.id),
         }));
         setCityOptions(mapped);
-      } catch (e) {
+      } catch {
         if (!cancelled) {
           setCityOptions([]);
         }
@@ -735,28 +735,31 @@ const MagicBento: React.FC<BentoProps> = ({
       return isNaN(n) ? undefined : n;
     };
 
-    // Map UI selections to backend enums
-    const invGoalMap: Record<string, InvestmentGoalTagEnum> = {
-      // UI goals -> backend InvestmentGoalTagEnum
-      high_roi: 'HIGH_ROI' as any,
-      rental_income: 'LONG_TERM_RENTAL_STABLE' as any,
-      // Best-effort mappings where backend lacks exact match
-      capital_growth: 'NEW_DEVELOPMENT' as any,
-      second_home: 'VACATION_HOME_INCOME' as any,
-    } as const as Record<string, any>;
-    const locBenefitMap: Record<string, LocationBenefitTagEnum> = {
-      tourist_hotspot: 'TOURIST_HOTSPOT' as any,
-      green: 'GREEN_ZONE' as any,
-      schools: 'SCHOOL_DISTRICT' as any,
-      eu_access: 'EU_RESIDENCY_ELIGIBLE' as any,
-      waterfront: 'COASTAL_ACCESS' as any,
-      low_crime: 'SAFE_NEIGHBORHOOD' as any,
-      transport: 'NEAR_INFRASTUCTURE_PROJECT' as any,
-      walkability: 'URBAN_GROWTH_ZONE' as any,
-      // Goals that are actually location-related
-      golden_visa: 'GOLDEN_VISA' as any,
-      tax_benefits: 'LOW_PROPERTY_TAX' as any,
-    } as const as Record<string, any>;
+    // Map UI selections to backend enums (strongly typed, no any)
+    type UiGoal = 'high_roi' | 'rental_income' | 'capital_growth' | 'second_home' | 'golden_visa' | 'tax_benefits';
+    type UiBenefit =
+      | 'transport' | 'schools' | 'low_crime' | 'walkability'
+      | 'green' | 'waterfront' | 'tourist_hotspot' | 'eu_access'
+      | 'golden_visa' | 'tax_benefits';
+
+    const invGoalMap: Partial<Record<UiGoal, InvestmentGoalTagEnum>> = {
+      high_roi: 'HIGH_ROI',
+      rental_income: 'LONG_TERM_RENTAL_STABLE',
+      capital_growth: 'NEW_DEVELOPMENT',
+      second_home: 'VACATION_HOME_INCOME',
+    };
+    const locBenefitMap: Partial<Record<UiBenefit, LocationBenefitTagEnum>> = {
+      tourist_hotspot: 'TOURIST_HOTSPOT',
+      green: 'GREEN_ZONE',
+      schools: 'SCHOOL_DISTRICT',
+      eu_access: 'EU_RESIDENCY_ELIGIBLE',
+      waterfront: 'COASTAL_ACCESS',
+      low_crime: 'SAFE_NEIGHBORHOOD',
+      transport: 'NEAR_INFRASTUCTURE_PROJECT',
+      walkability: 'URBAN_GROWTH_ZONE',
+      golden_visa: 'GOLDEN_VISA',
+      tax_benefits: 'LOW_PROPERTY_TAX',
+    };
 
     const mappedInvG = (goals || [])
       .map((g) => invGoalMap[g])
@@ -768,15 +771,17 @@ const MagicBento: React.FC<BentoProps> = ({
       .map((b) => locBenefitMap[b])
       .filter(Boolean);
 
-    const filterBody: Partial<{
-      minimumPrice: number;
-      maximumPrice: number;
-      location: number;
-      propertyType: string | number;
-      minimumScore: number;
-      minimumYield: number;
-      minimumNoBedrooms: number;
-    }> = {
+    type FilterBody = {
+      minimumPrice?: number;
+      maximumPrice?: number;
+      location?: number;
+      propertyType?: string | number;
+      minimumScore?: number;
+      minimumYield?: number;
+      minimumNoBedrooms?: number;
+    };
+
+    const filterBody: FilterBody = {
       minimumPrice: budget?.[0],
       maximumPrice: budget?.[1],
       location: typeof city === 'number' ? city : (typeof city === 'string' && city !== '' && !isNaN(Number(city)) ? Number(city) : undefined),
@@ -787,8 +792,8 @@ const MagicBento: React.FC<BentoProps> = ({
     };
 
     // Remove undefined keys to avoid validation errors
-    Object.keys(filterBody).forEach((k) => {
-      if ((filterBody as any)[k] === undefined) delete (filterBody as any)[k];
+    (Object.keys(filterBody) as (keyof FilterBody)[]).forEach((k) => {
+      if (filterBody[k] === undefined) delete filterBody[k];
     });
 
     const queryParams = {
