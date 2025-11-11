@@ -761,15 +761,23 @@ const MagicBento: React.FC<BentoProps> = ({
       tax_benefits: 'LOW_PROPERTY_TAX',
     };
 
+    // Type guard sets for safe indexing
+    const uiGoalSet: Set<UiGoal> = new Set(['high_roi','rental_income','capital_growth','second_home','golden_visa','tax_benefits']);
+    const uiBenefitSet: Set<UiBenefit> = new Set([
+      'transport','schools','low_crime','walkability','green','waterfront','tourist_hotspot','eu_access','golden_visa','tax_benefits'
+    ]);
+
     const mappedInvG = (goals || [])
+      .filter((g): g is UiGoal => uiGoalSet.has(g as UiGoal))
       .map((g) => invGoalMap[g])
-      .filter(Boolean);
+      .filter((v): v is InvestmentGoalTagEnum => !!v);
+
     const mappedLocB = (
-      // merge explicit benefits + any goal entries that are really location benefits
-      [...(benefits || []), ...goals.filter((g) => ['golden_visa', 'tax_benefits'].includes(g))]
+      [...(benefits || []), ...goals.filter((g) => ['golden_visa','tax_benefits'].includes(g))]
     )
+      .filter((b): b is UiBenefit => uiBenefitSet.has(b as UiBenefit))
       .map((b) => locBenefitMap[b])
-      .filter(Boolean);
+      .filter((v): v is LocationBenefitTagEnum => !!v);
 
     type FilterBody = {
       minimumPrice?: number;
