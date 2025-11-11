@@ -1,0 +1,32 @@
+{
+  "pages": {
+    "/(pages)/propertiesDashboard/page": [
+      "static/chunks/node_modules_next_dist_8db7fb1f._.js",
+      "static/chunks/app_favicon_ico_mjs_e98bdb63._.js",
+      "static/chunks/[root-of-the-server]__e0dfcb44._.css",
+      "static/chunks/node_modules_26b42cf0._.js",
+      "static/chunks/app_5e412699._.js",
+      "static/chunks/app_layout_tsx_0a548d63._.js",
+      "static/chunks/node_modules_next_dist_client_components_builtin_global-error_b22d5d27.js",
+      "static/chunks/app_components_propertyDashComponents_c0c41d6f._.js",
+      "static/chunks/app_d51480da._.js",
+      "static/chunks/node_modules_@mui_material_esm_Slider_91d464b1._.js",
+      "static/chunks/node_modules_@mui_material_esm_a348c66d._.js",
+      "static/chunks/node_modules_axios_lib_99e19c7d._.js",
+      "static/chunks/node_modules_gsap_0e537b14._.js",
+      "static/chunks/node_modules_@popperjs_core_lib_ce7e5cb7._.js",
+      "static/chunks/node_modules_9b20e2a5._.js",
+      "static/chunks/app_14b1e700._.css",
+      "static/chunks/app_(pages)_propertiesDashboard_page_tsx_b22d5d27._.js",
+      "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_57d40746._.js",
+      "static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js",
+      "static/chunks/node_modules_next_dist_compiled_next-devtools_index_a9cb0712.js",
+      "static/chunks/node_modules_next_dist_compiled_5150ccfd._.js",
+      "static/chunks/node_modules_next_dist_client_cf1d9188._.js",
+      "static/chunks/node_modules_next_dist_b0daae9a._.js",
+      "static/chunks/node_modules_@swc_helpers_cjs_b3dc30d6._.js",
+      "static/chunks/_a0ff3932._.js",
+      "static/chunks/turbopack-_cdba956c._.js"
+    ]
+  }
+}
