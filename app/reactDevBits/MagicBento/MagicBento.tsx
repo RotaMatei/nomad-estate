@@ -14,6 +14,39 @@ import { CustomAutocomplete } from '../../components/utils/autocomplete';
 import CheckboxGroup, { type Option as CheckboxOption } from '../../components/utils/checkboxGroup';
 import CustomButton from '../../components/utils/button';
 import api from '../../lib/api';
+// Import enums from backend generated types if available; otherwise declare minimal union types locally.
+// Assuming no direct prisma types on frontend, we approximate the enums used by /property/retrieve-search.
+type InvestmentGoalTagEnum =
+  | 'HIGH_ROI'
+  | 'CASH_FLOW_POSITIVE'
+  | 'SHORT_TERM_RENTAL_READY'
+  | 'LONG_TERM_RENTAL_STABLE'
+  | 'FIX_AND_FLIP'
+  | 'NEW_DEVELOPMENT'
+  | 'BELOW_MARKET_VALUE'
+  | 'TURNKEY_INVESTMENT'
+  | 'MULTI_UNIT'
+  | 'STUDENT_HOUSING'
+  | 'RETIREMENT_INCOME'
+  | 'VACATION_HOME_INCOME'
+  | 'COMMERCIAL_CONVERSION';
+
+type LocationBenefitTagEnum =
+  | 'TAX_FREE_ZONE'
+  | 'LOW_PROPERTY_TAX'
+  | 'URBAN_GROWTH_ZONE'
+  | 'TOURIST_HOTSPOT'
+  | 'NEAR_INFRASTUCTURE_PROJECT'
+  | 'ECONOMIC_HUB'
+  | 'EXPAT_FRIENDLY'
+  | 'GREEN_ZONE'
+  | 'HERITAGE_ZONE'
+  | 'SAFE_NEIGHBORHOOD'
+  | 'SCHOOL_DISTRICT'
+  | 'COASTAL_ACCESS'
+  | 'MOUNTAIN_VIEW'
+  | 'EU_RESIDENCY_ELIGIBLE'
+  | 'GOLDEN_VISA';
 import { CustomSelect } from '../../components/utils/select';
 import { MapGlobeSwitcher } from "../../components/propertyDashComponents/MapGlobeSwitcher";
 import { Location } from "../../components/propertyDashComponents/location";
@@ -669,9 +702,133 @@ const MagicBento: React.FC<BentoProps> = ({
   ];
 
   const handleSearch = () => {
-    // Placeholder: you can wire this to your router or API call
-    // Example payload
-  const payload = { country, city, budgetMin: budget[0], budgetMax: budget[1], goals, benefits };
+    // Build FilterDto body and query params for /property/retrieve-search
+    // Backend expects:
+    // Query: InvG = InvestmentGoalTagEnum[] | InvestmentGoalTagEnum
+    //        LocB = LocationBenefitTagEnum[] | LocationBenefitTagEnum
+    // Body (FilterDto): {
+    //   minimumPrice, maximumPrice, location (cityId), propertyType,
+    //   minimumScore, minimumYield, minimumNoBedrooms
+    // }
+    // NOTE: Controller uses GET with @Body; axios will send `data` if we use request config.
+    // Some intermediaries may strip GET bodies; if that happens consider changing to POST on both sides.
+
+    // Helpers to coerce UI selections to backend numeric/enums
+    const coerceBedrooms = (val: string | number | ''): number | undefined => {
+      if (val === '' || val == null) return undefined;
+      if (val === '5_PLUS') return 5; // treat 5+ as minimum 5
+      const n = Number(val);
+      return isNaN(n) ? undefined : n;
+    };
+    const coerceScore = (val: string | number | ''): number | undefined => {
+      if (val === '' || val == null) return undefined;
+      const n = Number(val);
+      return isNaN(n) ? undefined : n;
+    };
+    const coerceYield = (val: string | number | ''): number | undefined => {
+      if (val === '' || val == null) return undefined;
+      // Map range selections to lower bound as minimumYield
+      if (val === '1_5') return 1;
+      if (val === '6_10') return 6;
+      if (val === '11_plus') return 11;
+      const n = Number(val);
+      return isNaN(n) ? undefined : n;
+    };
+
+    // Map UI selections to backend enums
+    const invGoalMap: Record<string, InvestmentGoalTagEnum> = {
+      // UI goals -> backend InvestmentGoalTagEnum
+      high_roi: 'HIGH_ROI' as any,
+      rental_income: 'LONG_TERM_RENTAL_STABLE' as any,
+      // Best-effort mappings where backend lacks exact match
+      capital_growth: 'NEW_DEVELOPMENT' as any,
+      second_home: 'VACATION_HOME_INCOME' as any,
+    } as const as Record<string, any>;
+    const locBenefitMap: Record<string, LocationBenefitTagEnum> = {
+      tourist_hotspot: 'TOURIST_HOTSPOT' as any,
+      green: 'GREEN_ZONE' as any,
+      schools: 'SCHOOL_DISTRICT' as any,
+      eu_access: 'EU_RESIDENCY_ELIGIBLE' as any,
+      waterfront: 'COASTAL_ACCESS' as any,
+      low_crime: 'SAFE_NEIGHBORHOOD' as any,
+      transport: 'NEAR_INFRASTUCTURE_PROJECT' as any,
+      walkability: 'URBAN_GROWTH_ZONE' as any,
+      // Goals that are actually location-related
+      golden_visa: 'GOLDEN_VISA' as any,
+      tax_benefits: 'LOW_PROPERTY_TAX' as any,
+    } as const as Record<string, any>;
+
+    const mappedInvG = (goals || [])
+      .map((g) => invGoalMap[g])
+      .filter(Boolean);
+    const mappedLocB = (
+      // merge explicit benefits + any goal entries that are really location benefits
+      [...(benefits || []), ...goals.filter((g) => ['golden_visa', 'tax_benefits'].includes(g))]
+    )
+      .map((b) => locBenefitMap[b])
+      .filter(Boolean);
+
+    const filterBody: Partial<{
+      minimumPrice: number;
+      maximumPrice: number;
+      location: number;
+      propertyType: string | number;
+      minimumScore: number;
+      minimumYield: number;
+      minimumNoBedrooms: number;
+    }> = {
+      minimumPrice: budget?.[0],
+      maximumPrice: budget?.[1],
+      location: typeof city === 'number' ? city : (typeof city === 'string' && city !== '' && !isNaN(Number(city)) ? Number(city) : undefined),
+      propertyType: propertyType || undefined,
+      minimumScore: coerceScore(investmentScore),
+      minimumYield: coerceYield(expectedYield),
+      minimumNoBedrooms: coerceBedrooms(bedrooms),
+    };
+
+    // Remove undefined keys to avoid validation errors
+    Object.keys(filterBody).forEach((k) => {
+      if ((filterBody as any)[k] === undefined) delete (filterBody as any)[k];
+    });
+
+    const queryParams = {
+      // Backend normalizes single vs array automatically
+      InvG: mappedInvG.length ? mappedInvG : undefined,
+      LocB: mappedLocB.length ? mappedLocB : undefined,
+    } as const;
+
+    // Persist last search so listings can reconstruct the body on reload
+    try {
+      if (typeof window !== 'undefined') {
+        const toStore = { filterBody, InvG: queryParams.InvG, LocB: queryParams.LocB };
+        sessionStorage.setItem('properties_last_search', JSON.stringify(toStore));
+      }
+    } catch {}
+
+    // Execute request
+    console.log('[Properties] REQUEST /property/retrieve-search', {
+      url: '/property/retrieve-search',
+      method: 'POST',
+      params: queryParams,
+      body: filterBody,
+    });
+
+    api.request({
+      method: 'post',
+      url: '/property/retrieve-search',
+      params: queryParams,
+      data: filterBody, // relies on GET body; consider POST if infra blocks this
+    })
+      .then((res) => {
+        // Filter search success
+        // Dispatch a custom event so listings page can listen & update without prop drilling
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('properties:filter-results', { detail: res.data }));
+        }
+      })
+      .catch((err) => {
+        console.warn('[MagicBento] Filter search failed', err, { filterBody, queryParams });
+      });
   };
 
   const handleReload = () => {

@@ -4,7 +4,14 @@ import MagicBento from '@/app/reactDevBits/MagicBento/MagicBento';
 
 export default function Filters() {
     return (
-        <Box className="filters-container" sx={{ mt: { xs: 2, md: 3 } }}>
+        <Box
+            className="filters-container"
+            sx={{
+                mt: { xs: 3, sm: 3, md: 4 },
+                mb: { xs: 3, md: 4 }, // bottom margin controls space above properties list
+                // ensure consistent spacing inside a 100vh layout without huge gaps
+            }}
+        >
             <Box>
                 <MagicBento
                     textAutoHide={true}

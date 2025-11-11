@@ -1,6 +1,7 @@
 "use client";
 
 import { Typography, Container, Divider } from '@mui/material';
+import { formatMoney } from '@/app/lib/format';
 import SectionHeader from './SectionHeader';
 import InfoGrid from './InfoGrid';
 // imageData now is a direct URL string from backend
@@ -82,7 +83,7 @@ export default function PropertyDetails({ property }: PropertyDetailsProps) {
         items={[
           { label: 'Type', value: property.type },
           { label: 'Status', value: property.status },
-          { label: 'Price', value: `${property.price} €` },
+          { label: 'Price', value: formatMoney(property.price, '€') },
           { label: 'Yield', value: `${property.yield}%` },
           { label: 'Score', value: property.score },
         ]}
@@ -160,8 +161,8 @@ export default function PropertyDetails({ property }: PropertyDetailsProps) {
       <InfoGrid
         items={[
           { label: 'Other Feature', value: property.otherFeature },
-          { label: 'Property Taxes', value: `${property.propertyTaxes} €` },
-          { label: 'HOA Fees', value: `${property.HOAFees} €` },
+          { label: 'Property Taxes', value: formatMoney(property.propertyTaxes, '€') },
+          { label: 'HOA Fees', value: formatMoney(property.HOAFees, '€') },
         ]}
       />
     </Container>
