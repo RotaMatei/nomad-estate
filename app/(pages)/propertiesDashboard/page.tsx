@@ -11,7 +11,7 @@ import Properties from '@/app/components/propertyDashComponents/properties';
 export default function PropertiesDashboard() {
   return (
     <ThemeProvider theme={lightTheme}>
-      <Box sx={{ backgroundColor: 'background.default', minHeight: '150vh', position: 'relative', justifyContent: 'center', alignItems: 'center' }}>
+      <Box sx={{ backgroundColor: 'background.default', minHeight: '100vh', position: 'relative', justifyContent: 'center', alignItems: 'center' }}>
         <Navbar navColor='secondary.main' mobileNavColor='secondary.main'/>
         <GradientContainer>
           <HeroText />
