@@ -1,0 +1,1 @@
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,18566,(t,e,i)=>{e.exports=t.r(76562)},37394,t=>{"use strict";t.s(["default",()=>l]);var e=t.i(54624),i=t.i(43476);let l=(0,e.default)((0,i.jsx)("path",{d:"m16 6 2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"}),"TrendingUpOutlined")}]);
