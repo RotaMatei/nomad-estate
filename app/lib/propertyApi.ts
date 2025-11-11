@@ -2,6 +2,7 @@ import api from './api';
 import { PropertyFormData } from '../components/createPropertyComponents/types';
 
 // Only these fields are MANDATORY for property creation
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- used for RequiredField type inference
 const REQUIRED_FIELDS = [
   'agencyId',
   'agentId',
@@ -30,7 +31,7 @@ export async function getAgentsForAgency(agencyId: string) {
   try {
     const { data } = await api.get(`/agent/retrieve/agents-for-agency/${agencyId}`);
     return data;
-  } catch (err) {
+  } catch {
     return [];
   }
 }
@@ -45,30 +46,7 @@ function ensureString(s: unknown): s is string {
   return typeof s === 'string' && s.trim().length > 0;
 }
 
-/**
- * Convert a File object or data URL to base64 string
- */
-async function fileToBase64(file: File | string): Promise<string> {
-  if (typeof file === 'string') {
-    // Already a URL/data URL, extract base64 part if it's a data URL
-    if (file.startsWith('data:')) {
-      return file.split(',')[1] || '';
-    }
-    return file;
-  }
-
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      // Extract base64 from data URL
-      const base64 = result.split(',')[1] || '';
-      resolve(base64);
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
+// Removed base64 helpers; images are now handled via hosted URLs only.
 
 export function validateAndMapPropertyDto(form: PropertyFormData) {
   const missing: string[] = [];
@@ -98,13 +76,6 @@ export function validateAndMapPropertyDto(form: PropertyFormData) {
   }
 
   // Helper to safely parse optional fields
-  const optionalNumber = (v: unknown): number | undefined => {
-    return typeof v === 'number' && !isNaN(v) && v >= 0 ? v : undefined;
-  };
-
-  const optionalString = (v: unknown): string | undefined => {
-    return typeof v === 'string' && v.trim().length > 0 ? v : undefined;
-  };
 
   const optionalStringOrArray = (v: unknown): string | undefined => {
     if (Array.isArray(v)) {
@@ -114,12 +85,12 @@ export function validateAndMapPropertyDto(form: PropertyFormData) {
     return typeof v === 'string' && v.trim().length > 0 ? v : undefined;
   };
 
+  const optionalNumber = (v: unknown): number | undefined => (typeof v === 'number' && !isNaN(v) && v >= 0 ? v : undefined);
+  const optionalString = (v: unknown): string | undefined => (typeof v === 'string' && v.trim().length > 0 ? v : undefined);
   const optionalDate = (v: unknown): string | undefined => {
-    if (typeof v === 'string' && v.trim().length > 0) {
-      const d = new Date(v);
-      return !isNaN(d.getTime()) ? d.toISOString() : undefined;
-    }
-    return undefined;
+    if (typeof v !== 'string' || v.trim().length === 0) return undefined;
+    const d = new Date(v);
+    return !isNaN(d.getTime()) ? d.toISOString() : undefined;
   };
 
   // Map to DTO - send all fields that backend expects, with defaults for optional ones
@@ -194,21 +165,22 @@ export async function createProperty(form: PropertyFormData) {
       
       try {
         for (let i = 0; i < form.images.length; i++) {
-          const imageFile = form.images[i];
-          const base64 = await fileToBase64(imageFile as File | string);
-
-          if (!base64) {
+          const imageItem = form.images[i] as unknown;
+          // Expecting imageItem to be a hosted URL string (e.g., from imgbb)
+          const url = typeof imageItem === 'string' ? imageItem.trim() : '';
+          if (!/^https?:\/\//i.test(url)) {
+            console.warn('[createProperty] Skipping non-URL image item', imageItem);
             continue;
           }
 
           await api.post('/property/picture/create', {
             propertyId,
-            imageData: base64,
+            imageData: url,
             altText: `Property image ${i + 1}`,
             isPrimary: i === 0, // First image is primary
           });
         }
-      } catch (imgErr) {
+      } catch {
         // Don't throw - property was created successfully, just images failed
         // You might want to notify the user about partial failure
       }

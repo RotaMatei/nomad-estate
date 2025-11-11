@@ -9,12 +9,13 @@ import {
   Button,
   Stack,
 } from '@mui/material';
+// imageData now comes as a direct URL string from the backend
 
 // Interfaces
 interface PropertyPictureDto {
   id: string;
   propertyId: string;
-  imageData: unknown;
+  imageData: string;
   altText?: string | null;
   isPrimary: boolean;
 }
@@ -46,51 +47,32 @@ export interface PropertySummaryCardProps {
   onViewDetails?: (id: string) => void;
 }
 
-// Utility: Convert number[] to base64
-// function bufferToBase64(data: number[]): string {
-//   const bytes = new Uint8Array(data);
-//   let binary = '';
-//   const chunkSize = 0x8000;
-//   for (let i = 0; i < bytes.length; i += chunkSize) {
-//     const chunk = bytes.subarray(i, i + chunkSize);
-//     binary += String.fromCharCode.apply(null, Array.from(chunk));
-//   }
-//   return btoa(binary);
-// }
-
-// Utility: Normalize imageData to base64 URI
-// function toImageSrc(imageData?: unknown, mime = 'image/jpeg'): string | undefined {
-//   if (!imageData) return undefined;
-
-//   if (typeof imageData === 'string') {
-//     return imageData.startsWith('data:')
-//       ? imageData
-//       : `data:${mime};base64,${imageData}`;
-//   }
-
-//   if (Array.isArray(imageData)) {
-//     const base64 = bufferToBase64(imageData);
-//     return `data:${mime};base64,${base64}`;
-//   }
-
-//   if (typeof imageData === 'object' && imageData !== null) {
-//     const bufferLike = imageData as { data?: unknown };
-//     if (Array.isArray(bufferLike.data)) {
-//       const base64 = bufferToBase64(bufferLike.data);
-//       return `data:${mime};base64,${base64}`;
-//     }
-//   }
-
-//   return undefined;
-// }
-
 // Component
 const RealEstateCard: React.FC<PropertySummaryCardProps> = ({ property, onViewDetails }) => {
-  const pics = property.propertyPictures || [];
-  console.log('PropertyCard Props:', property);
+  const pics = property.propertyPictures || (property as unknown as { picture?: PropertyPictureDto[] }).picture || [];
+  console.log('[propertyCard] Full property object:', JSON.stringify(property, null, 2));
+  console.log('[propertyCard] Picture count:', pics.length);
+  console.log('[propertyCard] Pictures array:', pics);
+  
   const primary = pics.find((p) => p.isPrimary) || pics[0];
-  // const imageUrl = toImageSrc(primary?.imageData) || 'dubai4.jpg';
-  console.log('PropertyCard Image Data:', primary?.imageData);
+  console.log('[propertyCard] Primary picture:', primary);
+  console.log('[propertyCard] Primary imageData type:', typeof primary?.imageData);
+  console.log('[propertyCard] Primary imageData value:', primary?.imageData);
+  
+  const initialUrl = typeof primary?.imageData === 'string' && primary.imageData.trim().length > 0
+    ? primary.imageData
+    : '/dubai4.jpg';
+  const [imageUrl, setImageUrl] = React.useState<string>(initialUrl);
+  React.useEffect(() => {
+    // When primary changes, recompute URL (direct string URL now)
+    const url = typeof primary?.imageData === 'string' && primary.imageData.trim().length > 0
+      ? primary.imageData
+      : '/dubai4.jpg';
+    setImageUrl(url);
+  }, [primary?.imageData]);
+  
+  console.log('[propertyCard] Final image URL:', imageUrl, 'length:', imageUrl?.length);
+  console.log('[propertyCard] Image URL is fallback:', imageUrl === '/dubai4.jpg');
 
   const tags = [
     ...(property.propertyInvestmentGoalTags || []).map((t) => t.investmentGoalTag),
@@ -106,14 +88,14 @@ const RealEstateCard: React.FC<PropertySummaryCardProps> = ({ property, onViewDe
         <CardMedia
           component="img"
           height="200"
-          image={
-            primary?.imageData && typeof primary.imageData === 'string' && primary.imageData.trim() !== ''
-              ? primary.imageData.startsWith('data:image')
-                ? primary.imageData
-                : `data:image/jpeg;base64,${primary.imageData}`
-              : '/dubai4.jpg' // fallback image
-          }
+          image={imageUrl}
           alt={primary?.altText || property.title}
+          onError={() => {
+            console.warn('[propertyCard] Image failed to load, switching to fallback. src was:', imageUrl);
+            const fallback = '/dubai4.jpg';
+            if (imageUrl && imageUrl.startsWith('blob:')) URL.revokeObjectURL(imageUrl);
+            setImageUrl(fallback);
+          }}
         />
         <Chip
           label={`Score: ${property.score}`}

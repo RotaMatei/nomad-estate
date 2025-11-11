@@ -12,8 +12,10 @@ import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
-import { UserProfile } from './types';
-import api from '@/app/lib/api';
+// import { UserProfile } from './types';
+
+// Removed unused id fetch (was not used)
+// const id = typeof window !== 'undefined' ? window.localStorage.getItem('agencyId') : null;
 
 export default function Navbar(
   { navColor = 'background.default', mobileNavColor }: { navColor?: string; mobileNavColor?: string }
@@ -39,20 +41,14 @@ export default function Navbar(
       setIsLoggedIn(!!token);
 
       if (!token) {
-  // user state removed
         return;
       }
 
       try {
-        // decode JWT payload safely
-        const parts = token.split('.');
-        const payload = parts[1] ? JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))) : null;
-        const id = payload ? String(payload.sub) : null;
+        // decoding not needed here since we don't use payload fields
         if (!mounted) return;
-        // user state removed; id currently unused
       } catch {
         if (!mounted) return;
-  // user state removed
       }
     };
 

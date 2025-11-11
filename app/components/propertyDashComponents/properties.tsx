@@ -6,7 +6,7 @@ import React from 'react';
 interface PropertyPictureDto {
   id: string;
   propertyId: string;
-  imageData: unknown; // backend now sends number[] (Uint8Array) or string
+  imageData: string; // backend now sends URL string
   altText?: string | null;
   isPrimary: boolean;
 }
@@ -30,7 +30,7 @@ interface PropertySummary {
   propertyLocationBenefitTags?: LocationBenefitTagDto[];
 }
 
-// No client-side buffer conversion needed anymore; backend sends base64 strings
+// No client-side conversion needed anymore; backend sends URL strings
 
 const ListingsPage: React.FC = () => {
   const [data, setData] = React.useState<PropertySummary[]>([]);
@@ -46,8 +46,23 @@ const ListingsPage: React.FC = () => {
         // Basic search endpoint wiring (extend with query params later)
         console.log('[Listings] Fetching properties...');
         const res = await api.get('/property/retrieve-search');
+        console.log('[Listings] Raw API response:', JSON.stringify(res.data, null, 2));
         console.log('[Listings] Properties response:', res.status, Array.isArray(res.data) ? `count=${res.data.length}` : res.data);
         const list: PropertySummary[] = Array.isArray(res.data) ? res.data : [];
+        
+        // Log first property with pictures
+        if (list.length > 0) {
+          console.log('[Listings] First property:', JSON.stringify(list[0], null, 2));
+          if (list[0].propertyPictures && list[0].propertyPictures.length > 0) {
+            console.log('[Listings] First picture of first property:', {
+              id: list[0].propertyPictures[0].id,
+              propertyId: list[0].propertyPictures[0].propertyId,
+              isPrimary: list[0].propertyPictures[0].isPrimary,
+              imageDataType: typeof list[0].propertyPictures[0].imageData,
+              imageDataSample: list[0].propertyPictures[0].imageData?.slice?.(0, 60),
+            });
+          }
+        }
         if (!cancelled) {
           console.log('[Listings] Setting properties data (count):', list.length);
           setData(list);
