@@ -7,15 +7,18 @@ import * as THREE from 'three';
 import { MapProps } from './location';
 import { Suspense, useMemo, useRef, useEffect, useState } from 'react';
 import { Waypoint } from './Waypoint';
+import { useTheme } from '@emotion/react';
+import { text } from 'stream/consumers';
 
 const GlobeMesh = () => {
+  useTheme();
   const texture = useLoader(THREE.TextureLoader, '/earth-green.png');
   texture.colorSpace = THREE.SRGBColorSpace;
 
   const landMaterial = useMemo(() => {
     return new THREE.MeshBasicMaterial({
       map: texture,
-      color: new THREE.Color('#1eca4f'),
+      color: new THREE.Color('#89dfe5'),
       transparent: true,
       side: THREE.FrontSide,
       depthWrite: true,
@@ -25,7 +28,7 @@ const GlobeMesh = () => {
 
   const waterMaterial = useMemo(() => {
     return new THREE.MeshBasicMaterial({
-      color: new THREE.Color('#1fc7ff'),
+      color: new THREE.Color('#0C2239'),
       side: THREE.FrontSide,
       toneMapped: false,
     });
