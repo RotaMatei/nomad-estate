@@ -1,6 +1,8 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { formatMoney, formatEnumLabel } from '@/app/lib/format';
+import { isInvestmentGoalTag, isLocationBenefitTag } from '@/app/enums';
+import GradientTag from '@/app/GradientText/GradientTag';
 import {
   Card,
   CardContent,
@@ -85,14 +87,38 @@ const RealEstateCard: React.FC<PropertySummaryCardProps> = ({ property, onViewDe
     setDragDeltaX(0);
   }, [dragging, dragDeltaX, index, urls.length]);
 
-  const tags = React.useMemo(() => (
-    [
-      ...(property.propertyInvestmentGoalTags || []).map((t) => t.investmentGoalTag),
-      ...(property.propertyLocationBenefitTags || []).map((t) => t.locationBenefitTag),
-    ]
-      .map(formatEnumLabel)
-      .filter(Boolean)
-  ), [property.propertyInvestmentGoalTags, property.propertyLocationBenefitTags]);
+  type DisplayTag = { value: string; label: string; isMatch: boolean };
+
+  const displayTags = React.useMemo<DisplayTag[]>(() => {
+    // Read latest selected tags synchronously so a new search reflects immediately.
+    let searchedInvArr: string[] = [];
+    let searchedLocArr: string[] = [];
+    try {
+      if (typeof window !== 'undefined') {
+        const raw = sessionStorage.getItem('properties_last_search');
+        if (raw) {
+          const parsed = JSON.parse(raw) as { InvG?: string[]; LocB?: string[] };
+          searchedInvArr = Array.isArray(parsed.InvG) ? parsed.InvG : (parsed.InvG ? [parsed.InvG] : []);
+          searchedLocArr = Array.isArray(parsed.LocB) ? parsed.LocB : (parsed.LocB ? [parsed.LocB] : []);
+        }
+      }
+    } catch {}
+    const searchedInv = new Set(searchedInvArr);
+    const searchedLoc = new Set(searchedLocArr);
+    const goalTags = (property.propertyInvestmentGoalTags || [])
+      .map((t) => t.investmentGoalTag)
+      .filter(isInvestmentGoalTag)
+      .map(v => ({ value: v, label: formatEnumLabel(v), isMatch: searchedInv.has(v) }));
+    const benefitTags = (property.propertyLocationBenefitTags || [])
+      .map((t) => t.locationBenefitTag)
+      .filter(isLocationBenefitTag)
+      .map(v => ({ value: v, label: formatEnumLabel(v), isMatch: searchedLoc.has(v) }));
+    // Order: matching tags first (goals + benefits), preserving relative order, then non-matching tags.
+    const all = [...goalTags, ...benefitTags];
+    const matched = all.filter(t => t.isMatch);
+    const unmatched = all.filter(t => !t.isMatch);
+    return [...matched, ...unmatched];
+  }, [property.propertyInvestmentGoalTags, property.propertyLocationBenefitTags]);
 
   // Compute which tags fit in one line without cutting a chip; if none fit, show only the first tag
   const tagRowRef = React.useRef<HTMLDivElement | null>(null);
@@ -125,14 +151,14 @@ const RealEstateCard: React.FC<PropertySummaryCardProps> = ({ property, onViewDe
   React.useLayoutEffect(() => {
     const container = tagRowRef.current;
     const measurer = measureRef.current;
-    if (!container || !measurer || !tags.length) {
-      const next = tags.slice(0, 1);
+    if (!container || !measurer || !displayTags.length) {
+      const next = displayTags.slice(0, 1).map(t => t.label);
       if (!arraysEqual(next, visibleTags)) setVisibleTags(next);
       return;
     }
     const containerWidth = tagContainerWidth;
     if (!containerWidth) {
-      const next = tags.slice(0, 1);
+      const next = displayTags.slice(0, 1).map(t => t.label);
       if (!arraysEqual(next, visibleTags)) setVisibleTags(next);
       return;
     }
@@ -153,9 +179,10 @@ const RealEstateCard: React.FC<PropertySummaryCardProps> = ({ property, onViewDe
         break;
       }
     }
-    const next = count === 0 ? tags.slice(0, 1) : tags.slice(0, count);
+    const rawNext = count === 0 ? displayTags.slice(0, 1) : displayTags.slice(0, count);
+    const next = rawNext.map(t => t.label);
     if (!arraysEqual(next, visibleTags)) setVisibleTags(next);
-  }, [tags, tagContainerWidth]);
+  }, [displayTags, tagContainerWidth]);
 
   const priceFormatted = React.useMemo(() => formatMoney(property.price, '$'), [property.price]);
   const locationDisplay = [property.cityName, property.countryName].filter(Boolean).join(', ') || 'Unknown';
@@ -331,17 +358,28 @@ const RealEstateCard: React.FC<PropertySummaryCardProps> = ({ property, onViewDe
           }}
           ref={tagRowRef}
         >
-          {visibleTags.map((t) => (
-            <Chip
-              key={t}
-              label={t}
-              size="small"
-              sx={{ flex: '0 0 auto', maxWidth: visibleTags.length === 1 ? '100%' : 'none' }}
-            />
-          ))}
+          {visibleTags.map((label) => {
+            const tagObj = displayTags.find(dt => dt.label === label);
+            if (!tagObj) return null;
+            return tagObj.isMatch ? (
+              <GradientTag
+                key={tagObj.value}
+                label={tagObj.label}
+                size="small"
+                sx={{ flex: '0 0 auto', maxWidth: visibleTags.length === 1 ? '100%' : 'none' }}
+              />
+            ) : (
+              <Chip
+                key={tagObj.value}
+                label={tagObj.label}
+                size="small"
+                sx={{ flex: '0 0 auto', maxWidth: visibleTags.length === 1 ? '100%' : 'none' }}
+              />
+            );
+          })}
         </Box>
         {/* Hidden measurer for tag widths */}
-        {tags.length > 0 && (
+        {displayTags.length > 0 && (
           <Box
             ref={measureRef}
             sx={{
@@ -357,8 +395,12 @@ const RealEstateCard: React.FC<PropertySummaryCardProps> = ({ property, onViewDe
               width: '100%',
             }}
           >
-            {tags.map((t) => (
-              <Chip key={`measure-${t}`} label={t} size="small" sx={{ flex: '0 0 auto' }} />
+            {displayTags.map((t) => (
+              t.isMatch ? (
+                <GradientTag key={`measure-${t.value}`} label={t.label} size="small" sx={{ flex: '0 0 auto' }} />
+              ) : (
+                <Chip key={`measure-${t.value}`} label={t.label} size="small" sx={{ flex: '0 0 auto' }} />
+              )
             ))}
           </Box>
         )}

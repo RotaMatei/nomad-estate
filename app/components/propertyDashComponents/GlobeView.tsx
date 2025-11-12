@@ -15,7 +15,7 @@ const GlobeMesh = () => {
   const landMaterial = useMemo(() => {
     return new THREE.MeshBasicMaterial({
       map: texture,
-      color: new THREE.Color('#228B22'),
+      color: new THREE.Color('#1eca4f'),
       transparent: true,
       side: THREE.FrontSide,
       depthWrite: true,
@@ -25,7 +25,7 @@ const GlobeMesh = () => {
 
   const waterMaterial = useMemo(() => {
     return new THREE.MeshBasicMaterial({
-      color: new THREE.Color('#1E90FF'),
+      color: new THREE.Color('#1fc7ff'),
       side: THREE.FrontSide,
       toneMapped: false,
     });

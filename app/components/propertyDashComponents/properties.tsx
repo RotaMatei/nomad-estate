@@ -97,9 +97,7 @@ const ListingsPage: React.FC = () => {
           setCountryMap(JSON.parse(cachedCountryMap));
         }
       }
-    } catch (err) {
-      console.warn('[Listings] Failed to parse cache', err);
-    }
+    } catch {}
   }, []);
 
   // Fetch only if not restored from cache
@@ -116,31 +114,24 @@ const ListingsPage: React.FC = () => {
             const last = sessionStorage.getItem('properties_last_search');
             if (last) {
               const parsed = JSON.parse(last) as { filterBody?: Record<string, unknown>; InvG?: string[]; LocB?: string[] };
-              console.log('[Properties] REQUEST /property/retrieve-search', {
-                url: '/property/retrieve-search',
-                method: 'POST',
-                params: { InvG: parsed.InvG, LocB: parsed.LocB },
-                body: parsed.filterBody ?? {},
-              });
               res = await api.request({
                 method: 'post',
                 url: '/property/retrieve-search',
                 params: { InvG: parsed.InvG, LocB: parsed.LocB },
-                data: parsed.filterBody ?? {},
+                // Mirror tags in the body as well so backend POST can read them reliably
+                data: {
+                  ...(parsed.filterBody ?? {}),
+                  InvG: parsed.InvG,
+                  LocB: parsed.LocB,
+                },
               });
             }
           } catch (err) {
-            console.warn('[Listings] Failed to replay last search, falling back to unfiltered', err);
+            // swallow
           }
         }
         if (!res) {
           // Fallback: unfiltered base call
-          console.log('[Properties] REQUEST /property/retrieve-search', {
-            url: '/property/retrieve-search',
-            method: 'GET',
-            params: undefined,
-            body: undefined,
-          });
           res = await api.get('/property/retrieve-search');
         }
         const list: PropertySummary[] = Array.isArray(res.data) ? res.data : [];
@@ -161,7 +152,7 @@ const ListingsPage: React.FC = () => {
           setCountryMap((prev) => ({ ...prev, ...newCountryMap }));
         }
       } catch (e) {
-        console.error('[Listings] Failed to load properties', e);
+        // swallow
         if (!cancelled) setError('Failed to load properties');
       } finally {
         if (!cancelled) setLoading(false);
@@ -207,13 +198,13 @@ const ListingsPage: React.FC = () => {
   React.useEffect(() => {
     if (typeof window === 'undefined') return;
     if (!data.length) return;
+    // Cache full dataset for simplicity and immediate future navigation
+    try { sessionStorage.setItem('properties_all', JSON.stringify(data)); } catch {}
+    try { sessionStorage.setItem('properties_current_page', String(currentPage)); } catch {}
+    try { if (Object.keys(cityMap).length) sessionStorage.setItem('properties_city_map', JSON.stringify(cityMap)); } catch {}
+    try { if (Object.keys(countryMap).length) sessionStorage.setItem('properties_country_map', JSON.stringify(countryMap)); } catch {}
+    // Additionally store current and previous page slices individually (optional per requirement)
     try {
-      // Cache full dataset for simplicity and immediate future navigation
-      sessionStorage.setItem('properties_all', JSON.stringify(data));
-      sessionStorage.setItem('properties_current_page', String(currentPage));
-      if (Object.keys(cityMap).length) sessionStorage.setItem('properties_city_map', JSON.stringify(cityMap));
-      if (Object.keys(countryMap).length) sessionStorage.setItem('properties_country_map', JSON.stringify(countryMap));
-      // Additionally store current and previous page slices individually (optional per requirement)
       const currentSliceStart = (currentPage - 1) * pageSize;
       const currentSlice = data.slice(currentSliceStart, currentSliceStart + pageSize);
       sessionStorage.setItem(`properties_page_${currentPage}`, JSON.stringify(currentSlice));
@@ -222,9 +213,7 @@ const ListingsPage: React.FC = () => {
         const prevSlice = data.slice(prevSliceStart, prevSliceStart + pageSize);
         sessionStorage.setItem(`properties_page_${currentPage - 1}`, JSON.stringify(prevSlice));
       }
-    } catch (err) {
-      console.warn('[Listings] Failed to persist cache', err);
-    }
+    } catch {}
   }, [data, currentPage, cityMap, countryMap, pageSize]);
 
   if (loading) {

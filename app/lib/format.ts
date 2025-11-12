@@ -20,6 +20,17 @@ export function formatMoney(value: number | string | null | undefined, currencyS
 
 export function formatEnumLabel(value: string | null | undefined): string {
   if (!value) return '';
-  const str = String(value).trim().replace(/_/g, ' ').toLowerCase();
-  return str.length ? str[0].toUpperCase() + str.slice(1) : '';
+  // Preserve known acronyms fully uppercased (ROI, EU, USA etc.)
+  const ACRONYMS = new Set(['ROI','EU','USA']);
+  const parts = String(value).trim().split('_').filter(Boolean);
+  return parts
+    .map(p => {
+      const upper = p.toUpperCase();
+      if (ACRONYMS.has(upper)) return upper; // preserve acronym
+      // Special handling: singular words that should remain all-caps
+      if (upper === 'ROI') return 'ROI';
+      // Default: Capitalize first letter only
+      return upper[0] + upper.slice(1).toLowerCase();
+    })
+    .join(' ');
 }

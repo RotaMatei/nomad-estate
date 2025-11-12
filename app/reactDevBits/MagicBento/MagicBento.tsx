@@ -14,39 +14,9 @@ import { CustomAutocomplete } from '../../components/utils/autocomplete';
 import CheckboxGroup, { type Option as CheckboxOption } from '../../components/utils/checkboxGroup';
 import CustomButton from '../../components/utils/button';
 import api from '../../lib/api';
-// Import enums from backend generated types if available; otherwise declare minimal union types locally.
-// Assuming no direct prisma types on frontend, we approximate the enums used by /property/retrieve-search.
-type InvestmentGoalTagEnum =
-  | 'HIGH_ROI'
-  | 'CASH_FLOW_POSITIVE'
-  | 'SHORT_TERM_RENTAL_READY'
-  | 'LONG_TERM_RENTAL_STABLE'
-  | 'FIX_AND_FLIP'
-  | 'NEW_DEVELOPMENT'
-  | 'BELOW_MARKET_VALUE'
-  | 'TURNKEY_INVESTMENT'
-  | 'MULTI_UNIT'
-  | 'STUDENT_HOUSING'
-  | 'RETIREMENT_INCOME'
-  | 'VACATION_HOME_INCOME'
-  | 'COMMERCIAL_CONVERSION';
-
-type LocationBenefitTagEnum =
-  | 'TAX_FREE_ZONE'
-  | 'LOW_PROPERTY_TAX'
-  | 'URBAN_GROWTH_ZONE'
-  | 'TOURIST_HOTSPOT'
-  | 'NEAR_INFRASTUCTURE_PROJECT'
-  | 'ECONOMIC_HUB'
-  | 'EXPAT_FRIENDLY'
-  | 'GREEN_ZONE'
-  | 'HERITAGE_ZONE'
-  | 'SAFE_NEIGHBORHOOD'
-  | 'SCHOOL_DISTRICT'
-  | 'COASTAL_ACCESS'
-  | 'MOUNTAIN_VIEW'
-  | 'EU_RESIDENCY_ELIGIBLE'
-  | 'GOLDEN_VISA';
+// Centralized tag enums & helpers
+import { INVESTMENT_GOAL_TAGS, LOCATION_BENEFIT_TAGS, isInvestmentGoalTag, isLocationBenefitTag } from '@/app/enums';
+import { formatEnumLabel } from '@/app/lib/format';
 import { CustomSelect } from '../../components/utils/select';
 import { MapGlobeSwitcher } from "../../components/propertyDashComponents/MapGlobeSwitcher";
 import { Location } from "../../components/propertyDashComponents/location";
@@ -601,7 +571,8 @@ const MagicBento: React.FC<BentoProps> = ({
 
   // Filters state (for first card)
   const [country, setCountry] = useState<string | number | ''>('');
-  const [budget, setBudget] = useState<number[]>([100000, 500000]);
+  // Budget range slider default now spans full range (0 to 2,000,000)
+  const [budget, setBudget] = useState<number[]>([0, 2000000]);
   const [goals, setGoals] = useState<string[]>([]);
   const [benefits, setBenefits] = useState<string[]>([]);
   // Mobile collapsible state for goals and benefits sections
@@ -679,27 +650,61 @@ const MagicBento: React.FC<BentoProps> = ({
     };
   }, [country]);
 
-  const goalOptions: CheckboxOption[] = [
-    { value: 'capital_growth', label: 'Capital Appreciation' },
-    { value: 'residence_permit', label: 'Residence Permit' },
-    { value: 'citizenship', label: 'Citizenship' },
-    { value: 'high_roi', label: 'High ROI' },
-    { value: 'rental_income', label: 'Rental Income' },
-    { value: 'golden_visa', label: 'Golden Visa' },
-    { value: 'tax_benefits', label: 'Tax Benefits' },
-    { value: 'second_home', label: 'Second Home' },
-  ];
+  // Goal options now directly reflect the full backend InvestmentGoalTagEnum set
+  const goalOptions: CheckboxOption[] = INVESTMENT_GOAL_TAGS.map(tag => ({
+    value: tag,
+    label: formatEnumLabel(tag),
+  }));
 
-  const benefitOptions: CheckboxOption[] = [
-    { value: 'transport', label: 'Near Public Transport' },
-    { value: 'schools', label: 'Near Schools' },
-    { value: 'low_crime', label: 'Low Crime Rate' },
-    { value: 'walkability', label: 'High Walkability' },
-    { value: 'green', label: 'Green Spaces' },
-    { value: 'waterfront', label: 'Waterfront' },
-    { value: 'tourist_hotspot', label: 'Tourist Hotspot' },
-    { value: 'eu_access', label: 'EU Access' },
-  ];
+  // Benefit options reflect full backend LocationBenefitTagEnum set
+  const benefitOptions: CheckboxOption[] = LOCATION_BENEFIT_TAGS.map(tag => ({
+    value: tag,
+    label: formatEnumLabel(tag),
+  }));
+
+  // Rehydrate filters from last search so UI stays in sync with loaded results
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = sessionStorage.getItem('properties_last_search');
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as {
+        InvG?: string[];
+        LocB?: string[];
+        filterBody?: {
+          minimumPrice?: number;
+          maximumPrice?: number;
+          location?: number;
+          propertyType?: string | number;
+          minimumScore?: number;
+          minimumYield?: number;
+          minimumNoBedrooms?: number;
+        };
+      };
+      if (Array.isArray(parsed.InvG)) setGoals(parsed.InvG.filter(isInvestmentGoalTag));
+      if (Array.isArray(parsed.LocB)) setBenefits(parsed.LocB.filter(isLocationBenefitTag));
+      const fb = parsed.filterBody ?? {};
+      const minP = typeof fb.minimumPrice === 'number' ? fb.minimumPrice : undefined;
+      const maxP = typeof fb.maximumPrice === 'number' ? fb.maximumPrice : undefined;
+      if (minP !== undefined || maxP !== undefined) {
+        setBudget([minP ?? 0, maxP ?? 2000000]);
+      }
+      if (typeof fb.location === 'number') setCity(fb.location);
+      if (typeof fb.propertyType !== 'undefined') setPropertyType(fb.propertyType);
+      if (typeof fb.minimumScore === 'number') setInvestmentScore(fb.minimumScore);
+      if (typeof fb.minimumYield === 'number') {
+        const my = fb.minimumYield;
+        let v: string | number = '';
+        if (my >= 11) v = '11_plus';
+        else if (my >= 6) v = '6_10';
+        else if (my >= 1) v = '1_5';
+        setExpectedYield(v);
+      }
+      if (typeof fb.minimumNoBedrooms === 'number') setBedrooms(fb.minimumNoBedrooms >= 5 ? '5_PLUS' : fb.minimumNoBedrooms);
+    } catch {
+      // ignore rehydrate errors silently
+    }
+  }, []);
 
   const handleSearch = () => {
     // Build FilterDto body and query params for /property/retrieve-search
@@ -735,49 +740,9 @@ const MagicBento: React.FC<BentoProps> = ({
       return isNaN(n) ? undefined : n;
     };
 
-    // Map UI selections to backend enums (strongly typed, no any)
-    type UiGoal = 'high_roi' | 'rental_income' | 'capital_growth' | 'second_home' | 'golden_visa' | 'tax_benefits';
-    type UiBenefit =
-      | 'transport' | 'schools' | 'low_crime' | 'walkability'
-      | 'green' | 'waterfront' | 'tourist_hotspot' | 'eu_access'
-      | 'golden_visa' | 'tax_benefits';
-
-    const invGoalMap: Partial<Record<UiGoal, InvestmentGoalTagEnum>> = {
-      high_roi: 'HIGH_ROI',
-      rental_income: 'LONG_TERM_RENTAL_STABLE',
-      capital_growth: 'NEW_DEVELOPMENT',
-      second_home: 'VACATION_HOME_INCOME',
-    };
-    const locBenefitMap: Partial<Record<UiBenefit, LocationBenefitTagEnum>> = {
-      tourist_hotspot: 'TOURIST_HOTSPOT',
-      green: 'GREEN_ZONE',
-      schools: 'SCHOOL_DISTRICT',
-      eu_access: 'EU_RESIDENCY_ELIGIBLE',
-      waterfront: 'COASTAL_ACCESS',
-      low_crime: 'SAFE_NEIGHBORHOOD',
-      transport: 'NEAR_INFRASTUCTURE_PROJECT',
-      walkability: 'URBAN_GROWTH_ZONE',
-      golden_visa: 'GOLDEN_VISA',
-      tax_benefits: 'LOW_PROPERTY_TAX',
-    };
-
-    // Type guard sets for safe indexing
-    const uiGoalSet: Set<UiGoal> = new Set(['high_roi','rental_income','capital_growth','second_home','golden_visa','tax_benefits']);
-    const uiBenefitSet: Set<UiBenefit> = new Set([
-      'transport','schools','low_crime','walkability','green','waterfront','tourist_hotspot','eu_access','golden_visa','tax_benefits'
-    ]);
-
-    const mappedInvG = (goals || [])
-      .filter((g): g is UiGoal => uiGoalSet.has(g as UiGoal))
-      .map((g) => invGoalMap[g])
-      .filter((v): v is InvestmentGoalTagEnum => !!v);
-
-    const mappedLocB = (
-      [...(benefits || []), ...goals.filter((g) => ['golden_visa','tax_benefits'].includes(g))]
-    )
-      .filter((b): b is UiBenefit => uiBenefitSet.has(b as UiBenefit))
-      .map((b) => locBenefitMap[b])
-      .filter((v): v is LocationBenefitTagEnum => !!v);
+    // Direct mapping now: UI values are already backend enum strings
+    const mappedInvG = (goals || []).filter(isInvestmentGoalTag);
+    const mappedLocB = (benefits || []).filter(isLocationBenefitTag);
 
     type FilterBody = {
       minimumPrice?: number;
@@ -818,29 +783,25 @@ const MagicBento: React.FC<BentoProps> = ({
       }
     } catch {}
 
-    // Execute request
-    console.log('[Properties] REQUEST /property/retrieve-search', {
-      url: '/property/retrieve-search',
-      method: 'POST',
-      params: queryParams,
-      body: filterBody,
-    });
-
     api.request({
       method: 'post',
       url: '/property/retrieve-search',
       params: queryParams,
-      data: filterBody, // relies on GET body; consider POST if infra blocks this
+      // Send tags redundantly in body as well so backend POST can read from either place
+      data: {
+        ...filterBody,
+        InvG: mappedInvG.length ? mappedInvG : undefined,
+        LocB: mappedLocB.length ? mappedLocB : undefined,
+      },
     })
       .then((res) => {
-        // Filter search success
         // Dispatch a custom event so listings page can listen & update without prop drilling
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('properties:filter-results', { detail: res.data }));
         }
       })
-      .catch((err) => {
-        console.warn('[MagicBento] Filter search failed', err, { filterBody, queryParams });
+      .catch(() => {
+        // swallow
       });
   };
 
@@ -936,8 +897,8 @@ const MagicBento: React.FC<BentoProps> = ({
                               onChange={(_, val) => setBudget(val as number[])}
                               valueLabelDisplay="auto"
                               min={0}
-                              max={2000000}
-                              step={10000}
+                                max={2000000}
+                              step={100000}
                               sx={{
                                 color: '#003FC7',
                                 '& .MuiSlider-thumb': { boxShadow: '0 0 0 4px rgba(0,63,199,0.15)' },
