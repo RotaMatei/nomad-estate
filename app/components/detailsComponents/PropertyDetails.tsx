@@ -14,7 +14,7 @@ import BedtimeIcon from '@mui/icons-material/Bedtime';
 import ShowerIcon from '@mui/icons-material/Shower';
 import SquareFootIcon from '@mui/icons-material/SquareFoot';
 
-// Define a narrowed type for display (subset of full DTO)
+
 interface DisplayProperty {
   title?: string;
   description?: string;
@@ -28,6 +28,9 @@ interface DisplayProperty {
   cityId?: number;
   stateId?: number;
   countryId?: number;
+  cityName?: string;
+  stateName?: string;
+  countryName?: string;
   latitude?: number;
   longitude?: number;
   builtArea?: number;
@@ -81,7 +84,7 @@ export default function PropertyDetails({ property }: PropertyDetailsProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHydrated, setIsHydrated] = useState(false);
 
-  // Ensure hydration completes before rendering interactive elements
+
   useEffect(() => {
     setIsHydrated(true);
   }, []);
@@ -97,7 +100,7 @@ export default function PropertyDetails({ property }: PropertyDetailsProps) {
   };
 
   const priceFormatted = property.price ? `€${property.price.toLocaleString()}` : 'N/A';
-  const primaryColor = '#1976d2'; // Material-UI primary blue
+  const primaryColor = 'secondary.main';
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -175,77 +178,44 @@ export default function PropertyDetails({ property }: PropertyDetailsProps) {
       </Box>
 
       {/* Title & Basic Info */}
-      <Typography variant="h3" sx={{ fontWeight: 700, mb: 1 }}>
+      <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color:'text.primary' }}>
         {property.title}
       </Typography>
       {property.streetAddress && (
         <Stack direction="row" spacing={1} sx={{ mb: 2, alignItems: 'center' }}>
-          <LocationOnIcon sx={{ color: primaryColor }} />
-          <Typography variant="body1" color="text.secondary">
+          <LocationOnIcon sx={{ color: 'primary.main' }} />
+          <Typography variant="subtitle2" color="primary.main">
             {property.streetAddress}
             {property.postalCode && ` • ${property.postalCode}`}
+            {property.cityName && ` • ${property.cityName}`}
+            {property.stateName && ` • ${property.stateName}`}
+            {property.countryName && ` • ${property.countryName}`}
           </Typography>
         </Stack>
       )}
 
       {/* Price & Key Metrics */}
-      <Grid container spacing={2} sx={{ mb: 4 }}>
-        <Grid size={{ xs: 6, sm: 3 }}>
-          <Card sx={{ textAlign: 'center', backgroundColor: 'background.default', boxShadow: 'none', border: '1px solid #ddd' }}>
-            <CardContent>
-              <Stack direction="row" spacing={0.5} sx={{ justifyContent: 'center', mb: 1 }}>
-                <EuroIcon sx={{ color: primaryColor }} />
-              </Stack>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                {priceFormatted}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Price
-              </Typography>
-            </CardContent>
-          </Card>
+      <Grid container sx={{mb:4}} spacing={1}>
+        <Grid size={{xs:12,md:6}} sx={{p: 3, borderRadius: 4, backgroundColor: 'background.default', boxShadow: 'none', border: '1px solid', borderColor: '#c2c2c265'}}>
+         <Typography variant="subtitle2" sx={{ color: 'primary.main', mb: 2 }}> Property Specs</Typography>
+         <Grid container>
+           <Grid size={4} sx={{ borderRight: '1px solid #c2c2c265', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
+             <Typography variant="body2" color="text.secondary">Bedrooms</Typography>
+             <Typography variant="h6" sx={{ fontWeight: 600 }}>{property.bedrooms || '—'}</Typography>
+           </Grid>
+           <Grid size={4} sx={{ borderRight: '1px solid #c2c2c265', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
+             <Typography variant="body2" color="text.secondary">Bathrooms</Typography>
+             <Typography variant="h6" sx={{ fontWeight: 600 }}>{property.bathrooms || '—'}</Typography>
+           </Grid>
+           <Grid size={4} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
+             <Typography variant="body2" color="text.secondary">Total Area</Typography>
+             <Typography variant="h6" sx={{ fontWeight: 600 }}>{property.totalArea ? `${property.totalArea} m²` : '—'}</Typography>
+           </Grid>
+         </Grid>
         </Grid>
-        <Grid size={{ xs: 6, sm: 3 }}>
-          <Card sx={{ textAlign: 'center', backgroundColor: 'background.default', boxShadow: 'none', border: '1px solid #ddd' }}>
-            <CardContent>
-              <Stack direction="row" spacing={0.5} sx={{ justifyContent: 'center', mb: 1 }}>
-                <TrendingUpIcon sx={{ color: 'green' }} />
-              </Stack>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: 'green' }}>
-                {property.yield}%
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Yield
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid size={{ xs: 6, sm: 3 }}>
-          <Card sx={{ textAlign: 'center', backgroundColor: 'background.default', boxShadow: 'none', border: '1px solid #ddd' }}>
-            <CardContent>
-              <Stack direction="row" spacing={0.5} sx={{ justifyContent: 'center', mb: 1 }}>
-                <StarsIcon sx={{ color: 'orange' }} />
-              </Stack>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                {property.score}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Score
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid size={{ xs: 6, sm: 3 }}>
-          <Card sx={{ textAlign: 'center', backgroundColor: 'background.default', boxShadow: 'none', border: '1px solid #ddd' }}>
-            <CardContent>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-                Type
-              </Typography>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {property.type || 'N/A'}
-              </Typography>
-            </CardContent>
-          </Card>
+        <Grid size={{xs:12,md:6}} sx={{p: 3, borderRadius: 4, backgroundColor: 'background.default', boxShadow: 'none', border: '1px solid', borderColor: '#c2c2c265'}}>
+         <Typography variant="subtitle2" sx={{ color: 'primary.main' }}> Asking Price</Typography>
+         <Typography variant="h5" sx={{ fontWeight: 600, color: 'primary.main', justifyContent: 'center', mt:1 }}>{priceFormatted}</Typography>
         </Grid>
       </Grid>
 

@@ -18,12 +18,59 @@ interface PropertyDto {
   heatingSystem?: string; coolingSystem?: string; kitchen?: string; security?: string; utility?: string; smartHomeFeature?: string; otherFeature?: string;
   investmentGoalTag?: string; locationBenefitTag?: string;
   picture?: PropertyPictureDto[];
+  cityName?: string;
+  stateName?: string;
+  countryName?: string;
 }
 
 async function fetchProperty(id: string): Promise<PropertyDto | null> {
   try {
     const res = await api.get(`/property/retrieve-details/${id}`);
-    return res.data || null;
+    const property = res.data || null;
+    
+    if (!property) return null;
+
+    // Fetch location names if IDs are available
+    let cityName: string | undefined;
+    let stateName: string | undefined;
+    let countryName: string | undefined;
+
+    // Fetch city name
+    if (property.cityId) {
+      try {
+        const cityRes = await api.get(`/cities/retrieve/${property.cityId}`);
+        cityName = cityRes.data?.name;
+      } catch (error) {
+        console.warn(`Failed to fetch city name for ID ${property.cityId}`);
+      }
+    }
+
+    // Fetch state name
+    if (property.stateId) {
+      try {
+        const stateRes = await api.get(`/states/retrieve/${property.stateId}`);
+        stateName = stateRes.data?.name;
+      } catch (error) {
+        console.warn(`Failed to fetch state name for ID ${property.stateId}`);
+      }
+    }
+
+    // Fetch country name
+    if (property.countryId) {
+      try {
+        const countryRes = await api.get(`/countries/retrieve/${property.countryId}`);
+        countryName = countryRes.data?.name;
+      } catch (error) {
+        console.warn(`Failed to fetch country name for ID ${property.countryId}`);
+      }
+    }
+
+    return {
+      ...property,
+      cityName,
+      stateName,
+      countryName,
+    };
   } catch {
     return null;
   }
