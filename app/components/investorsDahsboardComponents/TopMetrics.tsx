@@ -7,9 +7,12 @@ type Metric = { label: string; value: string | number };
 interface TopMetricsProps {
   colorScheme?: 'primary' | 'secondary';
   metrics?: Metric[];
+  gridMd?: number; // how many columns each item spans at md breakpoint (default 2 -> 6 items/row)
+  gridSm?: number; // default 4 -> 3 items/row
+  gridXs?: number; // default 6 -> 2 items/row
 }
 
-export default function TopMetrics({ colorScheme = 'secondary', metrics }: TopMetricsProps) {
+export default function TopMetrics({ colorScheme = 'secondary', metrics, gridMd = 2, gridSm = 4, gridXs = 6 }: TopMetricsProps) {
   const theme = useTheme();
   const mainColor = colorScheme === 'primary' ? theme.palette.primary.main : theme.palette.secondary.main;
 
@@ -27,7 +30,7 @@ export default function TopMetrics({ colorScheme = 'secondary', metrics }: TopMe
   return (
     <Grid container spacing={2} sx={{ mt: 4, mb: 4 }}>
       {items.map((m, i) => (
-        <Grid key={i} size={{ xs: 6, sm: 4, md: 2 }}>
+        <Grid key={i} size={{ xs: gridXs, sm: gridSm, md: gridMd }}>
           <Paper
             elevation={3}
             sx={{

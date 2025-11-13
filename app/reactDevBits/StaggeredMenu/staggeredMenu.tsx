@@ -38,6 +38,7 @@ export interface StaggeredMenuProps {
   headerOnClick?: () => void;
   headerCtaLabel?: string;
   headerCtaOnClick?: () => void;
+  headerCtaHoverColor?: string;
   menuButtonColor?: string;
   openMenuButtonColor?: string;
   accentColor?: string;
@@ -88,6 +89,7 @@ export const StaggeredMenu = forwardRef<StaggeredMenuHandle, StaggeredMenuProps>
   headerOnClick,
   headerCtaLabel,
   headerCtaOnClick,
+  headerCtaHoverColor,
   menuButtonColor = '#fff',
   openMenuButtonColor = '#fff',
   changeMenuColorOnOpen = true,
@@ -559,7 +561,7 @@ export const StaggeredMenu = forwardRef<StaggeredMenuHandle, StaggeredMenuProps>
                 height: { xs: 38, md: 42, lg: 38 }, /* slightly reduced heights */
                 '&:hover': {
                   backgroundColor: '#fff',
-                  color: theme.palette.secondary.main,
+                  color: headerCtaHoverColor || theme.palette.secondary.main,
                 },
               }}
               containerSx={{ mb: 2 }}

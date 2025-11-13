@@ -151,7 +151,7 @@ export default function Navbar(
             <Grid>
               <Button
                 variant="text"
-                href={'/propertiesDashboard'}
+                href={'/properties'}
                 sx={{
                   color: navColor,
                   fontWeight: 500,
@@ -162,6 +162,23 @@ export default function Navbar(
                 }}
               >
                 PROPERTIES
+              </Button>
+            </Grid>
+
+            <Grid>
+              <Button
+                variant="text"
+                href={'/dashboard'}
+                sx={{
+                  color: navColor,
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  fontFamily: 'Montserrat, sans-serif',
+                  //textTransform: 'capitalize',
+                  borderRadius: 3,
+                }}
+              >
+                DASHBOARD
               </Button>
             </Grid>
 

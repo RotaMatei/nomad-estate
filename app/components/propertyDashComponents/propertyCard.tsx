@@ -11,7 +11,12 @@ import {
   Box,
   Button,
   Stack,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
+import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import { savePropertyForUser } from '@/app/lib/propertyApi';
 // imageData now comes as a direct URL string from the backend
 
 // Interfaces
@@ -70,6 +75,21 @@ const RealEstateCard: React.FC<PropertySummaryCardProps> = ({ property, onViewDe
   const dragStartX = React.useRef(0);
   const [dragDeltaX, setDragDeltaX] = React.useState(0);
   const dragMovedRef = React.useRef(false); // used to suppress click after a drag
+  const [saving, setSaving] = React.useState(false);
+  const [saved, setSaved] = React.useState(false);
+
+  const handleSave = async () => {
+    if (saving) return;
+    setSaving(true);
+    try {
+      const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
+      if (!userId) return;
+      const ok = await savePropertyForUser(userId, property.id);
+      if (ok || ok === false) setSaved(true);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const endDrag = React.useCallback(() => {
     if (!dragging) return;
@@ -274,6 +294,31 @@ const RealEstateCard: React.FC<PropertySummaryCardProps> = ({ property, onViewDe
             ))}
           </Box>
         </Box>
+        {/* Save (like) button top-left */}
+        <Tooltip title={saved ? 'Saved' : 'Save property'} placement="right">
+          <span>
+            <IconButton
+              aria-label="Save property"
+              onClick={handleSave}
+              disabled={saving}
+              sx={{
+                position: 'absolute',
+                top: 8,
+                left: 8,
+                bgcolor: 'rgba(255,255,255,0.85)',
+                '&:hover': { bgcolor: '#fff' },
+                boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
+              }}
+              size="small"
+            >
+              {saved ? (
+                <FavoriteIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+              ) : (
+                <FavoriteBorderOutlinedIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+              )}
+            </IconButton>
+          </span>
+        </Tooltip>
         <Chip
           label={`Score: ${property.score}`}
           color="success"
