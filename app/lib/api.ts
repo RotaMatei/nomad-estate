@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
 const api = axios.create({
   baseURL: 'https://api.nomadestatehub.com',
@@ -6,24 +6,23 @@ const api = axios.create({
 });
 
 // Attach Authorization header automatically if a token exists
-api.interceptors.request.use((config) => {
+api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   try {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    if (token) {
-      config.headers = config.headers || {};
-      config.headers['Authorization'] = `Bearer ${token}`;
+    if (token && config.headers) {
+      (config.headers as unknown as Record<string, string>)['Authorization'] = `Bearer ${token}`;
     }
   } catch {}
   return config;
 });
 
 api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  (response: AxiosResponse) => response,
+  async (error: AxiosError) => {
     if (error.response?.status === 401) {
       try {
         const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
-        const { data } = await axios.post(
+        const { data } = await axios.post<{ accessToken: string; refreshToken: string }>(
           'https://api.nomadestatehub.com/refresh',
           {
             refreshToken,
@@ -34,10 +33,12 @@ api.interceptors.response.use(
           localStorage.setItem('token', data.accessToken);
           localStorage.setItem('refreshToken', data.refreshToken);
         }
-        error.config.headers = error.config.headers || {};
-        error.config.headers['Authorization'] = `Bearer ${data.accessToken}`;
-        return axios.request(error.config);
-      } catch (refreshError) {
+        const cfg = (error.config || {}) as InternalAxiosRequestConfig;
+        if (cfg.headers) {
+          (cfg.headers as unknown as Record<string, string>)['Authorization'] = `Bearer ${data.accessToken}`;
+        }
+        return axios.request(cfg);
+      } catch (refreshError: unknown) {
         return Promise.reject(refreshError);
       }
     }

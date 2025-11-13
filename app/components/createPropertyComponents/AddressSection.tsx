@@ -6,12 +6,16 @@ import { Box, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import CustomInput from '../../components/utils/input';
 import CustomSelect from '../../components/utils/select';
+import { CustomAutocomplete } from '../../components/utils/autocomplete';
 import { PropertyFormData } from './types';
 import { getCitiesByState, getCountries, getStates, City, Country, State } from '../../lib/locationApi';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import MailIcon from '@mui/icons-material/Mail';
 // Removed unused icons PublicIcon and MapIcon
 import MyLocationIcon from '@mui/icons-material/MyLocation';
+import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
+import MapOutlinedIcon from '@mui/icons-material/MapOutlined';
+import LocationCityOutlinedIcon from '@mui/icons-material/LocationCityOutlined';
 
 interface Props {
   formData: PropertyFormData;
@@ -27,39 +31,42 @@ export default function AddressSection({ formData, setFormData }: Props) {
   // Parsing helper kept for other numeric fields (not used now for lat/lon which have custom format)
   const toFloat = (v: string) => (v === '' ? undefined : parseFloat(v));
 
-  // Local controlled strings for latitude/longitude formatted as sign + DDD,dddddd
+  // Local controlled strings for latitude/longitude formatted as sign + DDD.dddddd (dot decimal)
   const [latitudeInput, setLatitudeInput] = useState<string>('');
   const [longitudeInput, setLongitudeInput] = useState<string>('');
   const [latValid, setLatValid] = useState<boolean>(true);
   const [lonValid, setLonValid] = useState<boolean>(true);
+  const [postalValid, setPostalValid] = useState<boolean>(true);
+  const MAX_POSTAL_LENGTH = 10; // enforce numeric-only postal code up to 10 digits
 
-  // Regex: optional + or -, 1-3 digits, comma, 1-6 digits
-  const coordRegex = /^[+-]?\d{1,3},\d{1,6}$/;
+  // Regex: optional + or -, 1-3 digits, optional dot with up to 6 decimals
+  const coordRegex = /^[+-]?\d{1,3}(\.\d{0,6})?$/;
 
-  // Initialize from formData if numbers exist (convert dot to comma)
+  // Initialize from formData if numbers exist (keep dot)
   useEffect(() => {
     if (formData.latitude !== undefined) {
-      const latStr = formData.latitude.toFixed(6).replace('.', ',').replace(/0+$/,'').replace(/,$/,'');
+      const latStr = formData.latitude.toFixed(6).replace(/0+$/,'').replace(/\.$/,'');
       setLatitudeInput(latStr);
     }
     if (formData.longitude !== undefined) {
-      const lonStr = formData.longitude.toFixed(6).replace('.', ',').replace(/0+$/,'').replace(/,$/,'');
+      const lonStr = formData.longitude.toFixed(6).replace(/0+$/,'').replace(/\.$/,'');
       setLongitudeInput(lonStr);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleLatChange = (raw: string) => {
+  const handleLatChange = (inp: string) => {
+    const raw = inp.replace(/,/g, '.');
     // Allow user to build value: restrict characters first
-    // Permit: digits, leading +/-, single comma
-    if (/[^0-9+\-,]/.test(raw)) return; // ignore invalid chars
+    // Permit: digits, leading +/-, single dot
+    if (/[^0-9+\-.]/.test(raw)) return; // ignore invalid chars
     // Enforce single sign at start
     if ((raw.match(/[+-]/g)?.length || 0) > 1) return;
     if (raw.length > 1 && /[+-]/.test(raw.slice(1))) return;
-    // Enforce single comma
-    if ((raw.match(/,/g)?.length || 0) > 1) return;
+    // Enforce single dot
+    if ((raw.match(/\./g)?.length || 0) > 1) return;
     // Split check lengths
-    const [intPart, fracPart] = raw.split(',');
+    const [intPart, fracPart] = raw.split('.');
     if (intPart) {
       const digits = intPart.replace(/[+-]/,'');
       if (digits.length > 3) return;
@@ -69,19 +76,20 @@ export default function AddressSection({ formData, setFormData }: Props) {
     const isValid = coordRegex.test(raw);
     setLatValid(isValid);
     if (isValid) {
-      const numeric = parseFloat(raw.replace(',', '.'));
+      const numeric = parseFloat(raw);
       setFormData({ ...formData, latitude: numeric });
     } else {
       setFormData({ ...formData, latitude: undefined });
     }
   };
 
-  const handleLonChange = (raw: string) => {
-    if (/[^0-9+\-,]/.test(raw)) return;
+  const handleLonChange = (inp: string) => {
+    const raw = inp.replace(/,/g, '.');
+    if (/[^0-9+\-.]/.test(raw)) return;
     if ((raw.match(/[+-]/g)?.length || 0) > 1) return;
     if (raw.length > 1 && /[+-]/.test(raw.slice(1))) return;
-    if ((raw.match(/,/g)?.length || 0) > 1) return;
-    const [intPart, fracPart] = raw.split(',');
+    if ((raw.match(/\./g)?.length || 0) > 1) return;
+    const [intPart, fracPart] = raw.split('.');
     if (intPart) {
       const digits = intPart.replace(/[+-]/,'');
       if (digits.length > 3) return;
@@ -91,11 +99,19 @@ export default function AddressSection({ formData, setFormData }: Props) {
     const isValid = coordRegex.test(raw);
     setLonValid(isValid);
     if (isValid) {
-      const numeric = parseFloat(raw.replace(',', '.'));
+      const numeric = parseFloat(raw);
       setFormData({ ...formData, longitude: numeric });
     } else {
       setFormData({ ...formData, longitude: undefined });
     }
+  };
+
+  const handlePostalChange = (raw: string) => {
+    // Only digits; cut off at MAX_POSTAL_LENGTH
+    const digitsOnly = raw.replace(/\D/g, '').slice(0, MAX_POSTAL_LENGTH);
+    const isValid = /^\d{1,10}$/.test(digitsOnly) || digitsOnly.length === 0;
+    setPostalValid(isValid);
+    setFormData({ ...formData, postalCode: digitsOnly });
   };
 
   const [countries, setCountries] = useState<Country[]>([]);
@@ -198,18 +214,24 @@ export default function AddressSection({ formData, setFormData }: Props) {
         <CustomInput
           placeholder="Postal Code"
           value={formData.postalCode || ''}
-          onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
+          onChange={(e) => handlePostalChange(e.target.value)}
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
+          invalid={!postalValid && !!formData.postalCode}
           icon={<MailIcon sx={{ color: textColor }} />}
         />
+        {!postalValid && formData.postalCode && (
+          <Typography variant="caption" sx={{ color: theme.palette.error.main, mt: 0.5 }}>
+            Postal code must contain only digits (max {MAX_POSTAL_LENGTH}).
+          </Typography>
+        )}
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
         <Typography variant="body2" color={grey[500]}>Country (select to load states) *</Typography>
-        <CustomSelect
-          label={loadingCountry ? 'Loading countries…' : 'Country'}
+        <CustomAutocomplete
+          placeholder={loadingCountry ? 'Loading countries…' : 'Country'}
           value={formData.countryId ?? ''}
           onChange={(value) => {
             const id = typeof value === 'string' ? parseInt(value, 10) : (value as number);
@@ -219,13 +241,15 @@ export default function AddressSection({ formData, setFormData }: Props) {
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
+          icon={<PublicOutlinedIcon sx={{ color: textColor }} />}
+          disabled={loadingCountry}
         />
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
         <Typography variant="body2" color={grey[500]}>State/Region (loads after country)</Typography>
-        <CustomSelect
-          label={loadingState ? 'Loading states…' : 'State'}
+        <CustomAutocomplete
+          placeholder={loadingState ? 'Loading states…' : 'State'}
           value={formData.stateId ?? ''}
           onChange={(value) => {
             const id = typeof value === 'string' ? parseInt(value, 10) : (value as number);
@@ -235,13 +259,15 @@ export default function AddressSection({ formData, setFormData }: Props) {
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
+          icon={<MapOutlinedIcon sx={{ color: textColor }} />}
+          disabled={loadingState || !(formData.countryId && typeof formData.countryId === 'number')}
         />
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
         <Typography variant="body2" color={grey[500]}>City (loads after state) *</Typography>
-        <CustomSelect
-          label={loadingCity ? 'Loading cities…' : 'City'}
+        <CustomAutocomplete
+          placeholder={loadingCity ? 'Loading cities…' : 'City'}
           value={formData.cityId ?? ''}
           onChange={(value) => {
             const id = typeof value === 'string' ? parseInt(value, 10) : (value as number);
@@ -251,15 +277,17 @@ export default function AddressSection({ formData, setFormData }: Props) {
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
+          icon={<LocationCityOutlinedIcon sx={{ color: textColor }} />}
+          disabled={loadingCity || !(formData.stateId && typeof formData.stateId === 'number')}
         />
       </Box>
 
       
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
-        <Typography variant="body2" color={grey[500]}>Latitude coordinate for map placement (format ±DDD,DDDDDD) *</Typography>
+  <Typography variant="body2" color={grey[500]}>Latitude coordinate for map placement (±DDD with optional .DDDDDD, up to 6 decimals) *</Typography>
         <CustomInput
-          placeholder="e.g. +45,123456"
+          placeholder="e.g. +45.123456"
           value={latitudeInput}
           onChange={(e) => handleLatChange(e.target.value)}
           focusColor={focusColor}
@@ -270,15 +298,15 @@ export default function AddressSection({ formData, setFormData }: Props) {
         />
         {!latValid && latitudeInput.length > 0 && (
           <Typography variant="caption" sx={{ color: theme.palette.error.main, mt: 0.5 }}>
-            Invalid latitude format. Use ±DDD,DDDDDD (max 3 digits before, 6 after comma).
+            Invalid latitude format. Use ±DDD with optional .DDDDDD (max 3 digits before, up to 6 after dot).
           </Typography>
         )}
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
-        <Typography variant="body2" color={grey[500]}>Longitude coordinate for map placement (format ±DDD,DDDDDD) *</Typography>
+  <Typography variant="body2" color={grey[500]}>Longitude coordinate for map placement (±DDD with optional .DDDDDD, up to 6 decimals) *</Typography>
         <CustomInput
-          placeholder="e.g. -120,98765"
+          placeholder="e.g. -120.98765"
           value={longitudeInput}
           onChange={(e) => handleLonChange(e.target.value)}
           focusColor={focusColor}
@@ -289,7 +317,7 @@ export default function AddressSection({ formData, setFormData }: Props) {
         />
         {!lonValid && longitudeInput.length > 0 && (
           <Typography variant="caption" sx={{ color: theme.palette.error.main, mt: 0.5 }}>
-            Invalid longitude format. Use ±DDD,DDDDDD (max 3 digits before, 6 after comma).
+            Invalid longitude format. Use ±DDD with optional .DDDDDD (max 3 digits before, up to 6 after dot).
           </Typography>
         )}
       </Box>

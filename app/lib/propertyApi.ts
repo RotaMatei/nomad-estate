@@ -1,5 +1,28 @@
 import api from './api';
 import { PropertyFormData } from '../components/createPropertyComponents/types';
+import type {
+  CoolingSystemEnum,
+  HeatingSystemEnum,
+  KitchenEnum,
+  SecurityEnum,
+  UtilityEnum,
+  SmartHomeFeatureEnum,
+  OtherFeatureEnum,
+  InvestmentGoalTagEnum,
+  LocationBenefitTagEnum,
+} from '../components/createPropertyComponents/Enums';
+import type {
+  CoolingSystemCreateDto,
+  HeatingSystemCreateDto,
+  KitchenCreateDto,
+  SecurityCreateDto,
+  UtilityCreateDto,
+  SmartHomeFeatureCreateDto,
+  OtherFeatureCreateDto,
+  InvestmentGoalTagCreateDto,
+  LocationBenefitTagCreateDto,
+  PictureCreateDto,
+} from './propertyDtos';
 
 // Only these fields are MANDATORY for property creation
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- used for RequiredField type inference
@@ -87,6 +110,13 @@ export function validateAndMapPropertyDto(form: PropertyFormData) {
 
   const optionalNumber = (v: unknown): number | undefined => (typeof v === 'number' && !isNaN(v) && v >= 0 ? v : undefined);
   const optionalString = (v: unknown): string | undefined => (typeof v === 'string' && v.trim().length > 0 ? v : undefined);
+  const optionalStringOrArrayFirst = (v: unknown): string | undefined => {
+    if (Array.isArray(v)) {
+      const first = v.find(x => typeof x === 'string' && x.trim().length > 0);
+      return typeof first === 'string' ? first : undefined;
+    }
+    return optionalString(v);
+  };
   const optionalDate = (v: unknown): string | undefined => {
     if (typeof v !== 'string' || v.trim().length === 0) return undefined;
     const d = new Date(v);
@@ -124,7 +154,7 @@ export function validateAndMapPropertyDto(form: PropertyFormData) {
     totalArea: optionalNumber(form.totalArea) ?? 0,
     floors: optionalNumber(form.floors),  // nullable in schema
     energyEfficiencyRating: optionalString(form.energyEfficiencyRating) ?? 'A',
-    parking: optionalString(form.parking) ?? 'NONE',
+  parking: optionalStringOrArrayFirst(form.parking) ?? 'NONE',
     balconyType: optionalString(form.balconyType) ?? 'NONE',
     balconyTotalSize: optionalNumber(form.balconyTotalSize) ?? 0,
     balconyNumber: optionalNumber(form.balconyNumber) ?? 0,
@@ -134,14 +164,6 @@ export function validateAndMapPropertyDto(form: PropertyFormData) {
     availabilityDateStart: optionalDate(form.availabilityDateStart) ?? new Date().toISOString(),
     availabilityDateEnd: optionalDate(form.availabilityDateEnd),  // nullable in schema
     // Multi-select fields (take first value if array)
-    heatingSystem: optionalStringOrArray(form.heatingSystem) ?? 'NATURAL_GAS',
-    coolingSystem: optionalString(form.coolingSystem) ?? 'NO_COOLING',
-    security: optionalStringOrArray(form.security),
-    utility: optionalStringOrArray(form.utility),
-    smartHomeFeature: optionalStringOrArray(form.smartHomeFeature),
-    otherFeature: optionalStringOrArray(form.otherFeature),
-    investmentGoalTag: optionalStringOrArray(form.investmentGoalTag),
-    locationBenefitTag: optionalStringOrArray(form.locationBenefitTag),
   };
 
   return { ok: true as const, dto };
@@ -159,31 +181,122 @@ export async function createProperty(form: PropertyFormData) {
     // Create the property first
     const { data: createdProperty } = await api.post('/property/create', dto);
 
-    // Upload images if any exist
-    if (form.images && form.images.length > 0) {
-      const propertyId = createdProperty.id;
-      
-      try {
-        for (let i = 0; i < form.images.length; i++) {
-          const imageItem = form.images[i] as unknown;
-          // Expecting imageItem to be a hosted URL string (e.g., from imgbb)
-          const url = typeof imageItem === 'string' ? imageItem.trim() : '';
-          if (!/^https?:\/\//i.test(url)) {
-            console.warn('[createProperty] Skipping non-URL image item', imageItem);
-            continue;
-          }
+    const propertyId: string = createdProperty.id as string;
 
-          await api.post('/property/picture/create', {
-            propertyId,
-            imageData: url,
-            altText: `Property image ${i + 1}`,
-            isPrimary: i === 0, // First image is primary
-          });
-        }
-      } catch {
-        // Don't throw - property was created successfully, just images failed
-        // You might want to notify the user about partial failure
-      }
+    // Helper: normalize a string | string[] | undefined into an array of strings
+    const toArray = (v: unknown): string[] => {
+      if (!v) return [];
+      if (Array.isArray(v)) return v.map((x) => String(x)).filter((x) => x.trim().length > 0);
+      if (typeof v === 'string') return v.trim().length > 0 ? [v] : [];
+      return [];
+    };
+
+    // Fire-and-forget creation of related subtables based on provided form values.
+    // Failures in these should not rollback the base property creation.
+    const tasks: Promise<unknown>[] = [];
+
+    // Pictures (expects hosted URLs)
+    if (form.images && form.images.length > 0) {
+      const images = form.images as unknown[];
+      images.forEach((imageItem, i) => {
+        const url = typeof imageItem === 'string' ? imageItem.trim() : '';
+        if (!/^https?:\/\//i.test(url)) return; // skip non-URL items
+        const payload: PictureCreateDto = {
+          propertyId,
+          imageData: url,
+          altText: `Property image ${i + 1}`,
+          isPrimary: i === 0,
+        };
+        tasks.push(api.post('/property/picture/create', payload));
+      });
+    }
+
+    // HeatingSystem (may be single or multiple)
+    toArray(form.heatingSystem).forEach((hs) => {
+      const payload: HeatingSystemCreateDto = {
+        propertyId,
+        heatingSystem: hs as HeatingSystemEnum,
+      };
+      tasks.push(api.post('/property/heating-system/create', payload));
+    });
+
+    // CoolingSystem (single in form, create one if present)
+    toArray(form.coolingSystem).forEach((cs) => {
+      const payload: CoolingSystemCreateDto = {
+        propertyId,
+        coolingSystem: cs as CoolingSystemEnum,
+      };
+      tasks.push(api.post('/property/cooling-system/create', payload));
+    });
+
+    // Kitchen (single in form)
+    toArray(form.kitchen).forEach((k) => {
+      const payload: KitchenCreateDto = {
+        propertyId,
+        kitchen: k as KitchenEnum,
+      };
+      tasks.push(api.post('/property/kitchen/create', payload));
+    });
+
+    // Security (multi)
+    toArray(form.security).forEach((sec) => {
+      const payload: SecurityCreateDto = {
+        propertyId,
+        security: sec as SecurityEnum,
+      };
+      tasks.push(api.post('/property/security/create', payload));
+    });
+
+    // Utility (multi)
+    toArray(form.utility).forEach((u) => {
+      const payload: UtilityCreateDto = {
+        propertyId,
+        utility: u as UtilityEnum,
+      };
+      tasks.push(api.post('/property/utility/create', payload));
+    });
+
+    // SmartHomeFeature (multi)
+    toArray(form.smartHomeFeature).forEach((f) => {
+      const payload: SmartHomeFeatureCreateDto = {
+        propertyId,
+        smartHomeFeature: f as SmartHomeFeatureEnum,
+      };
+      tasks.push(api.post('/property/smart-home-feature/create', payload));
+    });
+
+    // OtherFeature (multi)
+    toArray(form.otherFeature).forEach((of) => {
+      const payload: OtherFeatureCreateDto = {
+        propertyId,
+        otherFeature: of as OtherFeatureEnum,
+      };
+      tasks.push(api.post('/property/other-feature/create', payload));
+    });
+
+    // InvestmentGoalTag (multi)
+    toArray(form.investmentGoalTag).forEach((g) => {
+      const payload: InvestmentGoalTagCreateDto = {
+        propertyId,
+        investmentGoalTag: g as InvestmentGoalTagEnum,
+      };
+      tasks.push(api.post('/property/investment-goal-tag/create', payload));
+    });
+
+    // LocationBenefitTag (multi)
+    toArray(form.locationBenefitTag).forEach((b) => {
+      const payload: LocationBenefitTagCreateDto = {
+        propertyId,
+        locationBenefitTag: b as LocationBenefitTagEnum,
+      };
+      tasks.push(api.post('/property/location-benefit-tag/create', payload));
+    });
+
+    // Execute all subtable creations in parallel, but don't block return; wait to propagate errors if any
+    try {
+      await Promise.all(tasks);
+    } catch {
+      // partial failures in subtable creation are tolerated
     }
 
     return createdProperty;
@@ -201,5 +314,69 @@ export async function createProperty(form: PropertyFormData) {
       }
     }
     throw err;
+  }
+}
+
+// Retrieve all base properties for a given agency (portfolio)
+export interface PortfolioProperty {
+  id: string | number;
+  title?: string;
+  price?: number;
+  yield?: number;
+  score?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  rooms?: number;
+  cityId?: number;
+  countryId?: number;
+}
+
+export async function getPortfolioForAgency(agencyId: string): Promise<PortfolioProperty[]> {
+  try {
+    const { data } = await api.get(`/property/retrieve-portfolio/${agencyId}`);
+    return Array.isArray(data) ? (data as PortfolioProperty[]) : [];
+  } catch {
+    return [] as PortfolioProperty[];
+  }
+}
+
+// Retrieve full property details (including pictures and related subtables)
+// Minimal details type for UI needs
+export interface PropertyDetails {
+  id?: string | number;
+  title?: string;
+  price?: number;
+  cityId?: number;
+  countryId?: number;
+  picture?: Array<{ imageData?: string }>;
+  propertyPictures?: Array<{ imageData?: string }>;
+  [k: string]: unknown;
+}
+
+export async function getPropertyDetails(propertyId: string): Promise<PropertyDetails | null> {
+  try {
+    const { data } = await api.get(`/property/retrieve-details/${propertyId}`);
+    return data as PropertyDetails;
+  } catch {
+    return null;
+  }
+}
+
+// Analytics: Saved (likes)
+export async function getSavedForUser(userId: string) {
+  try {
+    const { data } = await api.get(`/analytics/saved/retrieve/for-user/${userId}`);
+    return Array.isArray(data) ? (data as Array<{ propertyId: string; userId: string; createdAt?: string }>) : [];
+  } catch {
+    return [] as Array<{ propertyId: string; userId: string; createdAt?: string }>;
+  }
+}
+
+export async function getSavesForProperty(propertyId: string) {
+  try {
+    const { data } = await api.get(`/analytics/saved/retrieve/for-property/${propertyId}`);
+    return Array.isArray(data) ? (data as Array<{ propertyId: string; userId: string; createdAt?: string }>) : [];
+  } catch {
+    return [] as Array<{ propertyId: string; userId: string; createdAt?: string }>;
   }
 }

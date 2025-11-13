@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import BasicInfoSection from '../createPropertyComponents/DetailsSection';
 import AddressSection from '../createPropertyComponents/AddressSection';
@@ -18,6 +18,8 @@ interface CreatePropertyFormProps {
 export default function CreatePropertyForm({ onCancel, onSuccess }: CreatePropertyFormProps) {
   const [formData, setFormData] = useState<PropertyFormData>({});
   const [submitting, setSubmitting] = useState(false);
+  const [showGlare, setShowGlare] = useState(false);
+  const wasReadyRef = useRef<boolean>(false);
 
   // Auto-fill agency ID from token
   useEffect(() => {
@@ -29,6 +31,68 @@ export default function CreatePropertyForm({ onCancel, onSuccess }: CreateProper
       }));
     }
   }, []);
+
+  // Determine if all required fields are completed
+  const isReadyToSubmit = useMemo(() => {
+    const s = formData as Record<string, unknown>;
+    const hasString = (k: string) => typeof s[k] === 'string' && String(s[k]).trim().length > 0;
+    const hasNumber = (k: string) => typeof s[k] === 'number' && !isNaN(s[k] as number);
+    const hasStringOrArray = (k: string) => {
+      const v = s[k];
+      if (typeof v === 'string') return v.trim().length > 0;
+      if (Array.isArray(v)) return v.length > 0 && v.every(x => typeof x === 'string' && String(x).trim().length > 0);
+      return false;
+    };
+
+    const stringReq = [
+      'agencyId',
+      'agentId',
+      'title',
+      'description',
+      'type',
+      'status',
+      'streetAddress',
+      'orientation',
+      // UI marks postal code required
+      'postalCode',
+    ];
+    const numberReq = [
+      'price',
+      'countryId',
+      'cityId',
+      'latitude',
+      'longitude',
+      'rooms',
+      'bedrooms',
+      'bathrooms',
+      'floorLevel',
+      'totalArea',
+    ];
+    // Fields displayed with * in the UI but not strictly required by backend
+    const uiOnlyRequired = [
+      'yield', // DetailsSection marks yield as required
+    ];
+    const multiSelectRequired = [
+      'parking', // FeatureSection label shows *
+    ];
+
+    const stringsOk = stringReq.every(hasString);
+    const numbersOk = numberReq.every(hasNumber);
+    const uiOk = uiOnlyRequired.every(hasNumber);
+    const multiOk = multiSelectRequired.every(hasStringOrArray);
+    return stringsOk && numbersOk && uiOk && multiOk;
+  }, [formData]);
+
+  // When the form becomes ready (disabled -> enabled), flash a glare animation once
+  useEffect(() => {
+    const previouslyReady = wasReadyRef.current;
+    if (!previouslyReady && isReadyToSubmit && !submitting) {
+      setShowGlare(true);
+      const t = setTimeout(() => setShowGlare(false), 900);
+      return () => clearTimeout(t);
+    }
+    wasReadyRef.current = isReadyToSubmit;
+  }, [isReadyToSubmit, submitting]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,9 +129,33 @@ export default function CreatePropertyForm({ onCancel, onSuccess }: CreateProper
           type="submit"
           variant="contained"
           color="primary"
-          disabled={submitting}
+          disabled={submitting || !isReadyToSubmit}
+          sx={{ 
+            position: 'relative', 
+            overflow: 'hidden',
+            '@keyframes glare-sweep': {
+              from: { transform: 'translateX(0%)' },
+              to: { transform: 'translateX(260%)' },
+            },
+          }}
         >
           {submitting ? 'Submitting…' : 'Submit'}
+          {showGlare && (
+            <Box
+              aria-hidden
+              sx={{
+                pointerEvents: 'none',
+                position: 'absolute',
+                top: 0,
+                left: '-30%',
+                height: '100%',
+                width: '30%',
+                background: 'linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%)',
+                filter: 'blur(1px)',
+                animation: 'glare-sweep 0.9s ease-out forwards',
+              }}
+            />
+          )}
         </Button>
         {onCancel && (
           <Button

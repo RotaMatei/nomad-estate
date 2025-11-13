@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Location, MapProps } from "./location";
 import { shouldShowGlobe } from "./utils";
 import styles from "./mapGlobe.module.css";
@@ -23,6 +23,15 @@ interface Props {
 export const MapGlobeSwitcher = ({ locations, onReload, onSelect }: Props) => {
   const [zoom, setZoom] = useState(5);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+
+  // Debug: log locations passed to the globe/map
+  useEffect(() => {
+    try {
+      // Log count and a small preview
+      // eslint-disable-next-line no-console
+      console.log('[MapGlobeSwitcher] locations count =', locations?.length ?? 0, locations?.slice?.(0, 5));
+    } catch {}
+  }, [locations]);
 
   const showGlobe = useMemo(() => {
     return zoom < 3 || shouldShowGlobe(locations);

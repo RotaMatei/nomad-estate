@@ -14,6 +14,7 @@ import api from '@/app/lib/api';
 import TopCities from '../../components/investorsDahsboardComponents/topCities';
 import ListingCard from '../../components/investorsDahsboardComponents/ListingCard';
 import CreatePropertyForm from '../../components/investorsDahsboardComponents/CreatePropertyForm';
+import { getPortfolioForAgency, getPropertyDetails, getSavedForUser, getSavesForProperty, PortfolioProperty, PropertyDetails } from '@/app/lib/propertyApi';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 
@@ -74,6 +75,17 @@ export default function InvestmentDashboard() {
   // Selected content within the DASHBOARD section (no full page reload)
   const [dashboardTab, setDashboardTab] = React.useState<string>('Market Insights');
   const [showCreateProperty, setShowCreateProperty] = React.useState<boolean>(false);
+  const [agencyPortfolio, setAgencyPortfolio] = React.useState<PortfolioProperty[]>([]);
+  const [portfolioImages, setPortfolioImages] = React.useState<Record<string, string>>({});
+  const [cityMap, setCityMap] = React.useState<Record<number, string>>({});
+  const [countryMap, setCountryMap] = React.useState<Record<number, string>>({});
+  const [averages, setAverages] = React.useState<Record<string, number>>({});
+  // Track the agency id used for portfolio fetches so we can refresh after creating a listing
+  const [agencyIdForPortfolio, setAgencyIdForPortfolio] = React.useState<string | null>(null);
+  // Likes section state (for regular users)
+  const [likedProperties, setLikedProperties] = React.useState<PortfolioProperty[]>([]);
+  const [likedImages, setLikedImages] = React.useState<Record<string, string>>({});
+  const [likedSavesCount, setLikedSavesCount] = React.useState<Record<string, number>>({});
 
   const isAgent = profileRole === 'AGENT';
   const sidebarColorMain = isAgent ? theme.palette.primary.main : theme.palette.secondary.main;
@@ -97,6 +109,71 @@ export default function InvestmentDashboard() {
     { title: 'DASHBOARD', items: dashboardItems },
     { title: 'GENERAL', items: generalItems },
   ], [dashboardItems]);
+
+  // Helper to reload the agency portfolio and related derived state
+  const reloadPortfolio = React.useCallback(async () => {
+    if (!agencyIdForPortfolio) return;
+    try {
+      // eslint-disable-next-line no-console
+      console.log('[InvestorsDashboard] Reloading portfolio for agencyId:', agencyIdForPortfolio);
+      const list = await getPortfolioForAgency(agencyIdForPortfolio);
+      setAgencyPortfolio(list);
+
+      // Recompute averages
+  type NumericKeys = 'price' | 'yield' | 'score' | 'bedrooms' | 'bathrooms' | 'rooms';
+  const nums = (arr: PortfolioProperty[], key: NumericKeys) => arr.map((p) => p[key]).filter((n): n is number => typeof n === 'number' && !isNaN(n));
+      const avg = (ns: number[]) => (ns.length ? ns.reduce((a, b) => a + b, 0) / ns.length : 0);
+      const avgPrice = avg(nums(list, 'price'));
+      const avgYield = avg(nums(list, 'yield'));
+      const avgScore = avg(nums(list, 'score'));
+      const avgBedrooms = avg(nums(list, 'bedrooms'));
+      const avgBathrooms = avg(nums(list, 'bathrooms'));
+      const avgRooms = avg(nums(list, 'rooms'));
+      setAverages({ price: avgPrice, yield: avgYield, score: avgScore, bedrooms: avgBedrooms, bathrooms: avgBathrooms, rooms: avgRooms });
+
+      // Prefetch images for display (limit to first 12)
+      const first = list.slice(0, 12);
+      const imageEntries: Record<string, string> = {};
+      await Promise.all(
+        first.map(async (p: PortfolioProperty) => {
+          const det = await getPropertyDetails(String(p.id));
+          const pics = (det?.picture || det?.propertyPictures || []) as Array<{ imageData?: string }>;
+          const url = pics.find((ph) => typeof ph?.imageData === 'string' && (ph.imageData as string).length > 0)?.imageData as string | undefined;
+          if (url) imageEntries[String(p.id)] = url;
+        })
+      );
+      setPortfolioImages(imageEntries);
+
+      // Update city/country maps with any new ids
+  const uniqueCityIds = Array.from(new Set(list.map((p) => p.cityId).filter((v): v is number => typeof v === 'number')));
+  const uniqueCountryIds = Array.from(new Set(list.map((p) => p.countryId).filter((v): v is number => typeof v === 'number')));
+      const newCityMap: Record<number, string> = { ...cityMap };
+      const newCountryMap: Record<number, string> = { ...countryMap };
+      await Promise.all([
+        ...uniqueCityIds
+          .filter((id: number) => !newCityMap[id])
+          .map(async (id: number) => {
+            try {
+              const r = await api.get(`/cities/retrieve/${id}`);
+              if (r?.data?.name) newCityMap[id] = String(r.data.name);
+            } catch {}
+          }),
+        ...uniqueCountryIds
+          .filter((id: number) => !newCountryMap[id])
+          .map(async (id: number) => {
+            try {
+              const r = await api.get(`/countries/retrieve/${id}`);
+              if (r?.data?.name) newCountryMap[id] = String(r.data.name);
+            } catch {}
+          }),
+      ]);
+      setCityMap(newCityMap);
+      setCountryMap(newCountryMap);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn('[InvestorsDashboard] Failed to reload portfolio', e);
+    }
+  }, [agencyIdForPortfolio, cityMap, countryMap]);
 
   // Ensure selected tab stays valid if role changes filters
   React.useEffect(() => {
@@ -148,10 +225,12 @@ export default function InvestmentDashboard() {
         firstName?: string; lastName?: string; email?: string; role?: string;
         avatarUrl?: string; avatar?: string; imageUrl?: string; image?: string;
         profilePictureUrl?: string; profilePicture?: string;
+        // Some backends include agencyId for AGENT users
+        agencyId?: string;
       }
-      interface FetchedAgency { email?: string; companyName?: string; profilePictureData?: string }
+      interface FetchedAgency { id?: string; email?: string; companyName?: string; profilePictureData?: string }
 
-      const fetchUser = async () => {
+      const fetchUser = async (): Promise<FetchedUser | null> => {
         // Use api client without manual Authorization header to benefit from interceptor
         const resUser = await api.get<FetchedUser>(`/user/retrieve/${entityId}`);
         
@@ -177,9 +256,10 @@ export default function InvestmentDashboard() {
             setProfileAvatarUrl(avatar);
           }
         }
+        return u;
       };
 
-      const fetchAgency = async () => {
+      const fetchAgency = async (): Promise<FetchedAgency | null> => {
         // Use api client without manual Authorization header to benefit from interceptor
         const resAgency = await api.get<FetchedAgency>(`/agency/retrieve/${entityId}`);
         const a: FetchedAgency = (resAgency.data || {}) as FetchedAgency;
@@ -191,19 +271,186 @@ export default function InvestmentDashboard() {
             setProfileAvatarUrl(`data:image/png;base64,${a.profilePictureData}`);
           }
         }
+        return a ?? null;
       };
 
       // Try user first (covers both regular users and agent users)
+      let fetchedUser: FetchedUser | null = null;
+      let fetchedAgency: FetchedAgency | null = null;
       try {
-        await fetchUser();
+        fetchedUser = await fetchUser();
       } catch (usrErr) {
-        // User fetch failed; fall back to agency fetch
-        // If user fetch fails or returns empty, try agency (for direct agency login)
+        // User fetch failed; fall back to agency fetch (for direct agency login)
         try {
-          await fetchAgency();
+          fetchedAgency = await fetchAgency();
         } catch (agErr) {
           console.warn('Both user and agency endpoints failed', { userError: usrErr, agencyError: agErr });
         }
+      }
+      // If user fetch succeeded but indicates AGENT role, we may still need agency info
+      if (!fetchedAgency) {
+        try {
+          const roleFromUser = fetchedUser?.role || payload?.role || localStorage.getItem('role') || undefined;
+          if (roleFromUser === 'AGENT') {
+            // Attempt agency lookup using same id (backend may resolve agency by id when logged as agency)
+            fetchedAgency = await fetchAgency().catch(() => null);
+          }
+        } catch { /* ignore */ }
+      }
+
+  // After determining role/agency, load portfolio deterministically if we have an agency context
+      try {
+        // Prefer explicit agency id from agency fetch, otherwise fall back to entityId
+        const portfolioAgencyId = (fetchedAgency && (fetchedAgency.id || entityId))
+          || (fetchedUser?.role === 'AGENT' && (fetchedUser.agencyId || localStorage.getItem('agencyId') || entityId))
+          || null;
+        if (portfolioAgencyId) {
+          setAgencyIdForPortfolio(String(portfolioAgencyId));
+          // eslint-disable-next-line no-console
+          console.log('[InvestorsDashboard] Fetching portfolio for agencyId:', portfolioAgencyId);
+          const list = await getPortfolioForAgency(portfolioAgencyId);
+          // eslint-disable-next-line no-console
+          console.log('[InvestorsDashboard] Portfolio retrieved. Count =', Array.isArray(list) ? list.length : 0);
+          setAgencyPortfolio(list);
+
+          // Compute averages on base property fields
+          type NumericKeys2 = 'price' | 'yield' | 'score' | 'bedrooms' | 'bathrooms' | 'rooms';
+          const nums = (arr: PortfolioProperty[], key: NumericKeys2) => arr.map((p) => p[key]).filter((n): n is number => typeof n === 'number' && !isNaN(n));
+          const avg = (ns: number[]) => (ns.length ? ns.reduce((a, b) => a + b, 0) / ns.length : 0);
+          const avgPrice = avg(nums(list, 'price'));
+          const avgYield = avg(nums(list, 'yield'));
+          const avgScore = avg(nums(list, 'score'));
+          const avgBedrooms = avg(nums(list, 'bedrooms'));
+          const avgBathrooms = avg(nums(list, 'bathrooms'));
+          const avgRooms = avg(nums(list, 'rooms'));
+          const avgs = { price: avgPrice, yield: avgYield, score: avgScore, bedrooms: avgBedrooms, bathrooms: avgBathrooms, rooms: avgRooms };
+          setAverages(avgs);
+          // eslint-disable-next-line no-console
+          console.log('[InvestorsDashboard] Computed portfolio averages:', avgs);
+
+          // Prefetch images for the first 12 properties for display
+          const first = list.slice(0, 12);
+          const imageEntries: Record<string, string> = {};
+          await Promise.all(
+            first.map(async (p: PortfolioProperty) => {
+              const det = await getPropertyDetails(String(p.id));
+              const pics = (det?.picture || det?.propertyPictures || []) as Array<{ imageData?: string }>;
+              const url = pics.find((ph) => typeof ph?.imageData === 'string' && (ph.imageData as string).length > 0)?.imageData as string | undefined;
+              if (url) imageEntries[String(p.id)] = url;
+            })
+          );
+          setPortfolioImages(imageEntries);
+          // eslint-disable-next-line no-console
+          console.log('[InvestorsDashboard] Prefetched images for listings:', Object.keys(imageEntries).length, Object.values(imageEntries).slice(0, 3));
+
+          // Resolve city/country names for location labels (best-effort)
+          const uniqueCityIds = Array.from(new Set(list.map((p) => p.cityId).filter((v): v is number => typeof v === 'number')));
+          const uniqueCountryIds = Array.from(new Set(list.map((p) => p.countryId).filter((v): v is number => typeof v === 'number')));
+          const newCityMap: Record<number, string> = { ...cityMap };
+          const newCountryMap: Record<number, string> = { ...countryMap };
+          await Promise.all([
+            ...uniqueCityIds
+              .filter((id: number) => !newCityMap[id])
+              .map(async (id: number) => {
+                try {
+                  const r = await api.get(`/cities/retrieve/${id}`);
+                  if (r?.data?.name) newCityMap[id] = String(r.data.name);
+                } catch {}
+              }),
+            ...uniqueCountryIds
+              .filter((id: number) => !newCountryMap[id])
+              .map(async (id: number) => {
+                try {
+                  const r = await api.get(`/countries/retrieve/${id}`);
+                  if (r?.data?.name) newCountryMap[id] = String(r.data.name);
+                } catch {}
+              }),
+          ]);
+          setCityMap(newCityMap);
+          setCountryMap(newCountryMap);
+          // eslint-disable-next-line no-console
+          console.log('[InvestorsDashboard] Resolved names:', { cities: Object.keys(newCityMap).length, countries: Object.keys(newCountryMap).length });
+        } else {
+          // eslint-disable-next-line no-console
+          console.log('[InvestorsDashboard] Skipped portfolio fetch — no agency context resolved');
+        }
+      } catch (e) {
+        // ignore portfolio errors for now
+      }
+
+      // Likes section: For regular users, load saved properties and their save counts
+      try {
+        const roleFromUser = fetchedUser?.role || payload?.role || localStorage.getItem('role') || undefined;
+        if (roleFromUser && roleFromUser !== 'AGENT') {
+          // eslint-disable-next-line no-console
+          console.log('[InvestorsDashboard] Fetching liked properties for userId:', entityId);
+          const saved = await getSavedForUser(entityId);
+          const propertyIds = Array.from(new Set(saved.map(s => String(s.propertyId)).filter(Boolean)));
+          // eslint-disable-next-line no-console
+          console.log('[InvestorsDashboard] Liked property IDs:', propertyIds);
+
+          // Fetch details, images and save counts in parallel (limit to first 12 for UI)
+          const firstIds = propertyIds.slice(0, 12);
+          const details = await Promise.all(firstIds.map(async (pid) => {
+            const det = await getPropertyDetails(pid);
+            return { pid, det } as const;
+          }));
+          const savesCountsEntries = await Promise.all(firstIds.map(async (pid) => {
+            const arr = await getSavesForProperty(pid);
+            return [pid, Array.isArray(arr) ? arr.length : 0] as const;
+          }));
+          const imagesMap: Record<string, string> = {};
+          const props: PortfolioProperty[] = [];
+          for (const { pid, det } of details) {
+            if (det) {
+              const pics = (det?.picture || det?.propertyPictures || []) as Array<{ imageData?: string }>;
+              const url = pics.find((ph) => typeof ph?.imageData === 'string' && (ph.imageData as string).length > 0)?.imageData as string | undefined;
+              if (url) imagesMap[pid] = url;
+              // Build minimal base property to render
+              const base: PortfolioProperty = {
+                id: det?.id ?? pid,
+                title: det?.title ?? `Property ${pid.slice(0, 6)}`,
+                price: det?.price ?? 0,
+                cityId: det?.cityId ?? 0,
+                countryId: det?.countryId ?? 0,
+              };
+              props.push(base);
+            }
+          }
+          setLikedImages(imagesMap);
+          setLikedProperties(props);
+          setLikedSavesCount(Object.fromEntries(savesCountsEntries));
+          // Resolve city/country names (reuse maps)
+          const uniqueCityIds = Array.from(new Set(props.map((p) => p.cityId).filter((v): v is number => typeof v === 'number')));
+          const uniqueCountryIds = Array.from(new Set(props.map((p) => p.countryId).filter((v): v is number => typeof v === 'number')));
+          const newCityMap: Record<number, string> = { ...cityMap };
+          const newCountryMap: Record<number, string> = { ...countryMap };
+          await Promise.all([
+            ...uniqueCityIds
+              .filter((id: number) => !newCityMap[id])
+              .map(async (id: number) => {
+                try {
+                  const r = await api.get(`/cities/retrieve/${id}`);
+                  if (r?.data?.name) newCityMap[id] = String(r.data.name);
+                } catch {}
+              }),
+            ...uniqueCountryIds
+              .filter((id: number) => !newCountryMap[id])
+              .map(async (id: number) => {
+                try {
+                  const r = await api.get(`/countries/retrieve/${id}`);
+                  if (r?.data?.name) newCountryMap[id] = String(r.data.name);
+                } catch {}
+              }),
+          ]);
+          setCityMap(newCityMap);
+          setCountryMap(newCountryMap);
+          // eslint-disable-next-line no-console
+          console.log('[InvestorsDashboard] Liked properties loaded:', { count: props.length });
+        }
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn('[InvestorsDashboard] Failed to load liked properties', e);
       }
     })();
 
@@ -317,7 +564,22 @@ export default function InvestmentDashboard() {
                     <YieldGraph colorScheme={isAgent ? 'primary' : 'secondary'} />
                   </Grid>
                 </Grid>
-                <TopMetrics colorScheme={isAgent ? 'primary' : 'secondary'} />
+                <TopMetrics
+                  colorScheme={isAgent ? 'primary' : 'secondary'}
+                  metrics={(() => {
+                    if (!isAgent || !agencyPortfolio.length) return [];
+                    const fmtPct = (n: number) => `${(n || 0).toFixed(1)}%`;
+                    const fmtMoney = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n || 0);
+                    return [
+                      { label: 'Portfolio Size', value: agencyPortfolio.length },
+                      { label: 'Avg. ROI', value: fmtPct(averages.yield ?? 0) },
+                      { label: 'Avg. Bedrooms', value: (averages.bedrooms ?? 0).toFixed(1) },
+                      { label: 'Avg. Score', value: (averages.score ?? 0).toFixed(1) },
+                      { label: 'Avg. Price', value: fmtMoney(averages.price ?? 0) },
+                      { label: 'Avg. Rental Yield', value: fmtPct(averages.yield ?? 0) },
+                    ];
+                  })()}
+                />
                 <Grid container spacing={3} sx={{ mt: 2 }}>
                   <Grid size={{ xs: 12, lg: 15 }}>
                     <VolumeGraph colorScheme={isAgent ? 'primary' : 'secondary'} />
@@ -376,20 +638,29 @@ export default function InvestmentDashboard() {
                         />
                       </Grid>
 
-                      {/* Sample Listing Cards */}
-                      {listingsSampleData.map((listing) => (
-                        <Grid key={listing.id} size={{ xs: 12, sm: 4, md: 3 }}>
-                          <ListingCard
-                            id={listing.id}
-                            title={listing.title}
-                            location={listing.location}
-                            price={listing.price}
-                            likes={listing.likes}
-                            saves={listing.saves}
-                            colorScheme={isAgent ? 'primary' : 'secondary'}
-                          />
-                        </Grid>
-                      ))}
+                      {/* Portfolio Listing Cards (real data) */}
+                      {agencyPortfolio.map((p) => {
+                        const id = String(p.id);
+                        const city = cityMap[p.cityId as number] || `City #${p.cityId}`;
+                        const country = countryMap[p.countryId as number] || '';
+                        const location = country ? `${city}, ${country}` : city;
+                        const price = typeof p.price === 'number' ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(p.price) : String(p.price ?? '');
+                        const imageUrl = portfolioImages[id];
+                        return (
+                          <Grid key={id} size={{ xs: 12, sm: 4, md: 3 }}>
+                            <ListingCard
+                              id={id}
+                              title={p.title || `Property ${id.slice(0, 6)}`}
+                              location={location}
+                              price={price}
+                              likes={0}
+                              saves={0}
+                              imageUrl={imageUrl}
+                              colorScheme={isAgent ? 'primary' : 'secondary'}
+                            />
+                          </Grid>
+                        );
+                      })}
                     </Grid>
                   </>
                 ) : (
@@ -406,9 +677,9 @@ export default function InvestmentDashboard() {
                     </Box>
                     <CreatePropertyForm 
                       onCancel={() => setShowCreateProperty(false)}
-                      onSuccess={() => {
+                      onSuccess={async () => {
                         setShowCreateProperty(false);
-                        // Optionally refresh listings here
+                        await reloadPortfolio();
                       }}
                     />
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'baseline', gap: 1, mt: 4, flexWrap: 'nowrap' }}>
@@ -424,9 +695,77 @@ export default function InvestmentDashboard() {
                 )}
               </>
             ) : (
-              <Box sx={{ color: theme.palette.text.primary, fontSize: 16, opacity: 0.9 }}>
-                Placeholder content for: {dashboardTab}
-              </Box>
+              dashboardTab === 'Liked Properties & Inquiries' ? (
+                <>
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 1.5, mb: 4, mt:1 }}>
+                    <Typography variant="h6" sx={{ color: 'text.info' }}>
+                      Liked Properties & Inquiries
+                    </Typography>
+                    <IconButton aria-label="Open profile" onClick={() => router.push('/user')} sx={{ p: 0 }}>
+                      <Avatar
+                        src={profileAvatarUrl || undefined}
+                        sx={{
+                          width: 36,
+                          height: 36,
+                          bgcolor:'#e5e7eb',
+                          color:theme.palette.text.primary,
+                          fontWeight: 600,
+                        }}
+                      >
+                        {!profileAvatarUrl ? (profileName?.trim()?.charAt(0) || 'U').toUpperCase() : null}
+                      </Avatar>
+                    </IconButton>
+                  </Box>
+                  <Typography variant="subtitle2" gutterBottom sx={{ color: theme.palette.text.secondary, mb: 2 }}>
+                    Your saved properties
+                  </Typography>
+                  <Grid container spacing={3}>
+                    {likedProperties.length === 0 ? (
+                      <Grid size={{ xs: 12 }}>
+                        <Box sx={{ color: theme.palette.text.secondary, fontStyle: 'italic' }}>
+                          You haven’t saved any properties yet.
+                        </Box>
+                      </Grid>
+                    ) : (
+                      likedProperties.map((p) => {
+                        const id = String(p.id);
+                        const city = cityMap[p.cityId as number] || `City #${p.cityId}`;
+                        const country = countryMap[p.countryId as number] || '';
+                        const location = country ? `${city}, ${country}` : city;
+                        const price = typeof p.price === 'number' ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(p.price) : String(p.price ?? '');
+                        const imageUrl = likedImages[id];
+                        const savesCount = likedSavesCount[id] ?? 0;
+                        return (
+                          <Grid key={id} size={{ xs: 12, sm: 6, md: 4 }}>
+                            <ListingCard
+                              id={id}
+                              title={p.title || `Property ${id.slice(0, 6)}`}
+                              location={location}
+                              price={price}
+                              likes={savesCount}
+                              saves={savesCount}
+                              imageUrl={imageUrl}
+                              colorScheme={'secondary'}
+                            />
+                          </Grid>
+                        );
+                      })
+                    )}
+                  </Grid>
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'baseline', gap: 1, mt: 4, flexWrap: 'nowrap' }}>
+                    <Typography component="span" variant="subtitle1" sx={{ fontWeight: 300, color: theme.palette.grey[200], fontStyle: 'italic', fontSize:'12px', whiteSpace: 'nowrap' }}>
+                      Global Investment Platform
+                    </Typography>
+                    <Typography component="span" variant="subtitle1" sx={{ fontWeight: 500, color: 'primary.main', whiteSpace: 'nowrap' }}>
+                      Nomad Estate
+                    </Typography>
+                  </Box>
+                </>
+              ) : (
+                <Box sx={{ color: theme.palette.text.primary, fontSize: 16, opacity: 0.9 }}>
+                  Placeholder content for: {dashboardTab}
+                </Box>
+              )
             )}
           </Box>
         </Grid>

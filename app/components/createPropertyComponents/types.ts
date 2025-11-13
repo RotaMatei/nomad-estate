@@ -1,3 +1,21 @@
+import type {
+  PropertyTypeEnum,
+  StatusEnum,
+  EnergyRatingEnum,
+  OrientationEnum,
+  ParkingEnum,
+  BalconyTypeEnum,
+  HeatingSystemEnum,
+  CoolingSystemEnum,
+  KitchenEnum,
+  SecurityEnum,
+  UtilityEnum,
+  SmartHomeFeatureEnum,
+  OtherFeatureEnum,
+  InvestmentGoalTagEnum,
+  LocationBenefitTagEnum,
+} from './Enums';
+
 export interface PropertyFormData {
   streetAddress?: string;
   postalCode?: string;
@@ -10,26 +28,26 @@ export interface PropertyFormData {
   agentId?: string;
   title?: string;
   description?: string;
-  type?: string; // Could be PropertyTypeEnum
-  status?: string; // Could be StatusEnum
+  type?: PropertyTypeEnum;
+  status?: StatusEnum;
   price?: number;
   yield?: number;
   score?: number;
-  energyEfficiencyRating?: string;
-  orientation?: string;
-  parking?: string;
-  balconyType?: string;
+  energyEfficiencyRating?: EnergyRatingEnum;
+  orientation?: OrientationEnum;
+  parking?: ParkingEnum | ParkingEnum[];
+  balconyType?: BalconyTypeEnum;
   balconyTotalSize?: number;
   balconyNumber?: number;
-  heatingSystem?: string | string[];
-  coolingSystem?: string;
-  kitchen?: string;
-  security?: string | string[];
-  utility?: string | string[];
-  smartHomeFeature?: string | string[];
-  otherFeature?: string | string[];
-  investmentGoalTag?: string | string[];
-  locationBenefitTag?: string | string[];
+  heatingSystem?: HeatingSystemEnum | HeatingSystemEnum[];
+  coolingSystem?: CoolingSystemEnum | CoolingSystemEnum[];
+  kitchen?: KitchenEnum | KitchenEnum[];
+  security?: SecurityEnum | SecurityEnum[];
+  utility?: UtilityEnum | UtilityEnum[];
+  smartHomeFeature?: SmartHomeFeatureEnum | SmartHomeFeatureEnum[];
+  otherFeature?: OtherFeatureEnum | OtherFeatureEnum[];
+  investmentGoalTag?: InvestmentGoalTagEnum | InvestmentGoalTagEnum[];
+  locationBenefitTag?: LocationBenefitTagEnum | LocationBenefitTagEnum[];
   ownershipStatus?: boolean;
   propertyTaxes?: number;
   HOAFees?: number;

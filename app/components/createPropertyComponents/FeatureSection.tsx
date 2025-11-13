@@ -55,7 +55,15 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
   const availabilityStartRef = useRef<HTMLInputElement | null>(null);
   const availabilityEndRef = useRef<HTMLInputElement | null>(null);
 
-  const enumOptions = (values: readonly string[]) => values.map(v => ({ value: v, label: v }));
+  const enumOptions = (values: readonly string[]) => {
+    const pretty = (s: string) => s
+      .replace(/_/g, ' ')
+      .toLowerCase()
+      .split(' ')
+      .map(w => (w ? w[0].toUpperCase() + w.slice(1) : w))
+      .join(' ');
+    return values.map(v => ({ value: v, label: pretty(String(v)) }));
+  };
   const toInt = (v: string) => (v === '' ? undefined : parseInt(v, 10));
   const toFloat = (v: string) => (v === '' ? undefined : parseFloat(v));
 
@@ -71,61 +79,61 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
     }
   };
 
-  // Property Taxes and HOA Fees format: up to 6 digits, optional comma and up to 3 decimals
+  // Property Taxes and HOA Fees format: up to 6 digits, optional dot and up to 3 decimals
   const [propertyTaxesInput, setPropertyTaxesInput] = useState<string>('');
   const [propertyTaxesValid, setPropertyTaxesValid] = useState<boolean>(true);
   const [hoaFeesInput, setHoaFeesInput] = useState<string>('');
   const [hoaFeesValid, setHoaFeesValid] = useState<boolean>(true);
-  const taxesFeesRegex = /^\d{1,6}(,\d{1,3})?$/;
+  const taxesFeesRegex = /^\d{1,6}(\.\d{0,3})?$/; // allow optional decimals up to 3
 
   // Initialize from formData if present
   useEffect(() => {
     if (formData.propertyTaxes !== undefined) {
       const raw = (Math.round((formData.propertyTaxes + Number.EPSILON) * 1000) / 1000).toFixed(3);
-      const trimmed = raw.replace(/0+$/, '').replace(/\.$/, '');
-      const formatted = trimmed.replace('.', ',');
+      const formatted = raw.replace(/0+$/, '').replace(/\.$/, '');
       setPropertyTaxesInput(formatted);
       setPropertyTaxesValid(taxesFeesRegex.test(formatted));
     }
     if (formData.HOAFees !== undefined) {
       const raw = (Math.round((formData.HOAFees + Number.EPSILON) * 1000) / 1000).toFixed(3);
-      const trimmed = raw.replace(/0+$/, '').replace(/\.$/, '');
-      const formatted = trimmed.replace('.', ',');
+      const formatted = raw.replace(/0+$/, '').replace(/\.$/, '');
       setHoaFeesInput(formatted);
       setHoaFeesValid(taxesFeesRegex.test(formatted));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleTaxesChange = (raw: string) => {
-    // allow only digits and a single comma
-    if (/[^0-9,]/.test(raw)) return;
-    if ((raw.match(/,/g)?.length || 0) > 1) return;
-    const [intPart = '', fracPart = ''] = raw.split(',');
+  const handleTaxesChange = (input: string) => {
+    const raw = input.replace(/,/g, '.');
+    // allow only digits and a single dot
+    if (/[^0-9.]/.test(raw)) return;
+    if ((raw.match(/\./g)?.length || 0) > 1) return;
+    const [intPart = '', fracPart = ''] = raw.split('.');
     if (intPart.length > 6) return;
     if (fracPart.length > 3) return;
     setPropertyTaxesInput(raw);
     const isValid = taxesFeesRegex.test(raw);
     setPropertyTaxesValid(isValid);
     if (isValid) {
-      const numeric = parseFloat(raw.replace(',', '.'));
+      const numeric = parseFloat(raw);
       setFormData({ ...formData, propertyTaxes: numeric });
     } else {
       setFormData({ ...formData, propertyTaxes: undefined });
     }
   };
 
-  const handleHoaChange = (raw: string) => {
-    if (/[^0-9,]/.test(raw)) return;
-    if ((raw.match(/,/g)?.length || 0) > 1) return;
-    const [intPart = '', fracPart = ''] = raw.split(',');
+  const handleHoaChange = (input: string) => {
+    const raw = input.replace(/,/g, '.');
+    if (/[^0-9.]/.test(raw)) return;
+    if ((raw.match(/\./g)?.length || 0) > 1) return;
+    const [intPart = '', fracPart = ''] = raw.split('.');
     if (intPart.length > 6) return;
     if (fracPart.length > 3) return;
     setHoaFeesInput(raw);
     const isValid = taxesFeesRegex.test(raw);
     setHoaFeesValid(isValid);
     if (isValid) {
-      const numeric = parseFloat(raw.replace(',', '.'));
+      const numeric = parseFloat(raw);
       setFormData({ ...formData, HOAFees: numeric });
     } else {
       setFormData({ ...formData, HOAFees: undefined });
@@ -140,7 +148,7 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
         <CustomSelect
           label="Energy Rating"
           value={formData.energyEfficiencyRating || ''}
-          onChange={(value) => setFormData({ ...formData, energyEfficiencyRating: String(value) })}
+          onChange={(value) => setFormData({ ...formData, energyEfficiencyRating: value as EnergyRatingEnum })}
           options={enumOptions(Object.values(EnergyRatingEnum))}
           focusColor={focusColor}
           bgColor={bgColor}
@@ -153,8 +161,8 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
         <CustomSelect
           label="Orientation"
           value={formData.orientation || ''}
-          onChange={(value) => setFormData({ ...formData, orientation: String(value) })}
-          options={enumOptions(Object.values(OrientationEnum))}
+          onChange={(value) => setFormData({ ...formData, orientation: value as OrientationEnum })}
+          options={Object.values(OrientationEnum).map(v => ({ value: v, label: v }))}
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
@@ -163,15 +171,15 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
         <Typography variant="body2" color={grey[500]}>Parking availability type *</Typography>
-        <CustomSelect
-          label="Parking"
-          value={formData.parking || ''}
-          onChange={(value) => setFormData({ ...formData, parking: String(value) })}
+        <MultiSelectDropdown
           options={enumOptions(Object.values(ParkingEnum))}
+          values={Array.isArray(formData.parking) ? formData.parking : (formData.parking ? [formData.parking] : [])}
+          onChange={(values) => setFormData({ ...formData, parking: values.map(v => v as ParkingEnum) })}
+          icon={<LocalParkingIcon sx={{ color: 'currentColor' }} />}
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
-          icon={<LocalParkingIcon sx={{ color: 'currentColor' }} />}
+          placeholder="Select parking options"
         />
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
@@ -179,7 +187,7 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
         <CustomSelect
           label="Balcony Type"
           value={formData.balconyType || ''}
-          onChange={(value) => setFormData({ ...formData, balconyType: String(value) })}
+          onChange={(value) => setFormData({ ...formData, balconyType: value as BalconyTypeEnum })}
           options={enumOptions(Object.values(BalconyTypeEnum))}
           focusColor={focusColor}
           bgColor={bgColor}
@@ -194,7 +202,10 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
             <CustomInput
               placeholder="Balcony Total Size"
               value={formData.balconyTotalSize !== undefined ? String(formData.balconyTotalSize) : ''}
-              onChange={(e) => setFormData({ ...formData, balconyTotalSize: toInt(e.target.value) })}
+              onChange={(e) => {
+                const raw = e.target.value;
+                if (/^\d*$/.test(raw)) setFormData({ ...formData, balconyTotalSize: toInt(raw) });
+              }}
               focusColor={focusColor}
               bgColor={bgColor}
               icon={<StraightenIcon sx={{ color: textColor }} />}
@@ -206,7 +217,10 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
             <CustomInput
               placeholder="Balcony Number"
               value={formData.balconyNumber !== undefined ? String(formData.balconyNumber) : ''}
-              onChange={(e) => setFormData({ ...formData, balconyNumber: toInt(e.target.value) })}
+              onChange={(e) => {
+                const raw = e.target.value;
+                if (/^\d*$/.test(raw)) setFormData({ ...formData, balconyNumber: toInt(raw) });
+              }}
               focusColor={focusColor}
               bgColor={bgColor}
               icon={<BalconyIcon sx={{ color: textColor }} />}
@@ -220,7 +234,7 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
         <MultiSelectDropdown
           options={enumOptions(Object.values(HeatingSystemEnum))}
           values={Array.isArray(formData.heatingSystem) ? formData.heatingSystem : (formData.heatingSystem ? [formData.heatingSystem] : [])}
-          onChange={(values) => setFormData({ ...formData, heatingSystem: values })}
+          onChange={(values) => setFormData({ ...formData, heatingSystem: values.map(v => v as HeatingSystemEnum) })}
           icon={<WhatshotOutlinedIcon sx={{ color: 'currentColor' }} />}
           focusColor={focusColor}
           bgColor={bgColor}
@@ -230,28 +244,28 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
         <Typography variant="body2" color={grey[500]}>Primary cooling system</Typography>
-        <CustomSelect
-          label="Cooling System"
-          value={formData.coolingSystem || ''}
-          onChange={(value) => setFormData({ ...formData, coolingSystem: String(value) })}
+        <MultiSelectDropdown
           options={enumOptions(Object.values(CoolingSystemEnum))}
+          values={Array.isArray(formData.coolingSystem) ? formData.coolingSystem : (formData.coolingSystem ? [formData.coolingSystem] : [])}
+          onChange={(values) => setFormData({ ...formData, coolingSystem: values.map(v => v as CoolingSystemEnum) })}
+          icon={<AcUnitIcon sx={{ color: 'currentColor' }} />}
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
-          icon={<AcUnitIcon sx={{ color: 'currentColor' }} />}
+          placeholder="Select cooling systems"
         />
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
         <Typography variant="body2" color={grey[500]}>Kitchen furnishing level</Typography>
-        <CustomSelect
-          label="Kitchen"
-          value={formData.kitchen || ''}
-          onChange={(value) => setFormData({ ...formData, kitchen: String(value) })}
+        <MultiSelectDropdown
           options={enumOptions(Object.values(KitchenEnum))}
+          values={Array.isArray(formData.kitchen) ? formData.kitchen : (formData.kitchen ? [formData.kitchen] : [])}
+          onChange={(values) => setFormData({ ...formData, kitchen: values.map(v => v as KitchenEnum) })}
+          icon={<KitchenIcon sx={{ color: 'currentColor' }} />}
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
-          icon={<KitchenIcon sx={{ color: 'currentColor' }} />}
+          placeholder="Select kitchen options"
         />
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
@@ -259,7 +273,7 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
         <MultiSelectDropdown
           options={enumOptions(Object.values(SecurityEnum))}
           values={Array.isArray(formData.security) ? formData.security : (formData.security ? [formData.security] : [])}
-          onChange={(values) => setFormData({ ...formData, security: values })}
+          onChange={(values) => setFormData({ ...formData, security: values.map(v => v as SecurityEnum) })}
           icon={<SecurityOutlinedIcon sx={{ color: 'currentColor' }} />}
           focusColor={focusColor}
           bgColor={bgColor}
@@ -272,7 +286,7 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
         <MultiSelectDropdown
           options={enumOptions(Object.values(UtilityEnum))}
           values={Array.isArray(formData.utility) ? formData.utility : (formData.utility ? [formData.utility] : [])}
-          onChange={(values) => setFormData({ ...formData, utility: values })}
+          onChange={(values) => setFormData({ ...formData, utility: values.map(v => v as UtilityEnum) })}
           icon={<BoltOutlinedIcon sx={{ color: 'currentColor' }} />}
           focusColor={focusColor}
           bgColor={bgColor}
@@ -285,7 +299,7 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
         <MultiSelectDropdown
           options={enumOptions(Object.values(SmartHomeFeatureEnum))}
           values={Array.isArray(formData.smartHomeFeature) ? formData.smartHomeFeature : (formData.smartHomeFeature ? [formData.smartHomeFeature] : [])}
-          onChange={(values) => setFormData({ ...formData, smartHomeFeature: values })}
+          onChange={(values) => setFormData({ ...formData, smartHomeFeature: values.map(v => v as SmartHomeFeatureEnum) })}
           icon={<SmartToyOutlinedIcon sx={{ color: 'currentColor' }} />}
           focusColor={focusColor}
           bgColor={bgColor}
@@ -298,7 +312,7 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
         <MultiSelectDropdown
           options={enumOptions(Object.values(OtherFeatureEnum))}
           values={Array.isArray(formData.otherFeature) ? formData.otherFeature : (formData.otherFeature ? [formData.otherFeature] : [])}
-          onChange={(values) => setFormData({ ...formData, otherFeature: values })}
+          onChange={(values) => setFormData({ ...formData, otherFeature: values.map(v => v as OtherFeatureEnum) })}
           icon={<StarBorderOutlinedIcon sx={{ color: 'currentColor' }} />}
           focusColor={focusColor}
           bgColor={bgColor}
@@ -311,7 +325,7 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
         <MultiSelectDropdown
           options={enumOptions(Object.values(InvestmentGoalTagEnum))}
           values={Array.isArray(formData.investmentGoalTag) ? formData.investmentGoalTag : (formData.investmentGoalTag ? [formData.investmentGoalTag] : [])}
-          onChange={(values) => setFormData({ ...formData, investmentGoalTag: values })}
+          onChange={(values) => setFormData({ ...formData, investmentGoalTag: values.map(v => v as InvestmentGoalTagEnum) })}
           icon={<TrendingUpIcon sx={{ color: 'currentColor' }} />}
           focusColor={focusColor}
           bgColor={bgColor}
@@ -324,7 +338,7 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
         <MultiSelectDropdown
           options={enumOptions(Object.values(LocationBenefitTagEnum))}
           values={Array.isArray(formData.locationBenefitTag) ? formData.locationBenefitTag : (formData.locationBenefitTag ? [formData.locationBenefitTag] : [])}
-          onChange={(values) => setFormData({ ...formData, locationBenefitTag: values })}
+          onChange={(values) => setFormData({ ...formData, locationBenefitTag: values.map(v => v as LocationBenefitTagEnum) })}
           icon={<LocationOnOutlinedIcon sx={{ color: 'currentColor' }} />}
           focusColor={focusColor}
           bgColor={bgColor}
@@ -347,7 +361,7 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
         <Typography variant="body2" color={grey[500]}>Annual property tax cost (€) *</Typography>
         <CustomInput
-          placeholder="e.g. 123456,789 or 123456"
+          placeholder="e.g. 123456.789 or 123456"
           value={propertyTaxesInput}
           onChange={(e) => handleTaxesChange(e.target.value)}
           focusColor={focusColor}
@@ -358,14 +372,14 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
         />
         {!propertyTaxesValid && propertyTaxesInput.length > 0 && (
           <Typography variant="caption" sx={{ color: theme.palette.error.main, mt: 0.5 }}>
-            Invalid format. Use up to 6 digits, optionally a comma and up to 3 digits (e.g. 123456,789 or 123456).
+            Invalid format. Use up to 6 digits, optionally a dot and up to 3 digits (e.g. 123456.789 or 123456).
           </Typography>
         )}
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
         <Typography variant="body2" color={grey[500]}>Monthly HOA fee (€) *</Typography>
         <CustomInput
-          placeholder="e.g. 123456,789 or 123456"
+          placeholder="e.g. 123456.789 or 123456"
           value={hoaFeesInput}
           onChange={(e) => handleHoaChange(e.target.value)}
           focusColor={focusColor}
@@ -376,7 +390,7 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
         />
         {!hoaFeesValid && hoaFeesInput.length > 0 && (
           <Typography variant="caption" sx={{ color: theme.palette.error.main, mt: 0.5 }}>
-            Invalid format. Use up to 6 digits, optionally a comma and up to 3 digits (e.g. 123456,789 or 123456).
+            Invalid format. Use up to 6 digits, optionally a dot and up to 3 digits (e.g. 123456.789 or 123456).
           </Typography>
         )}
       </Box>

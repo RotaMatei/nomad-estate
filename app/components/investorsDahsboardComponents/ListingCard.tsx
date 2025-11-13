@@ -33,6 +33,7 @@ export default function ListingCard({
     saves,
     colorScheme = 'secondary',
     isAddCard = false,
+    imageUrl,
     onAddClick,
 }: Props) {
     const theme = useTheme();
@@ -69,7 +70,7 @@ export default function ListingCard({
 
     return (
         <Card elevation={4} sx={{ borderRadius: 4, backgroundColor: theme.palette.background.default, boxShadow: 'none', justifyContent: 'center', height: 420, display: 'flex', flexDirection: 'column' }}>
-            <Box sx={{ backgroundImage: 'url(/dubai4.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', height: 200, borderRadius: '4px 4px 0 0' }} />
+            <Box sx={{ backgroundImage: `url(${imageUrl || '/dubai4.jpg'})`, backgroundSize: 'cover', backgroundPosition: 'center', height: 200, borderRadius: '4px 4px 0 0' }} />
             <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <Box>
                     <Typography variant="subtitle1" sx={{ color: 'text.info', fontWeight: 600 }}>{title}</Typography>

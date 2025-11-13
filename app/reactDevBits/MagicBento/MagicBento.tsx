@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { gsap } from 'gsap';
 import './MagicBento.css';
-import { Box, Slider, Typography, Stack } from '@mui/material';
+import { Box, Slider, Typography, Stack, useMediaQuery, useTheme } from '@mui/material';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import MonetizationOnOutlinedIcon from '@mui/icons-material/MonetizationOnOutlined';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
@@ -20,12 +20,6 @@ import { formatEnumLabel } from '@/app/lib/format';
 import { CustomSelect } from '../../components/utils/select';
 import { MapGlobeSwitcher } from "../../components/propertyDashComponents/MapGlobeSwitcher";
 import { Location } from "../../components/propertyDashComponents/location";
-
-const mockLocations: Location[] = [
-  { id: 1, name: "Paris", lat: 48.8566, lng: 2.3522 },
-  { id: 2, name: "Berlin", lat: 52.52, lng: 13.405 },
-  { id: 3, name: "Tokyo", lat: 35.6762, lng: 139.6503 },
-];
 
 export interface BentoCardProps {
   color?: string;
@@ -568,6 +562,9 @@ const MagicBento: React.FC<BentoProps> = ({
   const gridRef = useRef<HTMLDivElement>(null);
   const isMobile = useMobileDetection();
   const shouldDisableAnimations = disableAnimations || isMobile;
+  const theme = useTheme();
+  const isLarge = useMediaQuery(theme.breakpoints.up('lg'));
+  const globePageSize = isLarge ? 30 : 28;
 
   // Filters state (for first card)
   const [country, setCountry] = useState<string | number | ''>('');
@@ -586,6 +583,18 @@ const MagicBento: React.FC<BentoProps> = ({
   const [investmentScore, setInvestmentScore] = useState<string | number>('');
   const [expectedYield, setExpectedYield] = useState<string | number>('');
   const [selectedId, setSelectedId] = useState<number | null>(null);
+
+  // Globe locations derived from search results
+  const [globeLocations, setGlobeLocations] = useState<Location[]>([]);
+  // Simple hash fallback to turn string IDs into numeric keys when needed
+  const hashCode = (str: string): number => {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) {
+      h = (h << 5) - h + str.charCodeAt(i);
+      h |= 0; // Convert to 32bit integer
+    }
+    return h;
+  };
 
   useEffect(() => {
     // Selected location id is tracked
@@ -799,6 +808,93 @@ const MagicBento: React.FC<BentoProps> = ({
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('properties:filter-results', { detail: res.data }));
         }
+        // Also map results to globe locations (ignore price constraints, keep backend order)
+        try {
+          const list = Array.isArray(res.data) ? (res.data as unknown[]) : [];
+          // eslint-disable-next-line no-console
+          console.log('[MagicBento] raw results count =', list.length);
+
+          // Helper to coerce possible string/Decimal values to number
+          const toNum = (v: unknown): number | null => {
+            if (typeof v === 'number' && isFinite(v)) return v;
+            if (typeof v === 'string') {
+              const n = parseFloat(v);
+              return isFinite(n) ? n : null;
+            }
+            // Prisma Decimal or other object with toString()
+            if (v && typeof (v as { toString: () => string }).toString === 'function') {
+              const s = (v as { toString: () => string }).toString();
+              const n = parseFloat(s);
+              return isFinite(n) ? n : null;
+            }
+            return null;
+          };
+
+          // Resolve latitude/longitude from common shapes
+          const getLat = (p: unknown): number | null => {
+            const obj = (p ?? {}) as Record<string, unknown>;
+            const loc = obj['Location'] as (Record<string, unknown> | undefined);
+            const loc2 = obj['location'] as (Record<string, unknown> | undefined);
+            return (
+              toNum(obj?.['latitude']) ??
+              toNum(obj?.['lat']) ??
+              toNum(loc?.['lat']) ??
+              toNum(loc?.['latitude']) ??
+              toNum(loc2?.['lat']) ??
+              toNum(loc2?.['latitude']) ??
+              null
+            );
+          };
+          const getLng = (p: unknown): number | null => {
+            const obj = (p ?? {}) as Record<string, unknown>;
+            const loc = obj['Location'] as (Record<string, unknown> | undefined);
+            const loc2 = obj['location'] as (Record<string, unknown> | undefined);
+            return (
+              toNum(obj?.['longitude']) ??
+              toNum(obj?.['lng']) ??
+              toNum(obj?.['lon']) ??
+              toNum(loc?.['lng']) ??
+              toNum(loc?.['lon']) ??
+              toNum(loc?.['longitude']) ??
+              toNum(loc2?.['lng']) ??
+              toNum(loc2?.['lon']) ??
+              toNum(loc2?.['longitude']) ??
+              null
+            );
+          };
+
+          // Keep only entries that have coercible coordinates and then take top N for the current layout
+          const candidates = list
+            .map((p) => ({ p, lat: getLat(p), lng: getLng(p) }))
+            .filter(({ lat, lng }) => typeof lat === 'number' && typeof lng === 'number');
+
+          const limited = candidates.slice(0, globePageSize);
+
+          const locs: Location[] = limited.map(({ p, lat, lng }) => {
+            const obj = (p ?? {}) as Record<string, unknown>;
+            const idVal = obj['id'];
+            const titleVal = obj['title'];
+            return {
+              id:
+                typeof idVal === 'string'
+                  ? Number(Math.abs(hashCode(idVal)))
+                  : (typeof idVal === 'number' ? idVal : Math.floor(Math.random() * 1e9)),
+              name:
+                typeof titleVal === 'string' && titleVal.trim().length
+                  ? titleVal
+                  : `Property ${String(idVal ?? '').slice(0, 6)}`,
+              lat: lat as number,
+              lng: lng as number,
+            };
+          });
+          // eslint-disable-next-line no-console
+          console.log('[MagicBento] derived globe locations =', locs.length, locs.slice(0, 5));
+          setGlobeLocations(locs);
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.warn('[MagicBento] failed to derive globe locations', e);
+          setGlobeLocations([]);
+        }
       })
       .catch(() => {
         // swallow
@@ -806,6 +902,8 @@ const MagicBento: React.FC<BentoProps> = ({
   };
 
   const handleReload = () => {
+    // Re-run the last search if available, else no-op
+    handleSearch();
   };
   // Initialize collapsed states depending on breakpoint
   useEffect(() => {
@@ -1060,7 +1158,7 @@ const MagicBento: React.FC<BentoProps> = ({
                     <div className="card">
                       <div className="card__content">
                         <h2 className="card__title">Global Locations</h2>
-                        <MapGlobeSwitcher locations={mockLocations} onReload={handleReload} onSelect={setSelectedId} />
+                        <MapGlobeSwitcher locations={globeLocations} onReload={handleReload} onSelect={setSelectedId} />
                         <p className="card__description">Explore the locations on map or globe.</p>
                       </div>
                     </div>

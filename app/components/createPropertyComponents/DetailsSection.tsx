@@ -41,7 +41,15 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
   const numberFloat = (v: string) => (v === '' ? undefined : parseFloat(v));
   const numberInt = (v: string) => (v === '' ? undefined : parseInt(v, 10));
 
-  const enumOptions = (values: readonly string[]) => values.map(v => ({ value: v, label: v }));
+  const enumOptions = (values: readonly string[]) => {
+    const pretty = (s: string) => s
+      .replace(/_/g, ' ')
+      .toLowerCase()
+      .split(' ')
+      .map(w => (w ? w[0].toUpperCase() + w.slice(1) : w))
+      .join(' ');
+    return values.map(v => ({ value: v, label: pretty(String(v)) }));
+  };
 
   // Fetch agents when agencyId changes
   useEffect(() => {
@@ -64,68 +72,70 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
     return () => { active = false; };
   }, [formData.agencyId, formData.agentId, setFormData]);
 
-  // Price input with strict format: up to 10 digits, comma, up to 2 digits
+  // Price input with strict format: up to 10 digits, dot, up to 2 digits
   const [priceInput, setPriceInput] = useState<string>('');
   const [priceValid, setPriceValid] = useState<boolean>(true);
-  const priceRegex = /^\d{1,10},\d{1,2}$/; // final valid format
+  const priceRegex = /^\d{1,10}(\.\d{0,2})?$/; // allow optional decimals up to 2
 
   // Initialize price display from formData (use comma decimals, always 2 digits)
   useEffect(() => {
     if (formData.price !== undefined) {
       const formatted = (Math.round((formData.price + Number.EPSILON) * 100) / 100)
         .toFixed(2)
-        .replace('.', ',');
+        .replace(/0+$/,'')
+        .replace(/\.$/,'');
       setPriceInput(formatted);
       setPriceValid(priceRegex.test(formatted));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handlePriceChange = (raw: string) => {
-    // Allow only digits and a single comma
-    if (/[^0-9,]/.test(raw)) return;
-    if ((raw.match(/,/g)?.length || 0) > 1) return;
-    const [intPart = '', fracPart = ''] = raw.split(',');
+  const handlePriceChange = (input: string) => {
+    const raw = input.replace(/,/g, '.');
+    // Allow only digits and a single dot
+    if (/[^0-9.]/.test(raw)) return;
+    if ((raw.match(/\./g)?.length || 0) > 1) return;
+    const [intPart = '', fracPart = ''] = raw.split('.');
     if (intPart.length > 10) return;
     if (fracPart.length > 2) return;
     setPriceInput(raw);
     const isValid = priceRegex.test(raw);
     setPriceValid(isValid);
     if (isValid) {
-      const numeric = parseFloat(raw.replace(',', '.'));
+      const numeric = parseFloat(raw);
       setFormData({ ...formData, price: numeric });
     } else {
       setFormData({ ...formData, price: undefined });
     }
   };
 
-  // Yield input strict format: 1-3 digits, comma, exactly 2 digits
+  // Yield input strict format: 1-3 digits, dot, exactly 2 digits
   const [yieldInput, setYieldInput] = useState<string>('');
   const [yieldValid, setYieldValid] = useState<boolean>(true);
-  const yieldRegex = /^\d{1,3},\d{2}$/; // exact two decimals
+  const yieldRegex = /^\d{1,3}(\.\d{0,2})?$/; // allow optional decimals up to 2
 
   useEffect(() => {
     if (formData.yield !== undefined) {
       const formatted = (Math.round((formData.yield + Number.EPSILON) * 100) / 100)
-        .toFixed(2)
-        .replace('.', ',');
+        .toFixed(2);
       setYieldInput(formatted);
       setYieldValid(yieldRegex.test(formatted));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleYieldChange = (raw: string) => {
-    if (/[^0-9,]/.test(raw)) return; // restrict characters
-    if ((raw.match(/,/g)?.length || 0) > 1) return; // single comma
-    const [intPart = '', fracPart = ''] = raw.split(',');
-    if (intPart.length > 3) return; // max 3 digits before comma
-    if (fracPart.length > 2) return; // max 2 digits after comma while typing
+  const handleYieldChange = (input: string) => {
+    const raw = input.replace(/,/g, '.');
+    if (/[^0-9.]/.test(raw)) return; // restrict characters
+    if ((raw.match(/\./g)?.length || 0) > 1) return; // single dot
+    const [intPart = '', fracPart = ''] = raw.split('.');
+    if (intPart.length > 3) return; // max 3 digits before dot
+    if (fracPart.length > 2) return; // max 2 digits after dot while typing
     setYieldInput(raw);
     const isValid = yieldRegex.test(raw);
     setYieldValid(isValid);
     if (isValid) {
-      const numeric = parseFloat(raw.replace(',', '.'));
+      const numeric = parseFloat(raw);
       setFormData({ ...formData, yield: numeric });
     } else {
       setFormData({ ...formData, yield: undefined });
@@ -213,7 +223,7 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
         <CustomSelect
           label="Type"
           value={formData.type || ''}
-          onChange={(value) => setFormData({ ...formData, type: String(value) })}
+          onChange={(value) => setFormData({ ...formData, type: value as PropertyTypeEnum })}
           options={enumOptions(Object.values(PropertyTypeEnum))}
           focusColor={focusColor}
           bgColor={bgColor}
@@ -225,7 +235,7 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
         <CustomSelect
           label="Status"
           value={formData.status || ''}
-          onChange={(value) => setFormData({ ...formData, status: String(value) })}
+          onChange={(value) => setFormData({ ...formData, status: value as StatusEnum })}
           options={enumOptions(Object.values(StatusEnum))}
           focusColor={focusColor}
           bgColor={bgColor}
@@ -235,7 +245,7 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
         <Typography variant="body2" color={grey[500]}>Asking price in euros *</Typography>
         <CustomInput
-          placeholder="e.g. 10000200,00"
+          placeholder="e.g. 10000200.00"
           value={priceInput}
           onChange={(e) => handlePriceChange(e.target.value)}
           focusColor={focusColor}
@@ -246,14 +256,14 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
         />
         {!priceValid && priceInput.length > 0 && (
           <Typography variant="caption" sx={{ color: theme.palette.error.main, mt: 0.5 }}>
-            Invalid price format. Use up to 10 digits, a comma, and up to 2 digits (e.g. 1234567890,99).
+            Invalid price format. Use up to 10 digits, optional dot and up to 2 decimals (e.g. 1234567890.99).
           </Typography>
         )}
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
         <Typography variant="body2" color={grey[500]}>Net yield as a percentage *</Typography>
         <CustomInput
-          placeholder="e.g. 12,50"
+          placeholder="e.g. 12.50"
           value={yieldInput}
           onChange={(e) => handleYieldChange(e.target.value)}
           focusColor={focusColor}
@@ -264,7 +274,7 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
         />
         {!yieldValid && yieldInput.length > 0 && (
           <Typography variant="caption" sx={{ color: theme.palette.error.main, mt: 0.5 }}>
-            Invalid yield format. Use 1-3 digits, a comma, then exactly 2 digits (e.g. 7,25 or 125,90).
+            Invalid yield format. Use 1-3 digits, optional dot and up to 2 decimals (e.g. 7 or 7.25).
           </Typography>
         )}
       </Box>
@@ -274,7 +284,10 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
         <CustomInput
           placeholder="Rooms"
           value={formData.rooms !== undefined ? String(formData.rooms) : ''}
-          onChange={(e) => setFormData({ ...formData, rooms: numberInt(e.target.value) })}
+          onChange={(e) => {
+            const raw = e.target.value;
+            if (/^\d*$/.test(raw)) setFormData({ ...formData, rooms: numberInt(raw) });
+          }}
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
@@ -286,7 +299,10 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
         <CustomInput
           placeholder="Bedrooms"
           value={formData.bedrooms !== undefined ? String(formData.bedrooms) : ''}
-          onChange={(e) => setFormData({ ...formData, bedrooms: numberInt(e.target.value) })}
+          onChange={(e) => {
+            const raw = e.target.value;
+            if (/^\d*$/.test(raw)) setFormData({ ...formData, bedrooms: numberInt(raw) });
+          }}
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
@@ -298,7 +314,10 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
         <CustomInput
           placeholder="Bathrooms"
           value={formData.bathrooms !== undefined ? String(formData.bathrooms) : ''}
-          onChange={(e) => setFormData({ ...formData, bathrooms: numberInt(e.target.value) })}
+          onChange={(e) => {
+            const raw = e.target.value;
+            if (/^\d*$/.test(raw)) setFormData({ ...formData, bathrooms: numberInt(raw) });
+          }}
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
@@ -310,7 +329,10 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
         <CustomInput
           placeholder="Floor Level"
           value={formData.floorLevel !== undefined ? String(formData.floorLevel) : ''}
-          onChange={(e) => setFormData({ ...formData, floorLevel: numberInt(e.target.value) })}
+          onChange={(e) => {
+            const raw = e.target.value;
+            if (/^\d*$/.test(raw)) setFormData({ ...formData, floorLevel: numberInt(raw) });
+          }}
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
@@ -323,7 +345,10 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
         <CustomInput
           placeholder="Floors"
           value={formData.floors !== undefined ? String(formData.floors) : ''}
-          onChange={(e) => setFormData({ ...formData, floors: numberInt(e.target.value) })}
+          onChange={(e) => {
+            const raw = e.target.value;
+            if (/^\d*$/.test(raw)) setFormData({ ...formData, floors: numberInt(raw) });
+          }}
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
@@ -336,7 +361,10 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
         <CustomInput
           placeholder="Built Area"
           value={formData.builtArea !== undefined ? String(formData.builtArea) : ''}
-          onChange={(e) => setFormData({ ...formData, builtArea: numberFloat(e.target.value) })}
+          onChange={(e) => {
+            const raw = e.target.value;
+            if (/^\d*(\.\d*)?$/.test(raw)) setFormData({ ...formData, builtArea: numberFloat(raw) });
+          }}
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
@@ -349,7 +377,10 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
         <CustomInput
           placeholder="Land Area"
           value={formData.landArea !== undefined ? String(formData.landArea) : ''}
-          onChange={(e) => setFormData({ ...formData, landArea: numberFloat(e.target.value) })}
+          onChange={(e) => {
+            const raw = e.target.value;
+            if (/^\d*(\.\d*)?$/.test(raw)) setFormData({ ...formData, landArea: numberFloat(raw) });
+          }}
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
@@ -362,7 +393,10 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
         <CustomInput
           placeholder="Total Area"
           value={formData.totalArea !== undefined ? String(formData.totalArea) : ''}
-          onChange={(e) => setFormData({ ...formData, totalArea: numberFloat(e.target.value) })}
+          onChange={(e) => {
+            const raw = e.target.value;
+            if (/^\d*(\.\d*)?$/.test(raw)) setFormData({ ...formData, totalArea: numberFloat(raw) });
+          }}
           focusColor={focusColor}
           bgColor={bgColor}
           textColor={textColor}
