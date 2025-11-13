@@ -7,15 +7,15 @@ import { useRouter } from 'next/navigation';
 import TopMetrics from '../../components/investorsDahsboardComponents/TopMetrics';
 import YieldGraph from '../../components/investorsDahsboardComponents/YieldGraph';
 import VolumeGraph from '../../components/investorsDahsboardComponents/VolumeGraph';
-import { StaggeredMenu, StaggeredMenuItem, StaggeredMenuSection } from '../../reactDevBits/StaggeredMenu/staggeredMenu';
+import { StaggeredMenu, StaggeredMenuItem, StaggeredMenuSection } from '@/app/reactDevBits/StaggeredMenu/staggeredMenu';
 import React from 'react';
-import { getTokenData } from '../../lib/auth';
+import { getTokenData } from '@/app/lib/auth';
 // Removed unused axios import (using api client instead)
-import api from '../../lib/api';
+import api from '@/app/lib/api';
 import TopCities from '../../components/investorsDahsboardComponents/topCities';
 import ListingCard from '../../components/investorsDahsboardComponents/ListingCard';
 import CreatePropertyForm from '../../components/investorsDahsboardComponents/CreatePropertyForm';
-import { getPortfolioForAgency, getPropertyDetails, getSavedForUser, getSavesForProperty, getPerformanceForProperty, getCtrForProperty, getActiveLeadsForProperty, getGlobalInsights, PortfolioProperty, deletePropertyById } from '../../lib/propertyApi';
+import { getPortfolioForAgency, getPropertyDetails, getSavedForUser, getSavesForProperty, getPerformanceForProperty, getCtrForProperty, getActiveLeadsForProperty, getGlobalInsights, PortfolioProperty, deletePropertyById } from '@/app/lib/propertyApi';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 

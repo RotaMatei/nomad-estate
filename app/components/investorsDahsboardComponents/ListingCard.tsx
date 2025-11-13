@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import {
     Card,
     CardContent,
@@ -9,6 +10,7 @@ import {
     Box,
 } from '@mui/material';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 
 interface Props {
@@ -22,6 +24,7 @@ interface Props {
     isAddCard?: boolean;
     imageUrl?: string;
     onAddClick?: () => void;
+    onDelete?: (id?: string) => void;
 }
 
 export default function ListingCard({
@@ -35,6 +38,7 @@ export default function ListingCard({
     isAddCard = false,
     imageUrl,
     onAddClick,
+    onDelete,
 }: Props) {
     const theme = useTheme();
     const mainColor = colorScheme === 'primary' ? theme.palette.primary.main : theme.palette.secondary.main;
@@ -80,7 +84,7 @@ export default function ListingCard({
                 <Box>
                     <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                         <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                            <FavoriteBorderOutlinedIcon sx={{ fontSize: 16, color: mainColor }} /> {likes} Likes
+                            <FavoriteBorderOutlinedIcon sx={{ fontSize: 16, color: mainColor }} /> {saves} Saves
                         </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', gap: 1 }}>
@@ -95,6 +99,7 @@ export default function ListingCard({
                             variant="contained"
                             fullWidth
                             color={colorScheme === 'primary' ? 'primary' : 'secondary'}
+                            onClick={() => onDelete?.(id)}
                         >
                             Delete
                         </Button>

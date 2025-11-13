@@ -380,3 +380,107 @@ export async function getSavesForProperty(propertyId: string) {
     return [] as Array<{ propertyId: string; userId: string; createdAt?: string }>;
   }
 }
+
+// Save (like) a property for a user
+export async function savePropertyForUser(userId: string, propertyId: string): Promise<boolean> {
+  try {
+    await api.post('/analytics/saved/create', {
+      userId,
+      propertyId,
+      savedAt: new Date().toISOString(),
+    });
+    return true;
+  } catch (e) {
+    // If already saved, treat as non-fatal success for UI purposes
+    try {
+      let msg = '';
+      const resp = (e as { response?: { data?: unknown } }).response?.data;
+      if (typeof resp === 'string') {
+        msg = resp;
+      } else if (resp && typeof resp === 'object' && 'message' in (resp as Record<string, unknown>)) {
+        const m = (resp as Record<string, unknown>).message;
+        if (typeof m === 'string') msg = m;
+      } else if (e instanceof Error && typeof e.message === 'string') {
+        msg = e.message;
+      }
+      if (msg.toLowerCase().includes('already exists')) return false;
+    } catch {}
+    return false;
+  }
+}
+
+// Delete a property by id
+export async function deletePropertyById(propertyId: string): Promise<void> {
+  await api.delete(`/property/delete-property/${propertyId}`);
+}
+
+// Analytics: Performance (views, inquiries, bounceRate, conversionRate)
+export interface PropertyPerformance {
+  propertyId: string;
+  views?: number;
+  inquiries?: number;
+  bounceRate?: number;
+  conversionRate?: number;
+  lastUpdated?: string | Date;
+}
+
+export async function getPerformanceForProperty(propertyId: string): Promise<PropertyPerformance | null> {
+  try {
+    const { data } = await api.get(`/analytics/performance/retrieve/${propertyId}`);
+    return (data ?? null) as PropertyPerformance | null;
+  } catch {
+    return null;
+  }
+}
+
+// Analytics: CTR
+export interface PropertyCtr { propertyId: string; ctr?: number }
+export async function getCtrForProperty(propertyId: string): Promise<PropertyCtr | null> {
+  try {
+    const { data } = await api.get(`/analytics/ctr/retrieve/${propertyId}`);
+    return (data ?? null) as PropertyCtr | null;
+  } catch {
+    return null;
+  }
+}
+
+// Analytics: Active Leads
+export interface PropertyActiveLeads { propertyId: string; lead?: number }
+export async function getActiveLeadsForProperty(propertyId: string): Promise<PropertyActiveLeads | null> {
+  try {
+    const { data } = await api.get(`/analytics/active-leads/retrieve/${propertyId}`);
+    return (data ?? null) as PropertyActiveLeads | null;
+  } catch {
+    return null;
+  }
+}
+
+// Analytics: Yield per property (fallback if not using base property yield)
+export interface PropertyYield { propertyId: string; yield?: number }
+export async function getYieldForProperty(propertyId: string): Promise<PropertyYield[] | []> {
+  try {
+    const { data } = await api.get(`/analytics/yield/retrieve/for-property/${propertyId}`);
+    return Array.isArray(data) ? (data as PropertyYield[]) : [];
+  } catch {
+    return [] as PropertyYield[];
+  }
+}
+
+// Analytics: Global Market Insights
+export interface GlobalInsightsResult {
+  propertyCount: number;
+  avgRentalYield: number;
+  avgROI: number;
+  avgCTR: number;
+  activeLeads: number;
+  avgInquiries: number;
+}
+
+export async function getGlobalInsights(): Promise<GlobalInsightsResult | null> {
+  try {
+    const { data } = await api.get(`/analytics/market/global-insights`);
+    return data as GlobalInsightsResult;
+  } catch {
+    return null;
+  }
+}
