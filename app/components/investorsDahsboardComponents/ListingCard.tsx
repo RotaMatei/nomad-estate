@@ -12,6 +12,7 @@ import {
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
+import { useRouter } from 'next/navigation';
 
 interface Props {
     id?: string;
@@ -24,6 +25,7 @@ interface Props {
     isAddCard?: boolean;
     imageUrl?: string;
     onAddClick?: () => void;
+    onEdit?: (id: string) => void;
     onDelete?: (id?: string) => void;
 }
 
@@ -38,10 +40,24 @@ export default function ListingCard({
     isAddCard = false,
     imageUrl,
     onAddClick,
+    onEdit,
     onDelete,
 }: Props) {
     const theme = useTheme();
+    const router = useRouter();
     const mainColor = colorScheme === 'primary' ? theme.palette.primary.main : theme.palette.secondary.main;
+
+    const handleEditClick = () => {
+        if (!id) return;
+        if (onEdit) {
+            onEdit(id);
+            return;
+        }
+        // Fallback: navigate to dashboard with edit query to open edit form
+        try {
+            router.push(`/investorsDashboard?edit=${encodeURIComponent(id)}`);
+        } catch {}
+    };
 
     if (isAddCard) {
         return (
@@ -92,6 +108,9 @@ export default function ListingCard({
                             variant="contained"
                             fullWidth
                             color={colorScheme === 'primary' ? 'primary' : 'secondary'}
+                            onClick={handleEditClick}
+                            disabled={!id}
+                            title={!id ? 'Editing not available here' : 'Edit this property'}
                         >
                             Edit
                         </Button>
@@ -100,6 +119,8 @@ export default function ListingCard({
                             fullWidth
                             color={colorScheme === 'primary' ? 'primary' : 'secondary'}
                             onClick={() => onDelete?.(id)}
+                            disabled={!id || !onDelete}
+                            title={!id || !onDelete ? 'Deleting not available here' : 'Delete this property'}
                         >
                             Delete
                         </Button>

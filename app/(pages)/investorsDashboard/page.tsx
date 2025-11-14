@@ -1,9 +1,9 @@
 'use client';
 
-import { Grid, Box, useTheme, IconButton, Typography, Avatar, Button, CircularProgress } from '@mui/material';
+import { Grid, Box, useTheme, IconButton, Typography, Avatar, Button, CircularProgress, Stack } from '@mui/material';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import TopMetrics from '../../components/investorsDahsboardComponents/TopMetrics';
 import YieldGraph from '../../components/investorsDahsboardComponents/YieldGraph';
 import VolumeGraph from '../../components/investorsDahsboardComponents/VolumeGraph';
@@ -15,6 +15,7 @@ import api from '../../lib/api';
 import TopCities from '../../components/investorsDahsboardComponents/topCities';
 import ListingCard from '../../components/investorsDahsboardComponents/ListingCard';
 import CreatePropertyForm from '../../components/investorsDahsboardComponents/CreatePropertyForm';
+import EditPropertyForm from '../../components/investorsDahsboardComponents/EditPropertyForm';
 import { getPortfolioForAgency, getPropertyDetails, getSavedForUser, getSavesForProperty, getPerformanceForProperty, getCtrForProperty, getActiveLeadsForProperty, getGlobalInsights, PortfolioProperty, deletePropertyById } from '../../lib/propertyApi';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
@@ -32,6 +33,7 @@ export default function InvestmentDashboard() {
   const isXs = useMediaQuery(theme.breakpoints.down('sm'));
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isSidebarOpen, setIsSidebarOpen] = React.useState<boolean>(true);
   const [sidebarVisible, setSidebarVisible] = React.useState<boolean>(true);
   const [profileName, setProfileName] = React.useState<string>('');
@@ -71,6 +73,7 @@ export default function InvestmentDashboard() {
   // Selected content within the DASHBOARD section (no full page reload)
   const [dashboardTab, setDashboardTab] = React.useState<string>('Market Insights');
   const [showCreateProperty, setShowCreateProperty] = React.useState<boolean>(false);
+  const [editingPropertyId, setEditingPropertyId] = React.useState<string | null>(null);
   const [agencyPortfolio, setAgencyPortfolio] = React.useState<PortfolioProperty[]>([]);
   const [portfolioImages, setPortfolioImages] = React.useState<Record<string, string>>({});
   const [portfolioSavesCount, setPortfolioSavesCount] = React.useState<Record<string, number>>({});
@@ -93,7 +96,8 @@ export default function InvestmentDashboard() {
   // Global insights (Market Insights tab)
   const [globalInsights, setGlobalInsights] = React.useState<{ propertyCount: number; avgRentalYield: number; avgROI: number; avgCTR: number; activeLeads: number; avgInquiries: number } | null>(null);
 
-  const isAgent = profileRole === 'AGENT';
+  // Treat both 'AGENT' and 'AGENCY' (and similar variants) as agent context
+  const isAgent = typeof profileRole === 'string' && /agent|agency/i.test(profileRole);
   const sidebarColorMain = isAgent ? theme.palette.primary.main : theme.palette.secondary.main;
   const sidebarColorDark = isAgent ? theme.palette.primary.dark : theme.palette.secondary.dark;
 
@@ -278,6 +282,26 @@ export default function InvestmentDashboard() {
       setDashboardTab('Market Insights');
     }
   }, [dashboardItems, dashboardTab]);
+
+  // Open edit form when URL has ?edit=<id>
+  React.useEffect(() => {
+    const eid = searchParams?.get('edit');
+    if (eid && typeof eid === 'string' && eid.trim()) {
+      setDashboardTab('Listings');
+      setEditingPropertyId(eid);
+      setShowCreateProperty(false);
+    }
+  }, [searchParams]);
+
+  // Helper: clear ?edit param from URL when leaving edit mode
+  const clearEditParam = React.useCallback(() => {
+    try {
+      if (searchParams?.get('edit')) {
+        // Replace current history entry so back button does not restore ?edit
+        router.replace('/investorsDashboard');
+      }
+    } catch {/* ignore navigation errors */}
+  }, [router, searchParams]);
 
   // Open menu button: white rounded rectangle with Menu icon in role-based color
   const headerMenuButton = (
@@ -807,12 +831,38 @@ export default function InvestmentDashboard() {
                   return (
                     <>
                       <TopMetrics colorScheme={'primary'} metrics={row1} gridMd={2} />
-                      <TopMetrics colorScheme={'primary'} metrics={row2} gridMd={3} />
+                      <Grid container sx={{border: `1px solid`, borderColor:"#c2c2c265", p:2, mt:1, borderRadius:4, mb:4}}>
+                        <Grid size={{xs:6, md:3}} sx={{borderRight: `1px solid`, borderColor:"#c2c2c265", pr:2, mt:0.5, display:'flex', justifyContent:'center'}}>
+                          <Stack sx={{textAlign:'center'}}><Typography variant="h6" sx={{fontWeight:600, color: "primary.main"}}>{row2[0].value}</Typography>
+                           <Typography variant="body2" sx={{ color: 'text.secondary' }}> {row2[0].label}</Typography>
+                           
+                           </Stack>
+                        </Grid>
+                        <Grid size={{xs:6, md:3}} sx={{borderRight: { md:`1px solid`}, borderColor:{md:"#c2c2c265"}, px:2, mt:0.5, display:'flex', justifyContent:'center'}}>
+                          <Stack sx={{textAlign:'center'}}> <Typography variant="h6" sx={{fontWeight:600, color: "primary.main"}}>{row2[1].value}</Typography>
+                           <Typography variant="body2" sx={{ color: 'text.secondary' }}> {row2[1].label}</Typography>
+                          
+                           </Stack>
+                        </Grid>
+                        <Grid size={{xs:6, md:3}} sx={{borderRight: `1px solid`, borderColor:"#c2c2c265", px:2, mt:0.5, display:'flex', justifyContent:'center'}}>
+                          <Stack sx={{textAlign:'center'}}> <Typography variant="h6" sx={{fontWeight:600, color: "primary.main"}}>{row2[2].value}</Typography>
+                           <Typography variant="body2" sx={{ color: 'text.secondary' }}> {row2[2].label}</Typography>
+                          
+                           </Stack>
+                        </Grid>
+                        <Grid size={{xs:6, md:3}} sx={{pl:2, mt:0.5, display:'flex', justifyContent:'center'}}>
+                          <Stack sx={{textAlign:'center'}}><Typography variant="h6" sx={{fontWeight:600, color: "primary.main"}}>{row2[3].value}</Typography>
+                           <Typography variant="body2" sx={{ color: 'text.secondary' }}> {row2[3].label}</Typography>
+                           
+                           </Stack>
+                        </Grid>
+                      </Grid>
+                      
                     </>
                   );
                 })()}
                 
-                {!showCreateProperty ? (
+                {!showCreateProperty && !editingPropertyId ? (
                   <>
                     <Typography variant="subtitle2" gutterBottom sx={{ color: isAgent ? theme.palette.primary.main : theme.palette.text.secondary, mb: 2 }}>
                       Portfolio
@@ -852,6 +902,7 @@ export default function InvestmentDashboard() {
                               saves={portfolioSavesCount[id] ?? 0}
                               imageUrl={imageUrl}
                               colorScheme={isAgent ? 'primary' : 'secondary'}
+                              onEdit={(propertyId) => setEditingPropertyId(propertyId)}
                               onDelete={handleDeleteListing}
                             />
                           </Grid>
@@ -859,25 +910,44 @@ export default function InvestmentDashboard() {
                       })}
                     </Grid>
                   </>
-                ) : (
+                ) : (showCreateProperty || editingPropertyId) && (
                   <Box sx={{ color: theme.palette.text.primary }}>
                     <Box sx={{ mb: 3 }}>
-                      <Button 
-                        variant="outlined" 
-                        onClick={() => setShowCreateProperty(false)}
+                      <Button
+                        variant="outlined"
+                        onClick={() => {
+                          setShowCreateProperty(false);
+                          setEditingPropertyId(null);
+                          clearEditParam();
+                        }}
                         startIcon={<ArrowBackIcon />}
-                        sx={{borderRadius: 2}}
+                        sx={{ borderRadius: 2 }}
                       >
                         Back to Listings
                       </Button>
                     </Box>
-                    <CreatePropertyForm 
-                      onCancel={() => setShowCreateProperty(false)}
-                      onSuccess={async () => {
-                        setShowCreateProperty(false);
-                        await reloadPortfolio();
-                      }}
-                    />
+                    {editingPropertyId ? (
+                      <EditPropertyForm
+                        propertyId={editingPropertyId}
+                        onCancel={() => {
+                          setEditingPropertyId(null);
+                          clearEditParam();
+                        }}
+                        onSuccess={async () => {
+                          setEditingPropertyId(null);
+                          clearEditParam();
+                          await reloadPortfolio();
+                        }}
+                      />
+                    ) : (
+                      <CreatePropertyForm 
+                        onCancel={() => setShowCreateProperty(false)}
+                        onSuccess={async () => {
+                          setShowCreateProperty(false);
+                          await reloadPortfolio();
+                        }}
+                      />
+                    )}
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'baseline', gap: 1, mt: 4, flexWrap: 'nowrap' }}>
                   <Typography component="span" variant="subtitle1" sx={{ fontWeight: 300, color: theme.palette.grey[200], fontStyle: 'italic', fontSize:'12px', whiteSpace: 'nowrap' }}>
                     Global Investment Platform
@@ -889,6 +959,14 @@ export default function InvestmentDashboard() {
                   </Box>
                   
                 )}
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'baseline', gap: 1, mt: 4, flexWrap: 'nowrap' }}>
+                  <Typography component="span" variant="subtitle1" sx={{ fontWeight: 300, color: theme.palette.grey[200], fontStyle: 'italic', fontSize:'12px', whiteSpace: 'nowrap' }}>
+                    Global Investment Platform
+                  </Typography>
+                  <Typography component="span" variant="subtitle1" sx={{ fontWeight: 500, color: 'primary.main', whiteSpace: 'nowrap' }}>
+                    Nomad Estate
+                  </Typography>
+                </Box>
               </>
             ) : (
               dashboardTab === 'Liked Properties & Inquiries' ? (

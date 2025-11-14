@@ -42,16 +42,17 @@ export default function AddressSection({ formData, setFormData }: Props) {
   // Regex: optional + or -, 1-3 digits, optional dot with up to 6 decimals
   const coordRegex = /^[+-]?\d{1,3}(\.\d{0,6})?$/;
 
-  // Initialize from formData if numbers exist (keep dot)
+  // Initialize from formData if numbers/strings exist (keep dot); coerce safely
   useEffect(() => {
-    if (formData.latitude !== undefined) {
-      const latStr = formData.latitude.toFixed(6).replace(/0+$/,'').replace(/\.$/,'');
-      setLatitudeInput(latStr);
-    }
-    if (formData.longitude !== undefined) {
-      const lonStr = formData.longitude.toFixed(6).replace(/0+$/,'').replace(/\.$/,'');
-      setLongitudeInput(lonStr);
-    }
+    const toCoordString = (v: unknown): string => {
+      const n = typeof v === 'number' ? v : typeof v === 'string' ? Number(v) : NaN;
+      if (!isFinite(n)) return '';
+      return n.toFixed(6).replace(/0+$/,'').replace(/\.$/,'');
+    };
+    const latStr = toCoordString((formData as Record<string, unknown>).latitude);
+    const lonStr = toCoordString((formData as Record<string, unknown>).longitude);
+    if (latStr) setLatitudeInput(latStr);
+    if (lonStr) setLongitudeInput(lonStr);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

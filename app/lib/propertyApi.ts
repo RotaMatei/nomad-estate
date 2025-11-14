@@ -484,3 +484,148 @@ export async function getGlobalInsights(): Promise<GlobalInsightsResult | null> 
     return null;
   }
 }
+
+// Update an existing property
+export async function updateProperty(propertyId: string, form: PropertyFormData) {
+  const result = validateAndMapPropertyDto(form);
+  if (!result.ok) {
+    const msg = `Missing or invalid fields: ${result.missing.join(', ')}`;
+    throw new Error(msg);
+  }
+  const { dto } = result;
+
+  try {
+    // Update the base property
+    const { data: updatedProperty } = await api.patch(`/property/update/${propertyId}`, dto);
+
+    const toArray = (v: unknown): string[] => {
+      if (!v) return [];
+      if (Array.isArray(v)) return v.map((x) => String(x)).filter((x) => x.trim().length > 0);
+      if (typeof v === 'string') return v.trim().length > 0 ? [v] : [];
+      return [];
+    };
+
+    // Fire-and-forget updates for related subtables
+    const tasks: Promise<unknown>[] = [];
+
+    // Pictures (expects hosted URLs)
+    if (form.images && form.images.length > 0) {
+      const images = form.images as unknown[];
+      images.forEach((imageItem, i) => {
+        const url = typeof imageItem === 'string' ? imageItem.trim() : '';
+        if (!/^https?:\/\//i.test(url)) return;
+        const payload: PictureCreateDto = {
+          propertyId,
+          imageData: url,
+          altText: `Property image ${i + 1}`,
+          isPrimary: i === 0,
+        };
+        tasks.push(api.post('/property/picture/create', payload));
+      });
+    }
+
+    // HeatingSystem
+    toArray(form.heatingSystem).forEach((hs) => {
+      const payload: HeatingSystemCreateDto = {
+        propertyId,
+        heatingSystem: hs as HeatingSystemEnum,
+      };
+      tasks.push(api.post('/property/heating-system/create', payload));
+    });
+
+    // CoolingSystem
+    toArray(form.coolingSystem).forEach((cs) => {
+      const payload: CoolingSystemCreateDto = {
+        propertyId,
+        coolingSystem: cs as CoolingSystemEnum,
+      };
+      tasks.push(api.post('/property/cooling-system/create', payload));
+    });
+
+    // Kitchen
+    toArray(form.kitchen).forEach((k) => {
+      const payload: KitchenCreateDto = {
+        propertyId,
+        kitchen: k as KitchenEnum,
+      };
+      tasks.push(api.post('/property/kitchen/create', payload));
+    });
+
+    // Security
+    toArray(form.security).forEach((sec) => {
+      const payload: SecurityCreateDto = {
+        propertyId,
+        security: sec as SecurityEnum,
+      };
+      tasks.push(api.post('/property/security/create', payload));
+    });
+
+    // Utility
+    toArray(form.utility).forEach((u) => {
+      const payload: UtilityCreateDto = {
+        propertyId,
+        utility: u as UtilityEnum,
+      };
+      tasks.push(api.post('/property/utility/create', payload));
+    });
+
+    // SmartHomeFeature
+    toArray(form.smartHomeFeature).forEach((f) => {
+      const payload: SmartHomeFeatureCreateDto = {
+        propertyId,
+        smartHomeFeature: f as SmartHomeFeatureEnum,
+      };
+      tasks.push(api.post('/property/smart-home-feature/create', payload));
+    });
+
+    // OtherFeature
+    toArray(form.otherFeature).forEach((of) => {
+      const payload: OtherFeatureCreateDto = {
+        propertyId,
+        otherFeature: of as OtherFeatureEnum,
+      };
+      tasks.push(api.post('/property/other-feature/create', payload));
+    });
+
+    // InvestmentGoalTag
+    toArray(form.investmentGoalTag).forEach((g) => {
+      const payload: InvestmentGoalTagCreateDto = {
+        propertyId,
+        investmentGoalTag: g as InvestmentGoalTagEnum,
+      };
+      tasks.push(api.post('/property/investment-goal-tag/create', payload));
+    });
+
+    // LocationBenefitTag
+    toArray(form.locationBenefitTag).forEach((b) => {
+      const payload: LocationBenefitTagCreateDto = {
+        propertyId,
+        locationBenefitTag: b as LocationBenefitTagEnum,
+      };
+      tasks.push(api.post('/property/location-benefit-tag/create', payload));
+    });
+
+    // Execute all subtable updates in parallel
+    try {
+      await Promise.all(tasks);
+    } catch {
+      // partial failures in subtable updates are tolerated
+    }
+
+    return updatedProperty;
+  } catch (err: unknown) {
+    console.error('❌ Error updating property');
+    if (err instanceof Error) {
+      console.error('Error message:', err.message);
+      console.error('Error stack:', err.stack);
+      const axiosErr = err as { response?: { data?: unknown; status?: number; statusText?: string } };
+      if (axiosErr.response?.data) {
+        console.error('Backend error response (data):', JSON.stringify(axiosErr.response.data, null, 2));
+        console.error('Backend error status:', axiosErr.response.status);
+        console.error('Backend error statusText:', axiosErr.response.statusText);
+      }
+    }
+    throw err;
+  }
+}
+
