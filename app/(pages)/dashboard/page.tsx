@@ -99,23 +99,26 @@ function InvestmentDashboardInner() {
   const [globalInsights, setGlobalInsights] = React.useState<{ propertyCount: number; avgRentalYield: number; avgROI: number; avgCTR: number; activeLeads: number; avgInquiries: number } | null>(null);
 
   const searchParams = useSearchParams();
-  const isAgent = /^(AGENT|AGENCY)$/i.test(String(profileRole || ''));
-  const sidebarColorMain = isAgent ? theme.palette.primary.main : theme.palette.secondary.main;
-  const sidebarColorDark = isAgent ? theme.palette.primary.dark : theme.palette.secondary.dark;
+  const roleStr = String(profileRole || '');
+  const isAgency = /^AGENCY$/i.test(roleStr);
+  const isAgentUser = /^AGENT$/i.test(roleStr);
+  const isInvestor = !isAgency && !isAgentUser; // treat anything else as user/investor for UI purposes
+  const sidebarColorMain = isAgency ? theme.palette.primary.main : theme.palette.secondary.main;
+  const sidebarColorDark = isAgency ? theme.palette.primary.dark : theme.palette.secondary.dark;
 
   // Compute dashboard items based on role
   const dashboardItems: StaggeredMenuItem[] = React.useMemo(() => {
     const items: StaggeredMenuItem[] = [
       { label: 'Market Insights', ariaLabel: 'Market Insights', link: '#' },
     ];
-    if (isAgent) {
+    if (isAgency) {
       items.push({ label: 'Listings', ariaLabel: 'Listings', link: '#' });
       items.push({ label: 'Agents', ariaLabel: 'Agents', link: '#' });
     } else {
       items.push({ label: 'Liked Properties & Inquiries', ariaLabel: 'Liked Properties & Inquiries', link: '#' });
     }
     return items;
-  }, [isAgent]);
+  }, [isAgency]);
 
   // Sections use the computed dashboard items
   const sections: StaggeredMenuSection[] = React.useMemo(() => [
@@ -414,7 +417,8 @@ function InvestmentDashboardInner() {
         if (!cancelled) {
           if (a.companyName) setProfileName(a.companyName);
           if (a.email) setProfileEmail(a.email);
-          setProfileRole('AGENT');
+          // Correct role for agency fetch
+          setProfileRole('AGENCY');
           if (a.profilePictureData && typeof a.profilePictureData === 'string') {
             setProfileAvatarUrl(`data:image/png;base64,${a.profilePictureData}`);
           }
@@ -571,10 +575,10 @@ function InvestmentDashboardInner() {
         // ignore portfolio errors for now
       }
 
-      // Likes section: For regular users, load saved properties and their save counts
+      // Likes section: For users (investors and agents), load saved properties and their save counts
       try {
         const roleFromUser = fetchedUser?.role || payload?.role || localStorage.getItem('role') || undefined;
-        if (roleFromUser && roleFromUser !== 'AGENT') {
+        if (roleFromUser && String(roleFromUser).toUpperCase() !== 'AGENCY') {
           // eslint-disable-next-line no-console
           console.log('[InvestorsDashboard] Fetching liked properties for userId:', entityId);
           const saved = await getSavedForUser(entityId);
@@ -716,7 +720,7 @@ function InvestmentDashboardInner() {
               headerTitle="Nomad Estate"
               headerOnClick={() => router.push('/')}
               headerCtaLabel={isMdUp ? 'Chat with AI' : undefined}
-                headerCtaHoverColor={isAgent ? theme.palette.primary.main : theme.palette.secondary.main}
+                headerCtaHoverColor={isAgency ? theme.palette.primary.main : theme.palette.secondary.main}
               headerCtaOnClick={() => {
                 try {
                   router.push('/sorry');
@@ -764,8 +768,8 @@ function InvestmentDashboardInner() {
                       sx={{
                         width: 36,
                         height: 36,
-                        bgcolor: isAgent ? theme.palette.primary.main : '#e5e7eb',
-                        color: isAgent ? theme.palette.common.white : theme.palette.text.primary,
+                        bgcolor: isAgency ? theme.palette.primary.main : '#e5e7eb',
+                        color: isAgency ? theme.palette.common.white : theme.palette.text.primary,
                         fontWeight: 600,
                       }}
                     >
@@ -774,14 +778,14 @@ function InvestmentDashboardInner() {
                   </IconButton>
                 </Box>
                 
-                <TopCities colorScheme={isAgent ? 'primary' : 'secondary'} />
+                <TopCities colorScheme={isAgency ? 'primary' : 'secondary'} />
                 <Grid container spacing={3} sx={{ mt: 2 }}>
                   <Grid size={{ xs: 12, lg: 15 }}>
-                    <YieldGraph colorScheme={isAgent ? 'primary' : 'secondary'} />
+                    <YieldGraph colorScheme={isAgency ? 'primary' : 'secondary'} />
                   </Grid>
                 </Grid>
                 <TopMetrics
-                  colorScheme={isAgent ? 'primary' : 'secondary'}
+                  colorScheme={isAgency ? 'primary' : 'secondary'}
                   metrics={(() => {
                     if (!globalInsights) return [];
                     const fmtPct = (n: number) => `${(n || 0).toFixed(1)}%`;
@@ -797,7 +801,7 @@ function InvestmentDashboardInner() {
                 />
                 <Grid container spacing={3} sx={{ mt: 2 }}>
                   <Grid size={{ xs: 12, lg: 15 }}>
-                    <VolumeGraph colorScheme={isAgent ? 'primary' : 'secondary'} />
+                    <VolumeGraph colorScheme={isAgency ? 'primary' : 'secondary'} />
                   </Grid>
                 </Grid>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'baseline', gap: 1, mt: 4, flexWrap: 'nowrap' }}>
@@ -810,7 +814,7 @@ function InvestmentDashboardInner() {
                 </Box>
                 
               </>
-            ) : dashboardTab === 'Listings' ? (
+            ) : dashboardTab === 'Listings' && isAgency ? (
               <>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 1.5, mb: 4, mt:1 }}>
                   <Typography variant="h6" sx={{ color: 'text.info' }}>
@@ -831,7 +835,7 @@ function InvestmentDashboardInner() {
                     </Avatar>
                   </IconButton>
                 </Box>
-                <Typography variant="subtitle2" gutterBottom sx={{ color: isAgent ? theme.palette.primary.main : theme.palette.text.secondary, mb: 2 }}>
+                <Typography variant="subtitle2" gutterBottom sx={{ color: isAgency ? theme.palette.primary.main : theme.palette.text.secondary, mb: 2 }}>
                   Average Portfolio Insights
                 </Typography>
                 {(() => {
@@ -920,7 +924,7 @@ function InvestmentDashboardInner() {
                   </Box>
                 ) : !showCreateProperty ? (
                   <>
-                    <Typography variant="subtitle2" gutterBottom sx={{ color: isAgent ? theme.palette.primary.main : theme.palette.text.secondary, mb: 2 }}>
+                    <Typography variant="subtitle2" gutterBottom sx={{ color: isAgency ? theme.palette.primary.main : theme.palette.text.secondary, mb: 2 }}>
                       Portfolio
                     </Typography>
                     {/* Listings Grid */}
@@ -934,7 +938,7 @@ function InvestmentDashboardInner() {
                           price=""
                           likes={0}
                           saves={0}
-                          colorScheme={isAgent ? 'primary' : 'secondary'}
+                          colorScheme={isAgency ? 'primary' : 'secondary'}
                           onAddClick={() => setShowCreateProperty(true)}
                         />
                       </Grid>
@@ -957,7 +961,7 @@ function InvestmentDashboardInner() {
                               likes={0}
                               saves={portfolioSavesCount[id] ?? 0}
                               imageUrl={imageUrl}
-                              colorScheme={isAgent ? 'primary' : 'secondary'}
+                              colorScheme={isAgency ? 'primary' : 'secondary'}
                               onEdit={handleStartEdit}
                               onDelete={handleDeleteListing}
                             />
@@ -998,11 +1002,11 @@ function InvestmentDashboardInner() {
                 )}
               </>
             ) : (
-              dashboardTab === 'Agents' && isAgent ? (
+              dashboardTab === 'Agents' && isAgency ? (
                 <>
                   <AgentsManager 
                     agencyId={agencyIdForPortfolio || ''} 
-                    colorScheme={isAgent ? 'primary' : 'secondary'}
+                    colorScheme={isAgency ? 'primary' : 'secondary'}
                     profileName={profileName}
                     profileAvatarUrl={profileAvatarUrl}
                     onProfileClick={() => router.push('/user')}

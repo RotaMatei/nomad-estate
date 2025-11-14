@@ -66,6 +66,15 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
   };
   const toInt = (v: string) => (v === '' ? undefined : parseInt(v, 10));
   const toFloat = (v: string) => (v === '' ? undefined : parseFloat(v));
+  // Logical limits
+  const LIMITS = {
+    balconySizeMin: 0,
+    balconySizeMax: 10_000,
+    balconyCountMin: 0,
+    balconyCountMax: 100,
+    moneyMin: 0,
+    moneyMax: 1_000_000,
+  } as const;
 
   const openDatePicker = (ref: React.RefObject<HTMLInputElement | null>) => {
     const el = ref.current;
@@ -111,15 +120,19 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
     const [intPart = '', fracPart = ''] = raw.split('.');
     if (intPart.length > 6) return;
     if (fracPart.length > 3) return;
-    setPropertyTaxesInput(raw);
+    let next = raw;
     const isValid = taxesFeesRegex.test(raw);
     setPropertyTaxesValid(isValid);
     if (isValid) {
-      const numeric = parseFloat(raw);
+      let numeric = parseFloat(raw);
+      if (numeric < LIMITS.moneyMin) numeric = LIMITS.moneyMin;
+      if (numeric > LIMITS.moneyMax) numeric = LIMITS.moneyMax;
+      next = String(numeric);
       setFormData({ ...formData, propertyTaxes: numeric });
     } else {
       setFormData({ ...formData, propertyTaxes: undefined });
     }
+    setPropertyTaxesInput(next);
   };
 
   const handleHoaChange = (input: string) => {
@@ -129,15 +142,19 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
     const [intPart = '', fracPart = ''] = raw.split('.');
     if (intPart.length > 6) return;
     if (fracPart.length > 3) return;
-    setHoaFeesInput(raw);
+    let next = raw;
     const isValid = taxesFeesRegex.test(raw);
     setHoaFeesValid(isValid);
     if (isValid) {
-      const numeric = parseFloat(raw);
+      let numeric = parseFloat(raw);
+      if (numeric < LIMITS.moneyMin) numeric = LIMITS.moneyMin;
+      if (numeric > LIMITS.moneyMax) numeric = LIMITS.moneyMax;
+      next = String(numeric);
       setFormData({ ...formData, HOAFees: numeric });
     } else {
       setFormData({ ...formData, HOAFees: undefined });
     }
+    setHoaFeesInput(next);
   };
 
   return (
@@ -204,7 +221,11 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
               value={formData.balconyTotalSize !== undefined ? String(formData.balconyTotalSize) : ''}
               onChange={(e) => {
                 const raw = e.target.value;
-                if (/^\d*$/.test(raw)) setFormData({ ...formData, balconyTotalSize: toInt(raw) });
+                if (!/^\d*$/.test(raw)) return;
+                const n = toInt(raw);
+                if (n === undefined) { setFormData({ ...formData, balconyTotalSize: undefined }); return; }
+                const clamped = Math.max(LIMITS.balconySizeMin, Math.min(LIMITS.balconySizeMax, n));
+                setFormData({ ...formData, balconyTotalSize: clamped });
               }}
               focusColor={focusColor}
               bgColor={bgColor}
@@ -219,7 +240,11 @@ export default function FeaturesSection({ formData, setFormData }: FeatureProps)
               value={formData.balconyNumber !== undefined ? String(formData.balconyNumber) : ''}
               onChange={(e) => {
                 const raw = e.target.value;
-                if (/^\d*$/.test(raw)) setFormData({ ...formData, balconyNumber: toInt(raw) });
+                if (!/^\d*$/.test(raw)) return;
+                const n = toInt(raw);
+                if (n === undefined) { setFormData({ ...formData, balconyNumber: undefined }); return; }
+                const clamped = Math.max(LIMITS.balconyCountMin, Math.min(LIMITS.balconyCountMax, n));
+                setFormData({ ...formData, balconyNumber: clamped });
               }}
               focusColor={focusColor}
               bgColor={bgColor}

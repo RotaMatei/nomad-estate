@@ -32,6 +32,19 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
   const focusColor = theme.palette.primary.main;
   const bgColor = theme.palette.background.default;
   const textColor = grey[500];
+  // Logical limits for numeric fields
+  const LIMITS = {
+    priceMin: 0,
+    priceMax: 1_000_000_000, // €1B cap to prevent accidental overs
+    yieldMin: 0,
+    yieldMax: 100,
+    countMin: 0,
+    countMax: 100, // rooms/bedrooms/bathrooms sensible cap
+    floorMin: 0,
+    floorMax: 200,
+    areaMin: 0,
+    areaMax: 1_000_000, // m² cap
+  } as const;
   const [agents, setAgents] = useState<
     Array<{
       userId: string;
@@ -99,15 +112,19 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
     const [intPart = '', fracPart = ''] = raw.split('.');
     if (intPart.length > 10) return;
     if (fracPart.length > 2) return;
-    setPriceInput(raw);
+    let next = raw;
     const isValid = priceRegex.test(raw);
     setPriceValid(isValid);
     if (isValid) {
-      const numeric = parseFloat(raw);
+      let numeric = parseFloat(raw);
+      if (numeric < LIMITS.priceMin) numeric = LIMITS.priceMin;
+      if (numeric > LIMITS.priceMax) numeric = LIMITS.priceMax;
+      next = String(numeric);
       setFormData({ ...formData, price: numeric });
     } else {
       setFormData({ ...formData, price: undefined });
     }
+    setPriceInput(next);
   };
 
   // Yield input strict format: 1-3 digits, dot, exactly 2 digits
@@ -132,15 +149,19 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
     const [intPart = '', fracPart = ''] = raw.split('.');
     if (intPart.length > 3) return; // max 3 digits before dot
     if (fracPart.length > 2) return; // max 2 digits after dot while typing
-    setYieldInput(raw);
+    let next = raw;
     const isValid = yieldRegex.test(raw);
     setYieldValid(isValid);
     if (isValid) {
-      const numeric = parseFloat(raw);
+      let numeric = parseFloat(raw);
+      if (numeric < LIMITS.yieldMin) numeric = LIMITS.yieldMin;
+      if (numeric > LIMITS.yieldMax) numeric = LIMITS.yieldMax;
+      next = String(numeric);
       setFormData({ ...formData, yield: numeric });
     } else {
       setFormData({ ...formData, yield: undefined });
     }
+    setYieldInput(next);
   };
 
   return (
@@ -285,7 +306,14 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
           value={formData.rooms !== undefined ? String(formData.rooms) : ''}
           onChange={(e) => {
             const raw = e.target.value;
-            if (/^\d*$/.test(raw)) setFormData({ ...formData, rooms: numberInt(raw) });
+            if (!/^\d*$/.test(raw)) return;
+            const n = numberInt(raw);
+            if (n === undefined) {
+              setFormData({ ...formData, rooms: undefined });
+              return;
+            }
+            const clamped = Math.max(LIMITS.countMin, Math.min(LIMITS.countMax, n));
+            setFormData({ ...formData, rooms: clamped });
           }}
           focusColor={focusColor}
           bgColor={bgColor}
@@ -300,7 +328,14 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
           value={formData.bedrooms !== undefined ? String(formData.bedrooms) : ''}
           onChange={(e) => {
             const raw = e.target.value;
-            if (/^\d*$/.test(raw)) setFormData({ ...formData, bedrooms: numberInt(raw) });
+            if (!/^\d*$/.test(raw)) return;
+            const n = numberInt(raw);
+            if (n === undefined) {
+              setFormData({ ...formData, bedrooms: undefined });
+              return;
+            }
+            const clamped = Math.max(LIMITS.countMin, Math.min(LIMITS.countMax, n));
+            setFormData({ ...formData, bedrooms: clamped });
           }}
           focusColor={focusColor}
           bgColor={bgColor}
@@ -315,7 +350,14 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
           value={formData.bathrooms !== undefined ? String(formData.bathrooms) : ''}
           onChange={(e) => {
             const raw = e.target.value;
-            if (/^\d*$/.test(raw)) setFormData({ ...formData, bathrooms: numberInt(raw) });
+            if (!/^\d*$/.test(raw)) return;
+            const n = numberInt(raw);
+            if (n === undefined) {
+              setFormData({ ...formData, bathrooms: undefined });
+              return;
+            }
+            const clamped = Math.max(LIMITS.countMin, Math.min(LIMITS.countMax, n));
+            setFormData({ ...formData, bathrooms: clamped });
           }}
           focusColor={focusColor}
           bgColor={bgColor}
@@ -330,7 +372,14 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
           value={formData.floorLevel !== undefined ? String(formData.floorLevel) : ''}
           onChange={(e) => {
             const raw = e.target.value;
-            if (/^\d*$/.test(raw)) setFormData({ ...formData, floorLevel: numberInt(raw) });
+            if (!/^\d*$/.test(raw)) return;
+            const n = numberInt(raw);
+            if (n === undefined) {
+              setFormData({ ...formData, floorLevel: undefined });
+              return;
+            }
+            const clamped = Math.max(LIMITS.floorMin, Math.min(LIMITS.floorMax, n));
+            setFormData({ ...formData, floorLevel: clamped });
           }}
           focusColor={focusColor}
           bgColor={bgColor}
@@ -346,7 +395,14 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
           value={formData.floors !== undefined ? String(formData.floors) : ''}
           onChange={(e) => {
             const raw = e.target.value;
-            if (/^\d*$/.test(raw)) setFormData({ ...formData, floors: numberInt(raw) });
+            if (!/^\d*$/.test(raw)) return;
+            const n = numberInt(raw);
+            if (n === undefined) {
+              setFormData({ ...formData, floors: undefined });
+              return;
+            }
+            const clamped = Math.max(LIMITS.floorMin, Math.min(LIMITS.floorMax, n));
+            setFormData({ ...formData, floors: clamped });
           }}
           focusColor={focusColor}
           bgColor={bgColor}
@@ -362,7 +418,14 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
           value={formData.builtArea !== undefined ? String(formData.builtArea) : ''}
           onChange={(e) => {
             const raw = e.target.value;
-            if (/^\d*(\.\d*)?$/.test(raw)) setFormData({ ...formData, builtArea: numberFloat(raw) });
+            if (!/^\d*(\.\d*)?$/.test(raw)) return;
+            const n = numberFloat(raw);
+            if (n === undefined) {
+              setFormData({ ...formData, builtArea: undefined });
+              return;
+            }
+            const clamped = Math.max(LIMITS.areaMin, Math.min(LIMITS.areaMax, n));
+            setFormData({ ...formData, builtArea: clamped });
           }}
           focusColor={focusColor}
           bgColor={bgColor}
@@ -378,7 +441,14 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
           value={formData.landArea !== undefined ? String(formData.landArea) : ''}
           onChange={(e) => {
             const raw = e.target.value;
-            if (/^\d*(\.\d*)?$/.test(raw)) setFormData({ ...formData, landArea: numberFloat(raw) });
+            if (!/^\d*(\.\d*)?$/.test(raw)) return;
+            const n = numberFloat(raw);
+            if (n === undefined) {
+              setFormData({ ...formData, landArea: undefined });
+              return;
+            }
+            const clamped = Math.max(LIMITS.areaMin, Math.min(LIMITS.areaMax, n));
+            setFormData({ ...formData, landArea: clamped });
           }}
           focusColor={focusColor}
           bgColor={bgColor}
@@ -394,7 +464,14 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
           value={formData.totalArea !== undefined ? String(formData.totalArea) : ''}
           onChange={(e) => {
             const raw = e.target.value;
-            if (/^\d*(\.\d*)?$/.test(raw)) setFormData({ ...formData, totalArea: numberFloat(raw) });
+            if (!/^\d*(\.\d*)?$/.test(raw)) return;
+            const n = numberFloat(raw);
+            if (n === undefined) {
+              setFormData({ ...formData, totalArea: undefined });
+              return;
+            }
+            const clamped = Math.max(LIMITS.areaMin, Math.min(LIMITS.areaMax, n));
+            setFormData({ ...formData, totalArea: clamped });
           }}
           focusColor={focusColor}
           bgColor={bgColor}
