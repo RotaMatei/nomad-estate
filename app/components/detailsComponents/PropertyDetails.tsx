@@ -108,7 +108,7 @@ export default function PropertyDetails({ property }: PropertyDetailsProps) {
       <Button
         startIcon={<ArrowBackIcon />}
         component={Link}
-        href="/propertiesDashboard"
+        href="/properties"
         sx={{ mb: 2, textTransform: 'none', fontSize: '14px' }}
       >
         Back to Properties

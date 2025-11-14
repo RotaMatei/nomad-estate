@@ -343,7 +343,7 @@ export default function UserDashboardPage() {
                     variant="contained"
                     color="primary"
                     startIcon={<TravelExploreOutlinedIcon />}
-                    onClick={() => router.push('/propertiesDashboard')}
+                    onClick={() => router.push('/properties')}
                     sx={{ textTransform: 'none', borderRadius: 2, mt: 1 }}
                   >
                     Browse Properties
@@ -351,7 +351,7 @@ export default function UserDashboardPage() {
                   <Button
                     variant="outlined"
                     startIcon={<WorkspacePremiumOutlinedIcon />}
-                    onClick={() => router.push('/plans')}
+                    onClick={() => router.push('/sorry')}
                     sx={{ textTransform: 'none', borderRadius: 2, mt:1 }}
                   >
                     Plans
