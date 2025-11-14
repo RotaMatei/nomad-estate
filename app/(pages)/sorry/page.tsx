@@ -22,7 +22,7 @@ export default function SorryPage() {
           Oops! We are sorry, but this feature is not here yet... :(
         </Typography>
         <Typography variant="body2" sx={{ mb: 4, color: 'text.secondary' }}>
-          We're working on it. In the meantime, you can go back.
+          We&apos;re working on it. In the meantime, you can go back.
         </Typography>
         <Button variant="contained" color="primary" onClick={handleBack}>
           Go back
