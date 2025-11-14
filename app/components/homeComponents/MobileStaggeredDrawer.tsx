@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import { createPortal } from 'react-dom';
-import StaggeredMenu, { StaggeredMenuSection, StaggeredMenuItem } from '@/app/reactDevBits/StaggeredMenu/staggeredMenu';
+import StaggeredMenu, { StaggeredMenuSection, StaggeredMenuItem, StaggeredMenuHandle } from '@/app/reactDevBits/StaggeredMenu/staggeredMenu';
 import { useTheme } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
 import { IconButton } from '@mui/material';
@@ -18,7 +18,7 @@ export interface MobileStaggeredDrawerProps {
 // Mobile drawer that mimics InvestorsDashboard StaggeredMenu styling, anchored on the right.
 export function MobileStaggeredDrawer({ open, onClose, pages, isLoggedIn, onNavigate, onLogout }: MobileStaggeredDrawerProps) {
   const theme = useTheme();
-  const menuRef = React.useRef<any>(null);
+  const menuRef = React.useRef<StaggeredMenuHandle | null>(null);
 
   // Transform pages into StaggeredMenuItem list
   const menuItems: StaggeredMenuItem[] = pages.map(p => ({ label: p.label.toUpperCase(), ariaLabel: p.label, link: p.href }));
@@ -53,8 +53,6 @@ export function MobileStaggeredDrawer({ open, onClose, pages, isLoggedIn, onNavi
       window.removeEventListener('keydown', handleKey);
     };
   }, [open, onClose]);
-
-  if (!open) return null;
 
   // Trigger open animation on mount
   React.useEffect(() => {
@@ -101,76 +99,80 @@ export function MobileStaggeredDrawer({ open, onClose, pages, isLoggedIn, onNavi
 
   // Use portal to escape ancestor stacking contexts
   return createPortal(
-    <>
-      {/* Semi-transparent backdrop click to close - behind everything */}
-      <div
-        onClick={onClose}
-        aria-hidden="true"
-        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.05)', zIndex: 999990, pointerEvents: 'auto' }}
-      />
-      {/* Escape X button on top-right corner - appears after animation */}
-      {showCloseButton && (
-        <IconButton
+    open ? (
+      <>
+        {/* Semi-transparent backdrop click to close - behind everything */}
+        <div
           onClick={onClose}
-          aria-label="Close menu"
-          sx={{
-            position: 'fixed',
-            top: 16,
-            right: 16,
-            zIndex: 9999999,
-            color: '#999999',
-            '&:hover': {
-              color: '#666666',
-            },
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      )}
-      <div style={{ position: 'fixed', inset: 0, zIndex: 999999, display: 'block', pointerEvents: 'none' }}>
-        <StaggeredMenu
-        ref={menuRef}
-        position="right"
-        open={open}
-        onOpenChange={(v) => { if (!v) onClose(); }}
-        // Disable layered shading: hide prelayers via style and keep a single flat color
-        colors={["#ffffff", "#ffffff", "#ffffff"]}
-        sections={sections}
-        headerTitle="Nomad Estate"
-        headerOnClick={() => { onNavigate('/'); onClose(); }}
-        showHeader
-        displayItemNumbering={false}
-        displaySocials={false}
-        // Omit accentColor to remove themed highlight
-        isFixed
-        menuButtonColor="#0f172a"
-        openMenuButtonColor="#cc0000"
-        onItemSelect={(item) => {
-          if (item.link === '#logout' && onLogout) {
-            onLogout();
-            onClose();
-            return;
-          }
-          if (item.link && item.link.startsWith('/')) {
-            onNavigate(item.link);
-            onClose();
-          }
-        }}
-        profileName={isLoggedIn ? 'Nomad Estate' : 'Nomad Estate'}
-        profileEmail={isLoggedIn ? '' : ''}
-        profileAvatarUrl="/logo.jpeg"
-        onProfileClick={() => { onNavigate(isLoggedIn ? '/user' : '/login'); onClose(); }}
-        // Custom styles for profile button
-        // We'll inject CSS to style it red
-        // Full-screen width with light background; remove box shadow for flat appearance
-        panelStyle={{ background: '#ffffff', width: '100vw', boxShadow: 'none' }}
-        // Hide prelayers entirely to eliminate residual shading edges
-        prelayersStyle={{ width: '100vw', display: 'none' }}
-        // Provide itemStyle for dark text since base CSS assumes white
-        itemStyle={{ color: '#0f172a', fontSize: 14 }}
-      />
-      </div>
-    </>,
+          aria-hidden="true"
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.05)', zIndex: 999990, pointerEvents: 'auto' }}
+        />
+        {/* Escape X button on top-right corner - appears after animation */}
+        {showCloseButton && (
+          <IconButton
+            onClick={onClose}
+            aria-label="Close menu"
+            sx={{
+              position: 'fixed',
+              top: 16,
+              right: 16,
+              zIndex: 9999999,
+              color: '#999999',
+              '&:hover': {
+                color: '#666666',
+              },
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        )}
+        <div style={{ position: 'fixed', inset: 0, zIndex: 999999, display: 'block', pointerEvents: 'none' }}>
+          <StaggeredMenu
+            ref={menuRef}
+            position="right"
+            open={open}
+            onOpenChange={(v) => { if (!v) onClose(); }}
+            // Disable layered shading: hide prelayers via style and keep a single flat color
+            colors={["#ffffff", "#ffffff", "#ffffff"]}
+            sections={sections}
+            headerTitle="Nomad Estate"
+            headerOnClick={() => { onNavigate('/'); onClose(); }}
+            showHeader
+            displayItemNumbering={false}
+            displaySocials={false}
+            // Omit accentColor to remove themed highlight
+            isFixed
+            menuButtonColor="#0f172a"
+            openMenuButtonColor="#cc0000"
+            onItemSelect={(item) => {
+              if (item.link === '#logout' && onLogout) {
+                onLogout();
+                onClose();
+                return;
+              }
+              if (item.link && item.link.startsWith('/')) {
+                onNavigate(item.link);
+                onClose();
+              }
+            }}
+            profileName={isLoggedIn ? 'Nomad Estate' : 'Nomad Estate'}
+            profileEmail={isLoggedIn ? '' : ''}
+            profileAvatarUrl="/logo.jpeg"
+            onProfileClick={() => { onNavigate(isLoggedIn ? '/user' : '/login'); onClose(); }}
+            // Custom styles for profile button
+            // We'll inject CSS to style it red
+            // Full-screen width with light background; remove box shadow for flat appearance
+            panelStyle={{ background: '#ffffff', width: '100vw', boxShadow: 'none' }}
+            // Hide prelayers entirely to eliminate residual shading edges
+            prelayersStyle={{ width: '100vw', display: 'none' }}
+            // Provide itemStyle for dark text since base CSS assumes white
+            itemStyle={{ color: '#0f172a', fontSize: 14 }}
+          />
+        </div>
+      </>
+    ) : (
+      <></>
+    ),
     document.body
   );
 }

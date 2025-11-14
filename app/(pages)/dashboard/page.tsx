@@ -31,7 +31,7 @@ const generalItems: StaggeredMenuItem[] = [
   { label: 'Plans', ariaLabel: 'Plans', link: '/plans' },
 ];
 
-export default function InvestmentDashboard() {
+function InvestmentDashboardInner() {
   const theme = useTheme();
   const isXs = useMediaQuery(theme.breakpoints.down('sm'));
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
@@ -1112,5 +1112,13 @@ export default function InvestmentDashboard() {
         </Grid>
       </Grid>
     </Box>
+  );
+}
+
+export default function InvestmentDashboard() {
+  return (
+    <React.Suspense fallback={null}>
+      <InvestmentDashboardInner />
+    </React.Suspense>
   );
 }

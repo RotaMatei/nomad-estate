@@ -51,14 +51,15 @@ export async function searchUsersByName(query: string): Promise<BasicUserSearchR
   if (q.length < 2) return [];
   try {
     const res = await api.get(`/user/search/${encodeURIComponent(q)}`);
-    const arr = Array.isArray(res.data) ? res.data : [];
-    return arr.map((u: any) => ({
-      id: String(u.id),
-      firstName: u.firstName,
-      lastName: u.lastName,
-      email: u.email,
-      phoneNumber: u.phoneNumber,
-      fullName: `${u.firstName || ''} ${u.lastName || ''}`.trim(),
-    }));
+    const arr = (Array.isArray(res.data) ? res.data : []) as Array<Record<string, unknown>>;
+    return arr.map((u) => {
+      const id = 'id' in u ? String((u as { id: string | number }).id) : '';
+      const firstName = typeof u.firstName === 'string' ? u.firstName : undefined;
+      const lastName = typeof u.lastName === 'string' ? u.lastName : undefined;
+      const email = typeof u.email === 'string' ? u.email : undefined;
+      const phoneNumber = typeof u.phoneNumber === 'string' ? u.phoneNumber : undefined;
+      const fullName = `${firstName || ''} ${lastName || ''}`.trim();
+      return { id, firstName, lastName, email, phoneNumber, fullName } as BasicUserSearchResult;
+    });
   } catch { return []; }
 }

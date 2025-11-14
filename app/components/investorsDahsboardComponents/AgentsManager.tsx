@@ -14,10 +14,10 @@ interface AgentsManagerProps {
   onProfileClick?: () => void;
 }
 
-const debounce = (fn: (...args: any[]) => void, ms: number) => {
-  let t: any;
-  return (...args: any[]) => {
-    clearTimeout(t);
+const debounce = <T extends unknown[]>(fn: (...args: T) => void, ms: number) => {
+  let t: ReturnType<typeof setTimeout> | null = null;
+  return (...args: T) => {
+    if (t) clearTimeout(t);
     t = setTimeout(() => fn(...args), ms);
   };
 };
