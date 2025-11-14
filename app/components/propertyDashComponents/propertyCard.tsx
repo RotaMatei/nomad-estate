@@ -53,10 +53,12 @@ export interface PropertySummaryCardProps {
     countryName?: string;
   };
   onViewDetails?: (id: string) => void;
+  isSaved?: boolean;
+  onToggleSave?: (id: string, saved: boolean) => void;
 }
 
 // Component
-const RealEstateCard: React.FC<PropertySummaryCardProps> = ({ property, onViewDetails }) => {
+const RealEstateCard: React.FC<PropertySummaryCardProps> = ({ property, onViewDetails, isSaved, onToggleSave }) => {
   const router = useRouter();
   const pics = property.propertyPictures || (property as unknown as { picture?: PropertyPictureDto[] }).picture || [];
 
@@ -76,7 +78,11 @@ const RealEstateCard: React.FC<PropertySummaryCardProps> = ({ property, onViewDe
   const [dragDeltaX, setDragDeltaX] = React.useState(0);
   const dragMovedRef = React.useRef(false); // used to suppress click after a drag
   const [saving, setSaving] = React.useState(false);
-  const [saved, setSaved] = React.useState(false);
+  const [saved, setSaved] = React.useState(!!isSaved);
+
+  React.useEffect(() => {
+    setSaved(!!isSaved);
+  }, [isSaved]);
 
   const handleSave = async () => {
     if (saving) return;
@@ -84,8 +90,20 @@ const RealEstateCard: React.FC<PropertySummaryCardProps> = ({ property, onViewDe
     try {
       const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
       if (!userId) return;
-      const ok = await savePropertyForUser(userId, property.id);
-      if (ok || ok === false) setSaved(true);
+      if (saved) {
+        const { unsavePropertyForUser } = await import('@/app/lib/propertyApi');
+        const ok = await unsavePropertyForUser(userId, property.id);
+        if (ok) {
+          setSaved(false);
+          onToggleSave?.(property.id, false);
+        }
+      } else {
+        const ok = await savePropertyForUser(userId, property.id);
+        if (ok || ok === false) {
+          setSaved(true);
+          onToggleSave?.(property.id, true);
+        }
+      }
     } finally {
       setSaving(false);
     }

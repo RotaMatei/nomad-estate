@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "prebuild": "node -e \"fs=require('fs');try{fs.rmSync('.next',{recursive:true,force:true})}catch(e){}\"",
+    "prebuild": "node -e \"fs=require('fs');['.next','.next_build'].forEach(d=>{try{fs.rmSync(d,{recursive:true,force:true})}catch(e){}})\"",
     "build": "next build",
     "build:classic": "next build",
     "build:notrace": "next build",

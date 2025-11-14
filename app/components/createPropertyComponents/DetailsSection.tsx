@@ -5,6 +5,7 @@ import { Box, Typography } from '@mui/material';
 import CustomInput from '../../components/utils/input';
 import CustomTextArea from '../../components/utils/textarea';
 import CustomSelect from '../../components/utils/select';
+import MultiSelectDropdown from '../../components/utils/multiSelectDropdown';
 import { PropertyFormData } from './types';
 import BusinessIcon from '@mui/icons-material/Business';
 import TitleIcon from '@mui/icons-material/Title';
@@ -61,16 +62,16 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
         if (!active) return;
         console.log('Fetched agents:', JSON.stringify(data, null, 2));
         setAgents(data || []);
-        if (data && data.length > 0 && !formData.agentId) {
+        if (data && data.length > 0 && !formData.agentId && (!Array.isArray(formData.agentIds) || formData.agentIds.length === 0)) {
           const firstAgentId = data[0].userId;
-          setFormData(prev => ({ ...prev, agentId: firstAgentId }));
+          setFormData(prev => ({ ...prev, agentId: firstAgentId, agentIds: [firstAgentId] }));
         }
       } catch (e) {
         console.warn('Failed to fetch agents', e);
       }
     })();
     return () => { active = false; };
-  }, [formData.agencyId, formData.agentId, setFormData]);
+  }, [formData.agencyId, formData.agentId, formData.agentIds, setFormData]);
 
   // Price input with strict format: up to 10 digits, dot, up to 2 digits
   const [priceInput, setPriceInput] = useState<string>('');
@@ -159,32 +160,30 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
         />
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, my: '1px' }}>
-        <Typography variant="body2" color={grey[500]}>Agent managing this listing *</Typography>
+        <Typography variant="body2" color={grey[500]}>Agent(s) managing this listing *</Typography>
         {agents.length > 0 ? (
-          <CustomSelect
-            label="Select Agent"
-            value={formData.agentId || ''}
-            onChange={(value) => {
-              setFormData({ ...formData, agentId: String(value) });
-            }}
+          <MultiSelectDropdown
             options={agents.map(agent => {
               const firstName = agent.user?.firstName || 'Unknown';
               const lastName = agent.user?.lastName || 'Agent';
               const userId = agent.userId;
-              return {
-                value: userId,
-                label: `${firstName} ${lastName} (${agent.user?.email || userId})`
-              };
+              return { value: String(userId), label: `${firstName} ${lastName} (${agent.user?.email || userId})` };
             })}
+            values={Array.isArray(formData.agentIds) ? formData.agentIds : (formData.agentId ? [formData.agentId] : [])}
+            onChange={(values) => {
+              setFormData({ ...formData, agentIds: values, agentId: values[0] || undefined });
+            }}
+            icon={<BusinessIcon sx={{ color: 'currentColor' }} />}
             focusColor={focusColor}
             bgColor={bgColor}
             textColor={textColor}
+            placeholder="Select agent(s)"
           />
         ) : (
           <CustomInput
             placeholder="Agent ID"
             value={formData.agentId || ''}
-            onChange={(e) => setFormData({ ...formData, agentId: e.target.value })}
+            onChange={(e) => setFormData({ ...formData, agentId: e.target.value, agentIds: e.target.value ? [e.target.value] : [] })}
             focusColor={focusColor}
             bgColor={bgColor}
             textColor={textColor}

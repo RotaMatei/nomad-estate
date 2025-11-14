@@ -9,6 +9,8 @@ import { Box, Typography, IconButton } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import GoogleIcon from '@mui/icons-material/Google';
 import AppleIcon from '@mui/icons-material/Apple';
 import CustomInput from '@/app/components/utils/input';
@@ -26,6 +28,7 @@ export default function LoginPage() {
   const theme = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [glareRun, setGlareRun] = useState(false);
@@ -267,7 +270,9 @@ export default function LoginPage() {
                   if (e.key === 'Enter') handleUserLogin();
                 }}
                 placeholder="Password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
+                endAdornment={showPassword ? <VisibilityOffOutlinedIcon fontSize="small" /> : <VisibilityOutlinedIcon fontSize="small" />}
+                onEndAdornmentClick={() => setShowPassword((prev) => !prev)}
               />
             </Box>
 

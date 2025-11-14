@@ -3,6 +3,7 @@ import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import RealEstateCard from './propertyCard';
 import api from '@/app/lib/api';
+import { getSavedForUser } from '@/app/lib/propertyApi';
 import React from 'react';
 
 interface PropertyPictureDto {
@@ -41,6 +42,7 @@ const ListingsPage: React.FC = () => {
   const [cityMap, setCityMap] = React.useState<Record<number, string>>({});
   const [countryMap, setCountryMap] = React.useState<Record<number, string>>({});
   const [currentPage, setCurrentPage] = React.useState(1);
+  const [likedIds, setLikedIds] = React.useState<Set<string>>(new Set());
   // Track whether we restored from cache to decide if we must fetch
   const [restored, setRestored] = React.useState(false);
 
@@ -160,6 +162,22 @@ const ListingsPage: React.FC = () => {
     })();
     return () => { cancelled = true; };
   }, [restored]);
+
+  // Load liked property IDs for the connected user
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const userId = localStorage.getItem('userId');
+    if (!userId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const saved = await getSavedForUser(userId);
+        const ids = new Set<string>(saved.map((s: { propertyId: string }) => s.propertyId));
+        if (!cancelled) setLikedIds(ids);
+      } catch {}
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   // Listen for filtered results from Filters (MagicBento) and update listings
   React.useEffect(() => {
@@ -307,6 +325,14 @@ const ListingsPage: React.FC = () => {
               return (
                 <RealEstateCard
                   property={propertyWithNames}
+                  isSaved={likedIds.has(p.id)}
+                  onToggleSave={(id, isSavedNow) => {
+                    setLikedIds((prev) => {
+                      const next = new Set(prev);
+                      if (isSavedNow) next.add(id); else next.delete(id);
+                      return next;
+                    });
+                  }}
                   onViewDetails={(id: string) => {
                     // Prefer router for SPA navigation if available
                     if (typeof window !== 'undefined') {
