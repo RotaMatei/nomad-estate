@@ -26,6 +26,7 @@ export interface PropertyFormData {
   longitude?: number;
   agencyId?: string;
   agentId?: string;
+  agentIds?: string[];
   title?: string;
   description?: string;
   type?: PropertyTypeEnum;

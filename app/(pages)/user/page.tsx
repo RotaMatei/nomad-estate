@@ -12,6 +12,7 @@ import MarkEmailUnreadOutlinedIcon from '@mui/icons-material/MarkEmailUnreadOutl
 import TravelExploreOutlinedIcon from '@mui/icons-material/TravelExploreOutlined';
 import WorkspacePremiumOutlinedIcon from '@mui/icons-material/WorkspacePremiumOutlined';
 import api from '@/app/lib/api';
+import { getSavedForUser } from '@/app/lib/propertyApi';
 
 export default function UserDashboardPage() {
   const router = useRouter();
@@ -43,6 +44,8 @@ export default function UserDashboardPage() {
   };
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [agency, setAgency] = useState<AgencyProfile | null>(null);
+  const [savedCount, setSavedCount] = useState<number>(0);
+  const [savedLoading, setSavedLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -68,6 +71,18 @@ export default function UserDashboardPage() {
         setName(storedName);
         return;
       }
+      // Fetch saved count independently after ensuring userId exists
+      (async () => {
+        try {
+          setSavedLoading(true);
+          const list = await getSavedForUser(userId!);
+          setSavedCount(Array.isArray(list) ? list.length : 0);
+        } catch {
+          setSavedCount(0);
+        } finally {
+          setSavedLoading(false);
+        }
+      })();
 
       const fetchUser = async () => {
         const userRes = await api.get<UserProfile>(`/user/retrieve/${userId}`, {
@@ -218,7 +233,9 @@ export default function UserDashboardPage() {
               <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <FavoriteBorderOutlinedIcon color="primary" />
                 <Box>
-                  <Typography sx={{ fontWeight: 700, lineHeight: 1 }}>0</Typography>
+                  <Typography sx={{ fontWeight: 700, lineHeight: 1 }}>
+                    {savedLoading ? '—' : savedCount}
+                  </Typography>
                   <Typography sx={{ color: 'text.secondary' }}>Saved</Typography>
                 </Box>
               </CardContent>

@@ -409,6 +409,16 @@ export async function savePropertyForUser(userId: string, propertyId: string): P
   }
 }
 
+// Unsave (remove like) a property for a user
+export async function unsavePropertyForUser(userId: string, propertyId: string): Promise<boolean> {
+  try {
+    await api.delete(`/analytics/saved/delete/for-user-and-property/${userId}/${propertyId}`);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // Delete a property by id
 export async function deletePropertyById(propertyId: string): Promise<void> {
   await api.delete(`/property/delete-property/${propertyId}`);
