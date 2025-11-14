@@ -507,7 +507,7 @@ export default function RegisterPage() {
             variant="contained"
             onClick={() => {
               setShowAgencyPrompt(false);
-              router.push('/agencyDashboard');
+              router.push('/dashboard');
             }}
             sx={{ fontFamily: 'Montserrat, sans-serif' }}
           >

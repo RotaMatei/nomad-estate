@@ -69,9 +69,10 @@ export default function Navbar(
 
   const pages: { label: string; href: string }[] = [
     { label: 'Home', href: '/' },
-    { label: 'Book a call', href: '/about' },
-    { label: 'Properties', href: '/propertiesDashboard' },
-    { label: 'Plans', href: '/plans' },
+    { label: 'Book a call', href: '/sorry' },
+    { label: 'Properties', href: '/properties' },
+    { label: 'Dashboard', href: '/dashboard' },
+    { label: 'Plans', href: '/sorry' },
   ];
 
   const handleLogout = () => {
@@ -192,6 +193,7 @@ export default function Navbar(
                   fontWeight: 500,
                   borderRadius: 3,
                 }}
+                onClick={() => router.push('/sorry')}
               >
                 BOOK A CALL
               </Button>
@@ -208,6 +210,7 @@ export default function Navbar(
                   fontWeight: 500,
                   borderRadius: 3,
                 }}
+                onClick={() => router.push('/sorry')}
               >
                 PLANS
               </Button>
