@@ -168,6 +168,8 @@ export default function RegisterPage() {
       localStorage.setItem('refreshToken', res.data.refreshToken);
       localStorage.setItem('jti', res.data.RefreshJTI);
       localStorage.setItem('user', res.data.firstName + ' ' + res.data.lastName);
+      // Persist role for UI (investor)
+      try { localStorage.setItem('role', 'INVESTOR'); } catch {}
       router.push('/');
     } catch (err: unknown) {
       // Log and keep UI simple; surface errors via toasts in the future
@@ -237,6 +239,8 @@ export default function RegisterPage() {
       if (data.payload?.firstName && data.payload?.lastName) {
         localStorage.setItem('user', `${data.payload.firstName} ${data.payload.lastName}`);
       }
+      // Persist role for UI (agency)
+      try { localStorage.setItem('role', 'AGENCY'); } catch {}
 
       // Extract agencyId from access token (sub)
       const decoded = jwtDecode<{ sub?: string }>(res.data.accessToken);

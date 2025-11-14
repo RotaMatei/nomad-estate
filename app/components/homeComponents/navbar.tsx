@@ -1,17 +1,19 @@
 'use client';
 /* eslint-disable @next/next/no-img-element */
 'use client';
-import { Box, Button, Grid, InputBase, Typography } from '@mui/material';
+import { Box, Button, Grid, InputBase, Typography, useTheme } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CreditCardOutlinedIcon from '@mui/icons-material/CreditCardOutlined';
 import { useEffect, useState } from 'react';
-import { Drawer, IconButton, List, ListItem, ListItemText } from '@mui/material';
+import { IconButton, List, ListItem, ListItemText } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import MobileStaggeredDrawer from './MobileStaggeredDrawer';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import { getTokenData } from '../../lib/auth';
 // import { UserProfile } from './types';
 
 // Removed unused id fetch (was not used)
@@ -20,11 +22,41 @@ import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 export default function Navbar(
   { navColor = 'background.default', mobileNavColor }: { navColor?: string; mobileNavColor?: string }
 ) {
+  const theme = useTheme();
+  const router = useRouter();
+  const pathname = usePathname();
+  const isHomePage = pathname === '/';
+  
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const router = useRouter();
+  const [userRole, setUserRole] = useState<string | null>(null);
+  
   const mColor = mobileNavColor ?? navColor;
-  // Removed unused user/userId state to satisfy lint; kept logged-in flag based on token
+  
+  // Determine navbar color based on role and page
+  const getNavbarColor = () => {
+    // Always white on home
+    if (isHomePage) return theme.palette.common.white;
+    // Logged-in agent/agency -> primary
+    if (isLoggedIn && userRole && /agent|agency/i.test(userRole)) return theme.palette.primary.main;
+    // Logged-in (non-agent) -> secondary
+    if (isLoggedIn && userRole) return theme.palette.secondary.main;
+    // Resolve color tokens passed via prop (e.g. 'primary.main') to actual theme values
+    if (navColor === 'primary.main') return theme.palette.primary.main;
+    if (navColor === 'secondary.main') return theme.palette.secondary.main;
+    if (navColor === 'common.white') return theme.palette.common.white;
+    // Fallback: return as-is (could be a CSS color string)
+    return navColor as string;
+  };
+
+  const getTextColor = () => {
+    // Keep white on home
+    if (isHomePage) return theme.palette.common.white;
+    return getNavbarColor();
+  };
+
+  const currentNavColor = getNavbarColor();
+  const currentTextColor = getTextColor();
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
@@ -33,31 +65,44 @@ export default function Navbar(
   // Detect auth state from localStorage token
   useEffect(() => {
     let mounted = true;
-
     const fetchUser = async () => {
-      // Initial check
       const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const storedRole = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
       if (!mounted) return;
       setIsLoggedIn(!!token);
-
-      if (!token) {
-        return;
-      }
-
-      try {
-        // decoding not needed here since we don't use payload fields
-        if (!mounted) return;
-      } catch {
-        if (!mounted) return;
+      if (storedRole) {
+        setUserRole(storedRole);
+      } else if (token) {
+        // Try decode token to extract role if not present in localStorage
+        try {
+          const data = getTokenData();
+          const maybeRole = data && typeof data.role === 'string' ? String(data.role) : (data && typeof (data as Record<string, unknown>)['role'] === 'string' ? String((data as Record<string, unknown>)['role']) : null);
+          if (maybeRole) setUserRole(maybeRole);
+        } catch {
+          // ignore decode errors
+        }
       }
     };
 
     fetchUser();
 
-    // Listen for token changes across tabs/windows
+    // Listen for token/role changes across tabs/windows
     const onStorage = (e: StorageEvent) => {
       if (e.key === 'token') {
-        setIsLoggedIn(!!e.newValue);
+        const tokenNow = !!e.newValue;
+        setIsLoggedIn(tokenNow);
+        if (tokenNow) {
+          try {
+            const data = getTokenData();
+            const maybeRole = data && typeof data.role === 'string' ? String(data.role) : null;
+            if (maybeRole) setUserRole(maybeRole);
+          } catch {}
+        } else {
+          setUserRole(null);
+        }
+      }
+      if (e.key === 'role') {
+        setUserRole(e.newValue);
       }
     };
     window.addEventListener('storage', onStorage);
@@ -97,7 +142,7 @@ export default function Navbar(
         zIndex: 300,
       }}
     >
-      <Grid container spacing={2} alignItems="center" display={{ xs: 'none', md: 'flex' }}>
+      <Grid container spacing={2} alignItems="center" display={{ xs: 'none', lg: 'flex' }}>
         {/* Logo */}
         <Grid size={{ xs: 12, md: 5 }}>
           <Box
@@ -109,7 +154,7 @@ export default function Navbar(
           >
             <Typography
               sx={{
-                color: navColor,
+                color: currentTextColor,
                 fontWeight: 'bold',
                 fontSize: '16px',
                 display: { xs: 'none', md: 'flex' },
@@ -122,7 +167,7 @@ export default function Navbar(
               sx={{
                 alignItems: 'center',
                 border: '1px solid',
-                borderColor: navColor,
+                borderColor: currentTextColor,
                 borderRadius: 4,
                 px: 1,
                 py: 0.5,
@@ -132,14 +177,14 @@ export default function Navbar(
                 justifyContent: 'left',
               }}
             >
-              <SearchIcon sx={{ color: navColor, mr: 1 }} />
+              <SearchIcon sx={{ color: currentTextColor, mr: 1 }} />
               <InputBase
                 placeholder="AI Search"
                 sx={{
                   width: '100%',
                   fontFamily: 'Montserrat, sans-serif',
                   fontSize: '16px',
-                  color: navColor,
+                  color: currentTextColor,
                 }}
               />
             </Box>
@@ -154,7 +199,7 @@ export default function Navbar(
                 variant="text"
                 href={'/properties'}
                 sx={{
-                  color: navColor,
+                  color: currentTextColor,
                   fontWeight: 500,
                   cursor: 'pointer',
                   fontFamily: 'Montserrat, sans-serif',
@@ -171,7 +216,7 @@ export default function Navbar(
                 variant="text"
                 href={'/dashboard'}
                 sx={{
-                  color: navColor,
+                  color: currentTextColor,
                   fontWeight: 500,
                   cursor: 'pointer',
                   fontFamily: 'Montserrat, sans-serif',
@@ -188,7 +233,7 @@ export default function Navbar(
                 variant="text"
                 sx={{
                   //backgroundColor: 'primary.main',
-                  color: navColor,
+                  color: currentTextColor,
                   fontFamily: 'Montserrat, sans-serif',
                   fontWeight: 500,
                   borderRadius: 3,
@@ -205,7 +250,7 @@ export default function Navbar(
                 startIcon={<CreditCardOutlinedIcon />}
                 sx={{
                   //backgroundColor: 'primary.main',
-                  color: navColor,
+                  color: currentTextColor,
                   fontFamily: 'Montserrat, sans-serif',
                   fontWeight: 500,
                   borderRadius: 3,
@@ -220,8 +265,8 @@ export default function Navbar(
               <Button
                 variant="outlined"
                 sx={{
-                  borderColor: navColor,
-                  color: navColor,
+                  borderColor: currentTextColor,
+                  color: currentTextColor,
                   fontFamily: 'Montserrat, sans-serif',
                   textTransform: 'none',
                   borderRadius: 3,
@@ -240,39 +285,39 @@ export default function Navbar(
           </Grid>
         </Grid>
       </Grid>
-      <Grid container sx={{ marginTop: 6 }} columns={{ xs: 12, sm: 16, md: 12 }}>
-        <Grid size={{ xs: isLoggedIn ? 9 : 10, sm: isLoggedIn ? 8 : 9, md: 6 }}>
+      <Grid container sx={{ marginTop: 6 }} columns={{ xs: 12, sm: 16, lg: 12 }}>
+        <Grid size={{ xs: isLoggedIn ? 9 : 10, sm: isLoggedIn ? 8 : 9, lg: 6 }}>
           <Box
             sx={{
               alignItems: 'center',
               border: '1px solid',
-              borderColor: mColor,
+              borderColor: currentTextColor,
               borderRadius: 4,
               mx:1,
               py: 0.5,
               height: '35px',
-              display: { xs: 'flex', md: 'none' },
+              display: { xs: 'flex', lg: 'none' },
             }}
           >
-            <SearchIcon sx={{ color: mColor, ml: 1 }} />
+            <SearchIcon sx={{ color: currentTextColor, ml: 1 }} />
             <InputBase
               placeholder="AI Search"
               sx={{
                 width: '100%',
                 fontFamily: 'Montserrat, sans-serif',
                 fontSize: '14px',
-                color: mColor,
+                color: currentTextColor,
                 ml: 1,
               }}
             />
           </Box>
         </Grid>
-        <Grid size={{ xs: 0, sm: 5, md: 0 }}
-          width={'100%'} sx={{ display: { xs: 'none',sm: 'block', md: 'none' }, justifyContent: 'center' }}>
+        <Grid size={{ xs: 0, sm: 5, lg: 0 }}
+          width={'100%'} sx={{ display: { xs: 'none',sm: 'block', lg: 'none' }, justifyContent: 'center' }}>
         </Grid>
         <Grid
-          size={{ xs: 1, sm: 1, md: 2 }}
-          sx={{ display: { xs: 'flex', md: 'none' }, justifyContent: 'center' }}
+          size={{ xs: 1, sm: 1, lg: 2 }}
+          sx={{ display: { xs: 'flex', lg: 'none' }, justifyContent: 'center' }}
         >
           <IconButton
             aria-label="login"
@@ -280,116 +325,41 @@ export default function Navbar(
             href={isLoggedIn ? '/user' : '/login'}
             title={isLoggedIn ? 'My Account' : 'Log in'}
           >
-            <PersonOutlineOutlinedIcon sx={{ color: mColor }} />
+            <PersonOutlineOutlinedIcon sx={{ color: currentTextColor }} />
           </IconButton>
         </Grid>
 
         {isLoggedIn ? (
           <Grid
-            size={{ xs: 1, sm: 1, md: 2 }}
-            sx={{ display: { xs: 'flex', md: 'none' }, justifyContent: 'center', }}
+            size={{ xs: 1, sm: 1, lg: 2 }}
+            sx={{ display: { xs: 'flex', lg: 'none' }, justifyContent: 'center', }}
           >
             <IconButton aria-label="log out" onClick={handleLogout} title="Log out">
-              <LogoutOutlinedIcon sx={{ color: mColor }} />
+              <LogoutOutlinedIcon sx={{ color: currentTextColor }} />
             </IconButton>
           </Grid>
         ) : null}
 
         <Grid
-          size={{ xs: 1, sm: 1, md: 2 }}
-          sx={{ display: { xs: 'flex', md: 'none' }, justifyContent: 'center', m: 0  }}
+          size={{ xs: 1, sm: 1, lg: 2 }}
+          sx={{ display: { xs: 'flex', lg: 'none' }, justifyContent: 'center', m: 0  }}
         >
           <IconButton onClick={handleDrawerToggle}>
-            <MenuIcon sx={{ color: mColor, ml: 0 }} />
+            <MenuIcon sx={{ color: currentTextColor, ml: 0 }} />
           </IconButton>
         </Grid>
 
-        {/* Drawer */}
-        <Drawer
-          anchor="right"
-          open={drawerOpen}
-          onClose={handleDrawerToggle}
-          sx={{
-            display: { xs: 'block', md: 'none' },
-            '& .MuiDrawer-paper': {
-              width: '100vw',
-              height: '100%',
-              backgroundColor: 'background.default',
-              padding: 4,
-              overflow: 'hidden'
-            },
-          }}
-        >
-          <IconButton
-            onClick={handleDrawerToggle}
-            sx={{
-              position: 'absolute',
-              top: 16,
-              right: 16,
-              color: 'grey.500',
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-
-          <Box sx={{ mt: 10 }}>
-            <List>
-              {pages.map((page) => (
-                <ListItem
-                  key={page.label}
-                  disableGutters
-                  component={Link}
-                  href={page.href}
-                  sx={{ textDecoration: 'none' }}
-                  onClick={() => setDrawerOpen(false)}
-                >
-                  <ListItemText
-                    primary={
-                      <Typography
-                        sx={{
-                          fontFamily: 'Montserrat, sans-serif',
-                          fontSize: '18px',
-                          fontWeight: 500,
-                          color: 'text.primary',
-                          ml: 2,
-                        }}
-                      >
-                        {page.label}
-                      </Typography>
-                    }
-                  />
-                </ListItem>
-              ))}
-            </List>
-            <Grid container sx={{ paddingTop: '32vh' }}>
-              <Grid size={{ xs: 2 }} sx={{ paddingTop: '21px' }}>
-                <img
-                  src="logo.jpeg"
-                  alt="Logo"
-                  style={{ width: '45px', height: '45px', borderRadius: '10%' }}
-                />
-              </Grid>
-              <Grid size={{ xs: 10 }}>
-                <Typography
-                  fontWeight="600"
-                  textAlign={{ xs: 'left', md: 'left' }}
-                  fontSize={'16px'}
-                  sx={{ paddingTop: '20px', color: 'primary.main' }}
-                >
-                  Nomad Estate
-                </Typography>
-                <Typography
-                  fontWeight="200"
-                  textAlign={{ xs: 'left', md: 'left' }}
-                  fontSize={'15px'}
-                  sx={{ color: 'grey.500' }}
-                >
-                  Global Investment Platform
-                </Typography>
-              </Grid>
-            </Grid>
-          </Box>
-        </Drawer>
+        {/* Mobile animated drawer using StaggeredMenu (right anchored) */}
+        {drawerOpen && (
+          <MobileStaggeredDrawer
+            open={drawerOpen}
+            onClose={() => setDrawerOpen(false)}
+            pages={pages}
+            isLoggedIn={isLoggedIn}
+            onNavigate={(href) => router.push(href)}
+            onLogout={handleLogout}
+          />
+        )}
       </Grid>
     </Box>
   );

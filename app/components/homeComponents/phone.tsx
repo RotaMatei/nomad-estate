@@ -18,6 +18,7 @@ export default function Phone() {
         justifyContent: 'center',
         alignItems: 'center',
         position: 'relative',
+        mt:{md:4, lg:0}
       }}
     >
       <Box

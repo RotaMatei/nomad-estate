@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Box, Grid, Typography, Card, CardContent, Button, Chip, Stack, Avatar } from '@mui/material';
 import Navbar from '@/app/components/homeComponents/navbar';
+import { getTokenData } from '@/app/lib/auth';
 import { useRouter } from 'next/navigation';
 import { alpha, useTheme } from '@mui/material/styles';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
@@ -17,6 +18,7 @@ export default function UserDashboardPage() {
   const router = useRouter();
   const theme = useTheme();
   const [name, setName] = useState<string | null>(null);
+  const [navColor, setNavColor] = useState<string>('primary.main');
   type UserProfile = {
     firstName: string | null;
     lastName: string | null;
@@ -137,6 +139,32 @@ export default function UserDashboardPage() {
     fetchData();
   }, [router]);
 
+  // Update navbar color based on role (localStorage.role or token role)
+  useEffect(() => {
+    try {
+      const role = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
+      if (role && /agent|agency/i.test(role)) {
+        setNavColor('primary.main');
+        return;
+      }
+      if (role) {
+        setNavColor('secondary.main');
+        return;
+      }
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      if (token) {
+        const data = getTokenData();
+        const maybeRole = data && typeof data.role === 'string' ? String(data.role) : null;
+        if (maybeRole && /agent|agency/i.test(maybeRole)) setNavColor('primary.main');
+        else setNavColor('secondary.main');
+      } else {
+        setNavColor('secondary.main');
+      }
+    } catch {
+      setNavColor('secondary.main');
+    }
+  }, []);
+
   const handleLogout = () => {
     try {
       localStorage.removeItem('token');
@@ -150,7 +178,7 @@ export default function UserDashboardPage() {
 
   return (
     <Box sx={{ backgroundColor: 'background.default', minHeight: '100vh', overflow: 'hidden'}}>
-      <Navbar navColor="primary.main" />
+      <Navbar navColor={navColor} />
 
       {/* Content container */}
       <Box

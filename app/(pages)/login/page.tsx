@@ -67,13 +67,17 @@ export default function LoginPage() {
     setGlareRun(false);
     requestAnimationFrame(() => setGlareRun(true));
 
-    // helper to persist tokens and optional name
-    const persistAndRedirect = (data: LoginResponse) => {
+    // helper to persist tokens, role and optional name
+    const persistAndRedirect = (data: LoginResponse, role: string) => {
       if (!data) return;
       localStorage.setItem('token', data.accessToken);
       localStorage.setItem('refreshToken', data.refreshToken);
       if (data.RefreshJTI) localStorage.setItem('jti', data.RefreshJTI);
       if (data.sub) localStorage.setItem('userId', data.sub);
+      // store role so navbar and other UI can react immediately
+      try {
+        localStorage.setItem('role', role);
+      } catch {}
       router.push('/');
     };
 
@@ -81,7 +85,8 @@ export default function LoginPage() {
       setLoading(true);
       // Attempt user login first
       const resUser = await api.post<LoginResponse>('/auth/user/login', { email: emailSanitized, password });
-      persistAndRedirect(resUser.data);
+      // user login -> investor role
+      persistAndRedirect(resUser.data, 'INVESTOR');
       return;
     } catch (err: unknown) {
       const status = axios.isAxiosError(err) ? err.response?.status : undefined;
@@ -89,7 +94,8 @@ export default function LoginPage() {
       if (status && status >= 400) {
         try {
           const resAgency = await api.post<LoginResponse>('/auth/agency/login', { email: emailSanitized, password });
-          persistAndRedirect(resAgency.data);
+          // agency login -> agency role
+          persistAndRedirect(resAgency.data, 'AGENCY');
           return;
         } catch (err2: unknown) {
           const status2 = axios.isAxiosError(err2) ? err2.response?.status : undefined;
