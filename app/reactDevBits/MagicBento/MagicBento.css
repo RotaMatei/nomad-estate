@@ -65,6 +65,11 @@
   align-self: start; /* prevent grid stretch to row height */
 }
 
+/* Disable blur effect on globe card */
+.card:nth-child(4) {
+  backdrop-filter: none;
+}
+
 .card:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(202, 202, 202, 0.15);
@@ -127,13 +132,41 @@
   line-clamp: var(--clamp-desc);
 }
 
+/* Top search bar (outside grid) */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  width: calc(95vw - 1.5em); /* match card inner width (grid padding) */
+  max-width: calc(1200px - 1.5em);
+  margin: 0.5rem auto 0.5rem;
+  padding: 0.5em 1.25em;
+  padding-bottom: 0.25rem;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  background: var(--background-dark);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 5px 32px rgba(230, 230, 230, 0.1);
+  position: relative;
+  z-index: 5; /* above .card-grid (z-index:3) */
+}
+
 @media (max-width: 450px) {
+  .search-bar {
+    width: calc(96vw - 1.5em); /* grid is 96vw on xs */
+    max-width: calc(1200px - 1.5em);
+  }
   .card-grid {
     grid-template-columns: 1fr;
     width: 96vw; /* wider on xs */
     max-width: none;
-    margin-top: -10rem;
+    margin-top: 0rem; /* move cards way lower */
     box-sizing: border-box;
+  }
+
+  .search-bar {
+    margin-top: -9rem; /* nudge search bar slightly higher */
   }
 
   .card {
@@ -173,7 +206,7 @@
 }
 
 /* Ensure Card 4 is hidden up to 600px wide as well (covers more small devices) */
-@media (max-width: 600px) {
+@media (max-width: 450px) {
   .card-grid > .card:nth-child(4) {
     display: none !important;
   }
@@ -188,9 +221,13 @@
     width: 95vw; /* keep it wide on sm/md */
     max-width: 1200px;
     padding: 0.75em;
-    box-sizing: border-box;
-     margin-top: -13rem; /* extreme overlap on small/medium screens */
+     box-sizing: border-box;
+      margin-top: -0.5rem; /* move cards way lower */
   }
+
+    .search-bar {
+     margin-top: -12rem; /* nudge search bar slightly higher */
+    }
 
 
 
@@ -237,9 +274,13 @@
   .card-grid {
     grid-template-columns: repeat(4, 1fr);
     grid-template-rows: 1fr 1fr 1fr;
-    margin-top: -22rem; /* extreme overlap on large screens */
+    margin-top: 0rem; /* move cards way lower */
    /* Reduce vertical spacing between rows on the right side */
    gap: 0.35em 0.75em; /* row-gap column-gap */
+  }
+
+  .search-bar {
+    margin-top: -23rem; /* nudge search bar slightly higher */
   }
 
   /* Large tall card on the left */
@@ -272,9 +313,8 @@
   .card:nth-child(4) {
     grid-column: 3 / span 2;
     grid-row: 2 / span 2;
-    /* Raise the card upwards while keeping the bottom aligned with card 1 */
-    --card4-raise: 0.75rem; /* tweak this to control extra height at the top */
-    height: calc(100% + var(--card4-raise));
+    
+    height: fit-content;
     margin-top: calc(var(--card4-raise) * -1);
     aspect-ratio: auto;
     min-height: 0;

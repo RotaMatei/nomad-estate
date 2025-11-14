@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { gsap } from 'gsap';
 import './MagicBento.css';
-import { Box, Slider, Typography, Stack, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Slider, Typography, Stack, useMediaQuery, useTheme, IconButton } from '@mui/material';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import MonetizationOnOutlinedIcon from '@mui/icons-material/MonetizationOnOutlined';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
@@ -10,6 +10,8 @@ import SingleBedOutlinedIcon from '@mui/icons-material/SingleBedOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined';
 import PercentOutlinedIcon from '@mui/icons-material/PercentOutlined';
+import AddIcon from '@mui/icons-material/Add';
+import DiamondIcon from '@mui/icons-material/Diamond';
 import { CustomAutocomplete } from '../../components/utils/autocomplete';
 import CheckboxGroup, { type Option as CheckboxOption } from '../../components/utils/checkboxGroup';
 import CustomButton from '../../components/utils/button';
@@ -572,9 +574,8 @@ const MagicBento: React.FC<BentoProps> = ({
   const [budget, setBudget] = useState<number[]>([0, 2000000]);
   const [goals, setGoals] = useState<string[]>([]);
   const [benefits, setBenefits] = useState<string[]>([]);
-  // Mobile collapsible state for goals and benefits sections
-  const [showGoals, setShowGoals] = useState(true);
-  const [showBenefits, setShowBenefits] = useState(true);
+  const [goalsExpanded, setGoalsExpanded] = useState(false);
+  const [benefitsExpanded, setBenefitsExpanded] = useState(false);
   const [countryOptions, setCountryOptions] = useState<{ value: string | number; label: string }[]>([]);
   const [city, setCity] = useState<string | number | ''>('');
   const [cityOptions, setCityOptions] = useState<{ value: string | number; label: string }[]>([]);
@@ -905,12 +906,6 @@ const MagicBento: React.FC<BentoProps> = ({
     // Re-run the last search if available, else no-op
     handleSearch();
   };
-  // Initialize collapsed states depending on breakpoint
-  useEffect(() => {
-    // Collapse by default on mobile, expand on md+ screens
-    setShowGoals(!isMobile);
-    setShowBenefits(!isMobile);
-  }, [isMobile]);
 
   return (
     <>
@@ -923,6 +918,27 @@ const MagicBento: React.FC<BentoProps> = ({
           glowColor={glowColor}
         />
       )}
+
+      {/* Standalone top search bar (outside grid to preserve layout) */}
+      <div className="search-bar">
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+          <SearchOutlinedIcon sx={{ color: '#003FC7', flexShrink: 0 }} />
+          <input
+            type="text"
+            placeholder="Quick search properties..."
+            style={{
+              flex: 1,
+              border: 'none',
+              background: 'transparent',
+              color: '#000',
+              fontSize: '1rem',
+              outline: 'none',
+              fontFamily: 'inherit',
+              padding: '0.5em 0',
+            }}
+          />
+        </Box>
+      </div>
 
       <BentoCardGrid gridRef={gridRef}>
         {cardData.map((card, index) => {
@@ -1007,52 +1023,70 @@ const MagicBento: React.FC<BentoProps> = ({
 
                         {/* Investment goals */}
                         <Box>
-                        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 500, color: 'grey.500' }}>Investment Goals</Typography>
-                          <KeyboardArrowDownOutlinedIcon
-                            onClick={() => setShowGoals((prev) => !prev)}
-                            sx={{
-                              display: { xs: 'block', sm: 'block', md: 'none' },
-                              cursor: 'pointer',
-                              transform: showGoals ? 'rotate(180deg)' : 'rotate(0deg)',
-                              transition: 'transform 0.2s ease',
-                              color: 'secondary.main'
-                            }}
-                          />
-                        </Stack>
-                        {showGoals && (
+                          <Typography variant="subtitle2" sx={{ fontWeight: 500, color: 'grey.500', mb: 1 }}>Investment Goals</Typography>
                           <CheckboxGroup
-                            options={goalOptions}
+                            options={goalsExpanded ? goalOptions : goalOptions.slice(0, 2)}
                             values={goals}
                             onChange={setGoals}
                             focusColor="#003FC7"
                           />
-                        )}
+                          {goalOptions.length > 2 && (
+                            <Box sx={{ mt: 3 }}>
+                              <Stack
+                                direction="row"
+                                alignItems="center"
+                                spacing={0.5}
+                                onClick={() => setGoalsExpanded((prev) => !prev)}
+                                sx={{
+                                  fontSize: '0.85rem',
+                                  color: '#003FC7',
+                                  cursor: 'pointer',
+                                  fontWeight: 500,
+                                  '&:hover': { opacity: 0.8 }
+                                }}
+                              >
+                                <AddIcon sx={{ fontSize: 16 }} />
+                                <DiamondIcon sx={{ fontSize: 16 }} />
+                                <Typography variant="body2" sx={{ fontSize: '0.85rem', fontWeight: 500 }}>
+                                  {goalsExpanded ? 'Show Less Tags' : `Show More Tags (${goalOptions.length - 2})`}
+                                </Typography>
+                              </Stack>
+                            </Box>
+                          )}
                         </Box>
 
                         {/* Location benefits */}
-                         <Box>
-                        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 500, color: 'grey.500' }}>Location Benefits</Typography>
-                          <KeyboardArrowDownOutlinedIcon
-                            onClick={() => setShowBenefits((prev) => !prev)}
-                            sx={{
-                              display: { xs: 'block', sm: 'block', md: 'none' },
-                              cursor: 'pointer',
-                              transform: showBenefits ? 'rotate(180deg)' : 'rotate(0deg)',
-                              transition: 'transform 0.2s ease',
-                              color: 'secondary.main'
-                            }}
-                          />
-                        </Stack>
-                        {showBenefits && (
+                        <Box>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 500, color: 'grey.500', mb: 1 }}>Location Benefits</Typography>
                           <CheckboxGroup
-                            options={benefitOptions}
+                            options={benefitsExpanded ? benefitOptions : benefitOptions.slice(0, 2)}
                             values={benefits}
                             onChange={setBenefits}
                             focusColor="#003FC7"
                           />
-                        )}
+                          {benefitOptions.length > 2 && (
+                            <Box sx={{ mt: 3, mb:3 }}>
+                              <Stack
+                                direction="row"
+                                alignItems="center"
+                                spacing={0.5}
+                                onClick={() => setBenefitsExpanded((prev) => !prev)}
+                                sx={{
+                                  fontSize: '0.85rem',
+                                  color: '#003FC7',
+                                  cursor: 'pointer',
+                                  fontWeight: 500,
+                                  '&:hover': { opacity: 0.8 }
+                                }}
+                              >
+                                <AddIcon sx={{ fontSize: 16 }} />
+                                <DiamondIcon sx={{ fontSize: 16 }} />
+                                <Typography variant="body2" sx={{ fontSize: '0.85rem', fontWeight: 500 }}>
+                                  {benefitsExpanded ? 'Show Less Tags' : `Show More Tags (${benefitOptions.length - 2})`}
+                                </Typography>
+                              </Stack>
+                            </Box>
+                          )}
                         </Box>
                       
                         <CustomButton
@@ -1154,15 +1188,15 @@ const MagicBento: React.FC<BentoProps> = ({
                     </div>
                   </Box>
                 ) : (
-                  <>
-                    <div className="card">
-                      <div className="card__content">
-                        <h2 className="card__title">Global Locations</h2>
-                        <MapGlobeSwitcher locations={globeLocations} onReload={handleReload} onSelect={setSelectedId} />
-                        <p className="card__description">Explore the locations on map or globe.</p>
-                      </div>
+                  <Box sx={{ p: { xs: 1, md: 2 }, display: 'flex', flexDirection: 'column', gap: { xs: 1.5, md: 2 }, height: '100%' }}>
+                    <div className="card__header">
+                      <div className="card__label">Global Locations</div>
                     </div>
-                  </>
+                    <div className="card__content" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                      <MapGlobeSwitcher locations={globeLocations} onReload={handleReload} onSelect={setSelectedId} />
+                      <p className="card__description" style={{ marginTop: 'auto' }}>Explore the locations on map or globe.</p>
+                    </div>
+                  </Box>
                 )}
               </ParticleCard>
             );
