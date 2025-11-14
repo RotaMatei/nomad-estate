@@ -4,7 +4,7 @@
 import { Box, Button, Grid, InputBase, Typography, useTheme } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CreditCardOutlinedIcon from '@mui/icons-material/CreditCardOutlined';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { IconButton, List, ListItem, ListItemText } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
@@ -26,10 +26,12 @@ export default function Navbar(
   const router = useRouter();
   const pathname = usePathname();
   const isHomePage = pathname === '/';
+  const prevPathRef = useRef(pathname);
   
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [searchText, setSearchText] = useState('');
   
   const mColor = mobileNavColor ?? navColor;
   
@@ -61,6 +63,27 @@ export default function Navbar(
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
   };
+
+  // Submit AI search on Enter -> route to /sorry for now
+  const submitSearch = () => {
+    router.push('/sorry');
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      submitSearch();
+    }
+  };
+
+  // Clear the search box when navigating back from /sorry
+  useEffect(() => {
+    const prev = prevPathRef.current;
+    if (prev === '/sorry' && pathname !== '/sorry') {
+      setSearchText('');
+    }
+    prevPathRef.current = pathname;
+  }, [pathname]);
 
   // Detect auth state from localStorage token
   useEffect(() => {
@@ -186,6 +209,9 @@ export default function Navbar(
                   fontSize: '16px',
                   color: currentTextColor,
                 }}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                onKeyDown={handleSearchKeyDown}
               />
             </Box>
           </Box>
@@ -309,6 +335,9 @@ export default function Navbar(
                 color: currentTextColor,
                 ml: 1,
               }}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
             />
           </Box>
         </Grid>

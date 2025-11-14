@@ -73,15 +73,18 @@ export default function AddressSection({ formData, setFormData }: Props) {
       if (digits.length > 3) return;
     }
     if (fracPart && fracPart.length > 6) return;
-    setLatitudeInput(raw);
+    let next = raw;
     const isValid = coordRegex.test(raw);
     setLatValid(isValid);
     if (isValid) {
       const numeric = parseFloat(raw);
-      setFormData({ ...formData, latitude: numeric });
+      const clamped = Math.max(-90, Math.min(90, numeric));
+      if (clamped !== numeric) next = String(clamped);
+      setFormData({ ...formData, latitude: clamped });
     } else {
       setFormData({ ...formData, latitude: undefined });
     }
+    setLatitudeInput(next);
   };
 
   const handleLonChange = (inp: string) => {
@@ -96,15 +99,18 @@ export default function AddressSection({ formData, setFormData }: Props) {
       if (digits.length > 3) return;
     }
     if (fracPart && fracPart.length > 6) return;
-    setLongitudeInput(raw);
+    let next = raw;
     const isValid = coordRegex.test(raw);
     setLonValid(isValid);
     if (isValid) {
       const numeric = parseFloat(raw);
-      setFormData({ ...formData, longitude: numeric });
+      const clamped = Math.max(-180, Math.min(180, numeric));
+      if (clamped !== numeric) next = String(clamped);
+      setFormData({ ...formData, longitude: clamped });
     } else {
       setFormData({ ...formData, longitude: undefined });
     }
+    setLongitudeInput(next);
   };
 
   const handlePostalChange = (raw: string) => {
