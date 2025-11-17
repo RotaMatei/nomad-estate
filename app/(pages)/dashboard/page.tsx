@@ -10,10 +10,9 @@ import VolumeGraph from '../../components/investorsDahsboardComponents/VolumeGra
 import { StaggeredMenu, StaggeredMenuItem, StaggeredMenuSection } from '@/app/reactDevBits/StaggeredMenu/staggeredMenu';
 import React from 'react';
 import { getTokenData } from '@/app/lib/auth';
-// Removed unused axios import (using api client instead)
 import api from '@/app/lib/api';
 import TopCities from '../../components/investorsDahsboardComponents/topCities';
-import ListingCard from '../../components/investorsDahsboardComponents/ListingCard'; // retained for other sections
+import ListingCard from '../../components/investorsDahsboardComponents/ListingCard';
 import PropertyCard from '../../components/investorsDahsboardComponents/PropertyCard';
 import AgentsManager from '../../components/investorsDahsboardComponents/AgentsManager';
 import { unsavePropertyForUser } from '@/app/lib/propertyApi';
