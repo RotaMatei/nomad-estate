@@ -299,6 +299,17 @@ export async function createProperty(form: PropertyFormData) {
       // partial failures in subtable creation are tolerated
     }
 
+    // After related data is created, calculate score and persist it
+    try {
+      const { data: calcScore } = await api.post(`/property/create-score/${propertyId}`);
+      if (typeof calcScore === 'number') {
+        // Persist the newly calculated score on the property
+        await api.patch(`/property/update-score/${propertyId}`, { score: calcScore });
+      }
+    } catch {
+      // Non-critical: score calculation failures should not block property creation
+    }
+
     return createdProperty;
   } catch (err: unknown) {
     console.error('❌ Error creating property');
@@ -620,6 +631,17 @@ export async function updateProperty(propertyId: string, form: PropertyFormData)
       await Promise.all(tasks);
     } catch {
       // partial failures in subtable updates are tolerated
+    }
+
+    // Recalculate and persist updated score after modifications
+    try {
+      const { data: calcScore } = await api.post(`/property/create-score/${propertyId}`);
+      console.log(`🔄 Updating property ${propertyId} with new calculated score: ${calcScore}`);
+      if (typeof calcScore === 'number') {
+        await api.patch(`/property/update-score/${propertyId}`, { score: calcScore });
+      }
+    } catch {
+      // Silent fail; UI can display stale score until next refresh
     }
 
     return updatedProperty;
