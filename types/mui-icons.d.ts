@@ -1,0 +1,9 @@
+declare module '@mui/icons-material/Search';
+declare module '@mui/icons-material/Menu';
+declare module '@mui/icons-material/PersonOutlineOutlined';
+declare module '@mui/icons-material/TrendingUp';
+declare module '@mui/icons-material/Stars';
+declare module '@mui/icons-material/Shower';
+declare module '@mui/icons-material/SquareFoot';
+declare module '@mui/icons-material/EuroIcon';
+declare module '@mui/icons-material/Bedtime';

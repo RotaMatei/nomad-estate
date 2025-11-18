@@ -20,13 +20,15 @@ api.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError) => {
     if (error.response?.status === 401) {
+      const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
+      // If there is no refresh token, do not attempt refresh; bubble the original 401
+      if (!refreshToken) {
+        return Promise.reject(error);
+      }
       try {
-        const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
         const { data } = await axios.post<{ accessToken: string; refreshToken: string }>(
           'https://api.nomadestatehub.com/refresh',
-          {
-            refreshToken,
-          },
+          { refreshToken },
           { withCredentials: true },
         );
         if (typeof window !== 'undefined') {

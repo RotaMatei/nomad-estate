@@ -1,5 +1,12 @@
 import api from './api';
 import { PropertyFormData } from '../components/createPropertyComponents/types';
+import axios from 'axios';
+
+// Simple axios instance without interceptors for public endpoints
+const publicApi = axios.create({
+  baseURL: 'https://api.nomadestatehub.com',
+});
+
 import type {
   CoolingSystemEnum,
   HeatingSystemEnum,
@@ -484,6 +491,53 @@ export async function getYieldForProperty(propertyId: string): Promise<PropertyY
     return Array.isArray(data) ? (data as PropertyYield[]) : [];
   } catch {
     return [] as PropertyYield[];
+  }
+}
+
+// User profile (for agent contact details)
+export interface UserProfile {
+  firstName?: string;
+  lastName?: string;
+  role?: string;
+  email?: string;
+  emailVerified?: boolean;
+  phoneNumber?: string;
+  phoneNumberVerified?: boolean;
+  birthDate?: string;
+}
+
+export async function getUserProfile(userId: string): Promise<UserProfile | null> {
+  if (!userId) return null;
+  try {
+    const { data } = await api.get(`/user/retrieve/${userId}`);
+    return data as UserProfile;
+  } catch (e) {
+    // Authorization failures or missing user -> return null; caller handles fallback UI
+    return null;
+  }
+}
+
+// Agency details
+export interface AgencyDetails {
+  id?: string;
+  phoneNumber?: string;
+  companyName?: string;
+  profilePictureData?: string; // base64 encoded or URL
+  email?: string;
+  establishedYear?: number;
+  companyExperience?: string; // backend returns String
+}
+
+export async function getAgencyDetails(agencyId: string): Promise<AgencyDetails | null> {
+  if (!agencyId) return null;
+  try {
+    const { data } = await api.get(`/agency/retrieve/${agencyId}`);
+    console.debug('Agency fetch success - full response:', data);
+    console.debug('establishedYear:', data?.establishedYear, 'companyExperience:', data?.companyExperience);
+    return data as AgencyDetails;
+  } catch (err) {
+    console.debug('Agency fetch error:', err);
+    return null;
   }
 }
 

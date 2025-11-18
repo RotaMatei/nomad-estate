@@ -1,5 +1,4 @@
 'use client';
-'use client';
 import { Box, Button, Grid, InputBase, Typography, useTheme } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CreditCardOutlinedIcon from '@mui/icons-material/CreditCardOutlined';
