@@ -173,7 +173,7 @@ export default function AgentsManager({ agencyId, colorScheme, profileName, prof
         </Box>
       )}
 
-      <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 500, color:'error.main' }}>Current Agents</Typography>
+      <Typography variant="subtitle2" gutterBottom sx={{ mb: 1,color:'primary.main' }}>Current Agents</Typography>
       {loadingAgents ? (
         <CircularProgress size={24} />
       ) : agents.length === 0 ? (

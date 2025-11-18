@@ -1,5 +1,4 @@
 'use client';
-/* eslint-disable @next/next/no-img-element */
 'use client';
 import { Box, Button, Grid, InputBase, Typography, useTheme } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
@@ -14,10 +13,6 @@ import { useRouter, usePathname } from 'next/navigation';
 import MobileStaggeredDrawer from './MobileStaggeredDrawer';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import { getTokenData } from '../../lib/auth';
-// import { UserProfile } from './types';
-
-// Removed unused id fetch (was not used)
-// const id = typeof window !== 'undefined' ? window.localStorage.getItem('agencyId') : null;
 
 export default function Navbar(
   { navColor = 'background.default', mobileNavColor }: { navColor?: string; mobileNavColor?: string }
@@ -35,19 +30,15 @@ export default function Navbar(
   
   const mColor = mobileNavColor ?? navColor;
   
-  // Determine navbar color based on role and page
+
   const getNavbarColor = () => {
-    // Always white on home
+
     if (isHomePage) return theme.palette.common.white;
-    // Logged-in agent/agency -> primary
     if (isLoggedIn && userRole && /agent|agency/i.test(userRole)) return theme.palette.primary.main;
-    // Logged-in (non-agent) -> secondary
     if (isLoggedIn && userRole) return theme.palette.secondary.main;
-    // Resolve color tokens passed via prop (e.g. 'primary.main') to actual theme values
     if (navColor === 'primary.main') return theme.palette.primary.main;
     if (navColor === 'secondary.main') return theme.palette.secondary.main;
     if (navColor === 'common.white') return theme.palette.common.white;
-    // Fallback: return as-is (could be a CSS color string)
     return navColor as string;
   };
 
