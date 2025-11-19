@@ -13,6 +13,8 @@ import PercentOutlinedIcon from '@mui/icons-material/PercentOutlined';
 import AddIcon from '@mui/icons-material/Add';
 import DiamondIcon from '@mui/icons-material/Diamond';
 import { CustomAutocomplete } from '../../components/utils/autocomplete';
+import TagSearchInput, { type TagItem } from '@/app/components/utils/TagSearchInput';
+import { searchCities, searchCountries } from '@/app/lib/locationApi';
 import CheckboxGroup, { type Option as CheckboxOption } from '../../components/utils/checkboxGroup';
 import CustomButton from '../../components/utils/button';
 import api from '../../lib/api';
@@ -569,21 +571,21 @@ const MagicBento: React.FC<BentoProps> = ({
   const globePageSize = isLarge ? 30 : 28;
 
   // Filters state (for first card)
-  const [country, setCountry] = useState<string | number | ''>('');
+  const [selectedCountries, setSelectedCountries] = useState<TagItem[]>([]);
   // Budget range slider default now spans full range (0 to 2,000,000)
   const [budget, setBudget] = useState<number[]>([0, 2000000]);
   const [goals, setGoals] = useState<string[]>([]);
   const [benefits, setBenefits] = useState<string[]>([]);
   const [goalsExpanded, setGoalsExpanded] = useState(false);
   const [benefitsExpanded, setBenefitsExpanded] = useState(false);
-  const [countryOptions, setCountryOptions] = useState<{ value: string | number; label: string }[]>([]);
-  const [city, setCity] = useState<string | number | ''>('');
-  const [cityOptions, setCityOptions] = useState<{ value: string | number; label: string }[]>([]);
+  const [selectedCities, setSelectedCities] = useState<TagItem[]>([]);
   const [propertyType, setPropertyType] = useState<string | number>('');
   const [bedrooms, setBedrooms] = useState<string | number>('');
   const [investmentScore, setInvestmentScore] = useState<string | number>('');
   const [expectedYield, setExpectedYield] = useState<string | number>('');
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  // Quick name search (separate from filters)
+  const [quickQuery, setQuickQuery] = useState<string>('');
 
   // Globe locations derived from search results
   const [globeLocations, setGlobeLocations] = useState<Location[]>([]);
@@ -601,64 +603,9 @@ const MagicBento: React.FC<BentoProps> = ({
     // Selected location id is tracked
   }, [selectedId]);
 
-  useEffect(() => {
-    let cancelled = false;
-    const loadCountries = async () => {
-      try {
-        const { data } = await api.get('/countries/retrieve/get-all');
-        if (cancelled) return;
-        // Expecting array of Country: { id, name, code, ... }
-        type CountryDTO = { id: number | string; name?: string; code?: string };
-        const mapped = ((data as CountryDTO[]) || []).map((c) => ({
-          value: c.id, // prefer numeric id to match cities API param
-          label: c.name ?? String(c.code ?? c.id),
-        }));
-        setCountryOptions(mapped);
-      } catch {
-        // Fallback to a minimal list if API fails, to keep UX working
-        if (!cancelled) {
-          setCountryOptions([
-            { value: 'ro', label: 'Romania' },
-            { value: 'us', label: 'United States' },
-            { value: 'de', label: 'Germany' },
-            { value: 'fr', label: 'France' },
-          ]);
-        }
-      }
-    };
-    loadCountries();
-    return () => { cancelled = true; };
-  }, []);
+  // Countries and cities now use text search via TagSearchInput; no full retrieve on mount.
 
-  // Load cities when a country is selected
-  useEffect(() => {
-    let cancelled = false;
-    const loadCities = async () => {
-      if (!country) {
-        setCityOptions([]);
-        setCity('');
-        return;
-      }
-      try {
-        const { data } = await api.get(`/cities/retrieve/get-all-by-country/${country}`);
-        if (cancelled) return;
-        type CityDTO = { id: number | string; name?: string };
-        const mapped = ((data as CityDTO[]) || []).map((ct) => ({
-          value: ct.id,
-          label: ct.name ?? String(ct.id),
-        }));
-        setCityOptions(mapped);
-      } catch {
-        if (!cancelled) {
-          setCityOptions([]);
-        }
-      }
-    };
-    loadCities();
-    return () => {
-      cancelled = true;
-    };
-  }, [country]);
+  // Cities are searched globally by text; no dependency on selected country.
 
   // Goal options now directly reflect the full backend InvestmentGoalTagEnum set
   const goalOptions: CheckboxOption[] = INVESTMENT_GOAL_TAGS.map(tag => ({
@@ -676,6 +623,11 @@ const MagicBento: React.FC<BentoProps> = ({
   useEffect(() => {
     if (typeof window === 'undefined') return;
     try {
+      // If last mode was name, rehydrate quick search bar
+      const lastMode = sessionStorage.getItem('properties_last_mode');
+      const lastQ = sessionStorage.getItem('properties_last_name_query');
+      if (lastMode === 'name' && typeof lastQ === 'string') setQuickQuery(lastQ);
+
       const raw = sessionStorage.getItem('properties_last_search');
       if (!raw) return;
       const parsed = JSON.parse(raw) as {
@@ -699,7 +651,8 @@ const MagicBento: React.FC<BentoProps> = ({
       if (minP !== undefined || maxP !== undefined) {
         setBudget([minP ?? 0, maxP ?? 2000000]);
       }
-      if (typeof fb.location === 'number') setCity(fb.location);
+      // Back-compat: If last search stored a single numeric city id, rehydrate as selected city tag placeholder
+      if (typeof fb.location === 'number') setSelectedCities([{ id: fb.location, label: String(fb.location) }]);
       if (typeof fb.propertyType !== 'undefined') setPropertyType(fb.propertyType);
       if (typeof fb.minimumScore === 'number') setInvestmentScore(fb.minimumScore);
       if (typeof fb.minimumYield === 'number') {
@@ -717,6 +670,10 @@ const MagicBento: React.FC<BentoProps> = ({
   }, []);
 
   const handleSearch = () => {
+    // Mark mode as filters (exclusive with name search)
+    try {
+      if (typeof window !== 'undefined') sessionStorage.setItem('properties_last_mode', 'filters');
+    } catch {}
     // Build FilterDto body and query params for /property/retrieve-search
     // Backend expects:
     // Query: InvG = InvestmentGoalTagEnum[] | InvestmentGoalTagEnum
@@ -757,21 +714,33 @@ const MagicBento: React.FC<BentoProps> = ({
     type FilterBody = {
       minimumPrice?: number;
       maximumPrice?: number;
+      // Deprecated: single city id; kept for back-compat if a single city is chosen
       location?: number;
       propertyType?: string | number;
       minimumScore?: number;
       minimumYield?: number;
       minimumNoBedrooms?: number;
+      // New: tag-based filters
+      cityTags?: string[];
+      countryTags?: string[];
+      cityIds?: Array<string | number>;
+      countryIds?: Array<string | number>;
     };
 
+    const cityIds = selectedCities.map((c) => c.id);
+    const countryIds = selectedCountries.map((c) => c.id);
     const filterBody: FilterBody = {
       minimumPrice: budget?.[0],
       maximumPrice: budget?.[1],
-      location: typeof city === 'number' ? city : (typeof city === 'string' && city !== '' && !isNaN(Number(city)) ? Number(city) : undefined),
+      location: cityIds.length === 1 && typeof cityIds[0] === 'number' ? (cityIds[0] as number) : undefined,
       propertyType: propertyType || undefined,
       minimumScore: coerceScore(investmentScore),
       minimumYield: coerceYield(expectedYield),
       minimumNoBedrooms: coerceBedrooms(bedrooms),
+      cityTags: selectedCities.map((c) => c.label),
+      countryTags: selectedCountries.map((c) => c.label),
+      cityIds,
+      countryIds,
     };
 
     // Remove undefined keys to avoid validation errors
@@ -783,6 +752,8 @@ const MagicBento: React.FC<BentoProps> = ({
       // Backend normalizes single vs array automatically
       InvG: mappedInvG.length ? mappedInvG : undefined,
       LocB: mappedLocB.length ? mappedLocB : undefined,
+      cities: selectedCities.length ? selectedCities.map((c) => c.label) : undefined,
+      countries: selectedCountries.length ? selectedCountries.map((c) => c.label) : undefined,
     } as const;
 
     // Persist last search so listings can reconstruct the body on reload
@@ -790,6 +761,8 @@ const MagicBento: React.FC<BentoProps> = ({
       if (typeof window !== 'undefined') {
         const toStore = { filterBody, InvG: queryParams.InvG, LocB: queryParams.LocB };
         sessionStorage.setItem('properties_last_search', JSON.stringify(toStore));
+        // Clear last name search query when running filters
+        sessionStorage.removeItem('properties_last_name_query');
       }
     } catch {}
 
@@ -907,6 +880,66 @@ const MagicBento: React.FC<BentoProps> = ({
     handleSearch();
   };
 
+  // Execute the quick name search (used by Enter key and search button)
+  const executeQuickSearch = async () => {
+    const q = (quickQuery ?? '').trim();
+    if (!q) return;
+    try {
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('properties_last_mode', 'name');
+        sessionStorage.setItem('properties_last_name_query', q);
+      }
+    } catch {}
+    try {
+      const res = await api.get('/property/retrieve-search-by-name', { params: { q } });
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('properties:filter-results', { detail: res.data }));
+      }
+      // Derive globe locations similarly to filter search
+      try {
+        const list = Array.isArray(res.data) ? (res.data as unknown[]) : [];
+        const toNum = (v: unknown): number | null => {
+          if (typeof v === 'number' && isFinite(v)) return v;
+          if (typeof v === 'string') { const n = parseFloat(v); return isFinite(n) ? n : null; }
+          if (v && typeof (v as { toString: () => string }).toString === 'function') { const s = (v as { toString: () => string }).toString(); const n = parseFloat(s); return isFinite(n) ? n : null; }
+          return null;
+        };
+        const getLat = (p: unknown): number | null => {
+          const obj = (p ?? {}) as Record<string, unknown>;
+          const loc = obj['Location'] as (Record<string, unknown> | undefined);
+          const loc2 = obj['location'] as (Record<string, unknown> | undefined);
+          return (
+            toNum(obj?.['latitude']) ?? toNum(obj?.['lat']) ?? toNum(loc?.['lat']) ?? toNum(loc?.['latitude']) ?? toNum(loc2?.['lat']) ?? toNum(loc2?.['latitude']) ?? null
+          );
+        };
+        const getLng = (p: unknown): number | null => {
+          const obj = (p ?? {}) as Record<string, unknown>;
+          const loc = obj['Location'] as (Record<string, unknown> | undefined);
+          const loc2 = obj['location'] as (Record<string, unknown> | undefined);
+          return (
+            toNum(obj?.['longitude']) ?? toNum(obj?.['lng']) ?? toNum(obj?.['lon']) ?? toNum(loc?.['lng']) ?? toNum(loc?.['lon']) ?? toNum(loc?.['longitude']) ?? toNum(loc2?.['lng']) ?? toNum(loc2?.['lon']) ?? toNum(loc2?.['longitude']) ?? null
+          );
+        };
+        const candidates = list.map((p) => ({ p, lat: getLat(p), lng: getLng(p) })).filter(({ lat, lng }) => typeof lat === 'number' && typeof lng === 'number');
+        const limited = candidates.slice(0, globePageSize);
+        const locs: Location[] = limited.map(({ p, lat, lng }) => {
+          const obj = (p ?? {}) as Record<string, unknown>;
+          const idVal = obj['id'];
+          const titleVal = obj['title'];
+          return {
+            id: typeof idVal === 'string' ? Number(Math.abs(hashCode(idVal))) : (typeof idVal === 'number' ? idVal : Math.floor(Math.random() * 1e9)),
+            name: typeof titleVal === 'string' && titleVal.trim().length ? titleVal : `Property ${String(idVal ?? '').slice(0, 6)}`,
+            lat: lat as number,
+            lng: lng as number,
+          };
+        });
+        setGlobeLocations(locs);
+      } catch { setGlobeLocations([]); }
+    } catch {
+      // swallow
+    }
+  };
+
   return (
     <>
       {enableSpotlight && (
@@ -936,7 +969,16 @@ const MagicBento: React.FC<BentoProps> = ({
               fontFamily: 'inherit',
               padding: '0.5em 0',
             }}
+            value={quickQuery}
+            onChange={(e) => setQuickQuery(e.target.value)}
+            onKeyDown={async (e) => {
+              if (e.key !== 'Enter') return;
+              await executeQuickSearch();
+            }}
           />
+          <IconButton aria-label="Search" onClick={executeQuickSearch} sx={{ color: '#003FC7', flexShrink: 0 }}>
+            <SearchOutlinedIcon />
+          </IconButton>
         </Box>
       </div>
 
@@ -972,29 +1014,29 @@ const MagicBento: React.FC<BentoProps> = ({
                       <Stack spacing={{ xs: 1.5, md: 2 }}>
                         {/* Country search */}
                         <Box>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 500, mb: 1, color: 'grey.500' }}>Country</Typography>
-                          <CustomAutocomplete
-                            focusColor="#003FC7"
-                            icon={<PlaceOutlinedIcon />}
-                            label="Country"
-                            value={country}
-                            onChange={setCountry}
-                            placeholder="Search country"
-                            options={countryOptions}
-                            selectedColor="#003FC7"
+                          <Typography variant="subtitle2" sx={{ fontWeight: 500, mb: 1, color: 'grey.500' }}>Countries</Typography>
+                          <TagSearchInput
+                            label="Countries"
+                            placeholder=""
+                            value={selectedCountries}
+                            onChange={setSelectedCountries}
+                            fetchSuggestions={async (q) => {
+                              const list = await searchCountries(q);
+                              return list;
+                            }}
                           />
                         </Box>
                         <Box>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 500, mb: 1, color: 'grey.500' }}>City</Typography>
-                          <CustomAutocomplete
-                            focusColor="#003FC7"
-                            icon={<PlaceOutlinedIcon />}
-                            label="City"
-                            value={city}
-                            onChange={setCity}
-                            placeholder="Search city"
-                            options={cityOptions}
-                            selectedColor="#003FC7"
+                          <Typography variant="subtitle2" sx={{ fontWeight: 500, mb: 1, color: 'grey.500' }}>Cities</Typography>
+                          <TagSearchInput
+                            label="Cities"
+                            placeholder=""
+                            value={selectedCities}
+                            onChange={setSelectedCities}
+                            fetchSuggestions={async (q) => {
+                              const list = await searchCities(q);
+                              return list;
+                            }}
                           />
                         </Box>
 

@@ -5,23 +5,41 @@ import BusinessIcon from '@mui/icons-material/Business';
 import HandshakeIcon from '@mui/icons-material/Handshake';
 // Removed unused FadeContent import
 import AnimatedContent from '../../reactDevBits/AnimatedContent/AnimatedContent';
+import api from '../../lib/api';
 
-const features = [
-  {
-    icon: <LocationOnIcon color="action" fontSize="small" />,
-    title: '50+ Countries',
-  },
-  {
-    icon: <BusinessIcon color="action" fontSize="small" />,
-    title: '1000+ Properties',
-  },
-  {
-    icon: <HandshakeIcon color="action" fontSize="small" />,
-    title: '500+ Partners',
-  },
-];
+const useHomeStats = () => {
+  const [stats, setStats] = React.useState<{ countries: number; properties: number; partners: number } | null>(null);
+  React.useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await api.get('/property/stats-home');
+        if (!cancelled) setStats(res.data as { countries: number; properties: number; partners: number });
+      } catch {
+        // ignore; keep null so we fall back to defaults
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+  return stats;
+};
 
 export default function GlobalTrustGrid() {
+  const live = useHomeStats();
+  const features = React.useMemo(() => ([
+    {
+      icon: <LocationOnIcon color="action" fontSize="small" />,
+      title: `${live?.countries ?? 50}+ Countries`,
+    },
+    {
+      icon: <BusinessIcon color="action" fontSize="small" />,
+      title: `${live?.properties ?? 1000}+ Properties`,
+    },
+    {
+      icon: <HandshakeIcon color="action" fontSize="small" />,
+      title: `${live?.partners ?? 500}+ Partners`,
+    },
+  ]), [live]);
   return (
     <Box
       sx={{

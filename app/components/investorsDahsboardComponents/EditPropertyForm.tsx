@@ -41,6 +41,7 @@ export default function EditPropertyForm({ propertyId, onCancel, onSuccess }: Ed
   const [error, setError] = useState<string | null>(null);
   const [showGlare, setShowGlare] = useState(false);
   const wasReadyRef = useRef<boolean>(false);
+  const [existingPictures, setExistingPictures] = useState<Array<{ id: string; url: string }>>([]);
 
   // Load property details on mount
   useEffect(() => {
@@ -97,10 +98,8 @@ export default function EditPropertyForm({ propertyId, onCancel, onSuccess }: Ed
           HOAFees: toNum(details.HOAFees),
           availabilityDateStart: details.availabilityDateStart as string | undefined,
           availabilityDateEnd: details.availabilityDateEnd as string | undefined,
-          // Images from picture array
-          images: ((details.picture || details.propertyPictures || []) as Array<{ imageData?: string }>)
-            .map(p => p.imageData)
-            .filter((url): url is string => typeof url === 'string' && url.length > 0),
+          // Do not seed images with existing ones to avoid duplicate create calls on update.
+          images: [],
           // Additional fields from details object
           heatingSystem: (details.heatingSystem || []) as HeatingSystemEnum | HeatingSystemEnum[] | undefined,
           coolingSystem: (details.coolingSystem || []) as CoolingSystemEnum | CoolingSystemEnum[] | undefined,
@@ -114,6 +113,16 @@ export default function EditPropertyForm({ propertyId, onCancel, onSuccess }: Ed
         };
 
         setFormData(mappedData);
+        try {
+          const pics = ((details.propertyPictures || details.picture || []) as Array<{ id?: string; imageData?: string }>);
+          const ex = pics
+            .filter(p => typeof p.imageData === 'string' && (p.imageData as string).length > 0)
+            .map(p => ({ id: String(p.id ?? ''), url: String(p.imageData) }))
+            .filter(p => p.id && p.url);
+          setExistingPictures(ex);
+        } catch {
+          setExistingPictures([]);
+        }
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to load property details';
         setError(message);
@@ -247,7 +256,13 @@ export default function EditPropertyForm({ propertyId, onCancel, onSuccess }: Ed
       <BasicInfoSection formData={formData} setFormData={setFormData} />
       <AddressSection formData={formData} setFormData={setFormData} />
       <FeaturesSection formData={formData} setFormData={setFormData} />
-      <ImageUploadSection formData={formData} setFormData={setFormData} />
+      <ImageUploadSection
+        formData={formData}
+        setFormData={setFormData}
+        propertyId={String(propertyId)}
+        existing={existingPictures}
+        onExistingChange={setExistingPictures}
+      />
       <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-start', mt: 2 }}>
         <Button
           type="submit"
