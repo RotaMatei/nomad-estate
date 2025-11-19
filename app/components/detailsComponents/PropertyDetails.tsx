@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Box, Typography, Container, Divider, Card, CardContent, Grid, Button, Chip, Stack, CircularProgress, IconButton, Tooltip } from '@mui/material';
 import { useState, useEffect, useRef } from 'react';
+import type { Map as LeafletMap } from 'leaflet';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -75,7 +76,7 @@ interface PropertyDetailsProps {
 // Modern Map Component with Leaflet
 function MapComponent({ latitude, longitude, title }: { latitude: number; longitude: number; title: string }) {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<any>(null);
+  const map = useRef<LeafletMap | null>(null);
   const mapInitialized = useRef(false);
 
   useEffect(() => {
@@ -121,7 +122,7 @@ function MapComponent({ latitude, longitude, title }: { latitude: number; longit
         className: 'custom-div-icon',
       });
 
-      const marker = L.marker([latitude, longitude], { icon: customIcon }).addTo(map.current);
+      const marker = L.marker([latitude, longitude], { icon: customIcon }).addTo(map.current!);
 
       // Popup with modern styling
       marker.bindPopup(`
@@ -267,7 +268,15 @@ export default function PropertyDetails({ property }: PropertyDetailsProps) {
   };
 
   // Fetch agency details
-  const [fetchedAgency, setFetchedAgency] = useState<any>(null);
+  interface Agency {
+    companyName?: string;
+    phoneNumber?: string | null;
+    email?: string | null;
+    establishedYear?: number | null;
+    companyExperience?: string | number | null;
+    profilePictureData?: string | null;
+  }
+  const [fetchedAgency, setFetchedAgency] = useState<Agency | null>(null);
   useEffect(() => {
     if (!property.agencyId) {
       console.debug('No agencyId, skipping fetch');
@@ -558,16 +567,16 @@ export default function PropertyDetails({ property }: PropertyDetailsProps) {
               if (!val) return [];
               if (Array.isArray(val)) {
                 return val
-                  .map((item: any) => {
+                  .map((item: unknown) => {
                     if (typeof item === 'string') return item;
                     if (typeof item === 'object' && item !== null) {
                       // Handle relation objects - find the enum value (not the id)
-                      const values = Object.entries(item)
+                      const values = Object.entries(item as Record<string, unknown>)
                         .filter(([key, v]) => {
                           // Skip 'id' field and only get string values that aren't UUIDs
                           return key !== 'id' && typeof v === 'string' && !v.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
                         })
-                        .map(([, v]) => v);
+                        .map(([, v]) => v as string);
                       return values[0] || '';
                     }
                     return '';
@@ -651,14 +660,14 @@ export default function PropertyDetails({ property }: PropertyDetailsProps) {
           <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>About the Agency
           </Typography>
           {(() => {
-            const agencyData = displayedAgency ?? {
+            const agencyData: Agency = (displayedAgency as Agency | null) ?? {
               companyName: 'Agency',
               phoneNumber: null,
               email: null,
               establishedYear: null,
               companyExperience: null,
               profilePictureData: null,
-            } as any;
+            };
             return (
               <Box sx={{
                 backgroundColor: 'white',
