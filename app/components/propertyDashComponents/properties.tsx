@@ -109,24 +109,30 @@ const ListingsPage: React.FC = () => {
     (async () => {
       try {
   // Fetching properties (no cache)
-        // Attempt to replay last filter search if present
+        // Attempt to replay last name or filter search if present
         let res;
         if (typeof window !== 'undefined') {
           try {
-            const last = sessionStorage.getItem('properties_last_search');
-            if (last) {
-              const parsed = JSON.parse(last) as { filterBody?: Record<string, unknown>; InvG?: string[]; LocB?: string[] };
-              res = await api.request({
-                method: 'post',
-                url: '/property/retrieve-search',
-                params: { InvG: parsed.InvG, LocB: parsed.LocB },
-                // Mirror tags in the body as well so backend POST can read them reliably
-                data: {
-                  ...(parsed.filterBody ?? {}),
-                  InvG: parsed.InvG,
-                  LocB: parsed.LocB,
-                },
-              });
+            const lastMode = sessionStorage.getItem('properties_last_mode');
+            if (lastMode === 'name') {
+              const q = sessionStorage.getItem('properties_last_name_query') ?? '';
+              res = await api.get('/property/retrieve-search-by-name', { params: { q } });
+            } else {
+              const last = sessionStorage.getItem('properties_last_search');
+              if (last) {
+                const parsed = JSON.parse(last) as { filterBody?: Record<string, unknown>; InvG?: string[]; LocB?: string[] };
+                res = await api.request({
+                  method: 'post',
+                  url: '/property/retrieve-search',
+                  params: { InvG: parsed.InvG, LocB: parsed.LocB },
+                  // Mirror tags in the body as well so backend POST can read them reliably
+                  data: {
+                    ...(parsed.filterBody ?? {}),
+                    InvG: parsed.InvG,
+                    LocB: parsed.LocB,
+                  },
+                });
+              }
             }
           } catch (err) {
             // swallow

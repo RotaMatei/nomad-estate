@@ -435,6 +435,16 @@ export async function deletePropertyById(propertyId: string): Promise<void> {
   await api.delete(`/property/delete-property/${propertyId}`);
 }
 
+// Pictures API helpers
+export async function deletePictureById(pictureId: string): Promise<boolean> {
+  try {
+    await api.delete(`/property/picture/delete-picture/${pictureId}`);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // Analytics: Performance (views, inquiries, bounceRate, conversionRate)
 export interface PropertyPerformance {
   propertyId: string;

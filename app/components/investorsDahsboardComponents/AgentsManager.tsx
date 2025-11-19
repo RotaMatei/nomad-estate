@@ -4,7 +4,9 @@ import { Box, Typography, TextField, TableContainer, Table, TableHead, TableRow,
 import AddIcon from '@mui/icons-material/PersonAddAlt1';
 import DeleteIcon from '@mui/icons-material/PersonRemoveAlt1';
 import SearchIcon from '@mui/icons-material/Search';
-import { getAgentsForAgency, addAgentToAgency, removeAgentFromAgency, searchUsersByName, AgentRecord, BasicUserSearchResult } from '@/app/lib/agentApi';
+import { getAgentsForAgency, addAgentToAgency, removeAgentFromAgency, searchUsers, AgentRecord, BasicUserSearchResult } from '@/app/lib/agentApi';
+import TagSearchInput, { type TagItem } from '@/app/components/utils/TagSearchInput';
+import { searchCities, searchCountries } from '@/app/lib/locationApi';
 
 interface AgentsManagerProps {
   agencyId: string;
@@ -29,6 +31,8 @@ export default function AgentsManager({ agencyId, colorScheme, profileName, prof
   const [results, setResults] = React.useState<BasicUserSearchResult[]>([]);
   const [loadingAgents, setLoadingAgents] = React.useState(true);
   const [processing, setProcessing] = React.useState<string | null>(null); // userId currently processed
+  const [countryTags, setCountryTags] = React.useState<TagItem[]>([]);
+  const [cityTags, setCityTags] = React.useState<TagItem[]>([]);
 
   const loadAgents = React.useCallback(async () => {
     setLoadingAgents(true);
@@ -45,10 +49,10 @@ export default function AgentsManager({ agencyId, colorScheme, profileName, prof
       return;
     }
     setSearching(true);
-    const list = await searchUsersByName(q.trim());
+    const list = await searchUsers(q.trim(), cityTags.map(c=>c.label), countryTags.map(c=>c.label));
     setResults(list);
     setSearching(false);
-  }, 400), []);
+  }, 400), [cityTags, countryTags]);
 
   React.useEffect(() => { runSearch(query); }, [query, runSearch]);
 
@@ -95,6 +99,23 @@ export default function AgentsManager({ agencyId, colorScheme, profileName, prof
         </IconButton>
       </Box>
       <Typography variant="subtitle2" gutterBottom sx={{ color: `${colorScheme}.main`, mb: 2 }}>Add Agents</Typography>
+      {/* Location tags for refining agent search */}
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 1.5, mb: 2 }}>
+        <TagSearchInput
+          label="Countries"
+          placeholder="Type to search countries..."
+          value={countryTags}
+          onChange={setCountryTags}
+          fetchSuggestions={searchCountries}
+        />
+        <TagSearchInput
+          label="Cities"
+          placeholder="Type to search cities..."
+          value={cityTags}
+          onChange={setCityTags}
+          fetchSuggestions={searchCities}
+        />
+      </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
           <TextField
             size="small"
@@ -116,7 +137,7 @@ export default function AgentsManager({ agencyId, colorScheme, profileName, prof
               },
             }}
           />
-          {searching && <CircularProgress size={20} />}
+            {searching && <CircularProgress size={20} />}
       </Box>
 
       {/* Results as selectable tag chips */}
