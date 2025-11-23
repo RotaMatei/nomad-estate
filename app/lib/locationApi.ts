@@ -1,6 +1,6 @@
 export async function getCities(): Promise<City[]> {
   try {
-    const { data } = await api.get('/cities/retrieve/get-all');
+    const { data } = await api.get('/cities/retrieve/all');
     return Array.isArray(data) ? (data as City[]) : [];
   } catch {
     return [];
