@@ -308,12 +308,16 @@ export async function createProperty(form: PropertyFormData) {
 
     // After related data is created, calculate score and persist it
     try {
+      console.log('[propertyApi] Triggering score calculation for property:', propertyId);
       const { data: calcScore } = await api.post(`/property/create-score/${propertyId}`);
+      console.log('[propertyApi] Score calculation result:', calcScore);
       if (typeof calcScore === 'number') {
-        // Persist the newly calculated score on the property
-        await api.patch(`/property/update-score/${propertyId}`, { score: calcScore });
+        console.log('[propertyApi] Updating property score:', calcScore);
+        const updateRes = await api.patch(`/property/update-score/${propertyId}`, { score: calcScore });
+        console.log('[propertyApi] Score update response:', updateRes.data);
       }
-    } catch {
+    } catch (scoreErr) {
+      console.error('[propertyApi] Score calculation or update failed:', scoreErr);
       // Non-critical: score calculation failures should not block property creation
     }
 

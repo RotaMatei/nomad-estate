@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback, useState } from 'react';
+import React, { useRef, useCallback, useState, useEffect } from 'react';
 import { gsap } from 'gsap';
 import './MagicBento.css';
 import { Box, Slider, Typography, Stack, useMediaQuery, useTheme, IconButton } from '@mui/material';
@@ -15,6 +15,7 @@ import DiamondIcon from '@mui/icons-material/Diamond';
 import { CustomAutocomplete } from '../../components/utils/autocomplete';
 import TagSearchInput, { type TagItem } from '@/app/components/utils/TagSearchInput';
 import { searchCities, searchCountries } from '@/app/lib/locationApi';
+import { getCountries, getCities, Country, City } from '@/app/lib/locationApi';
 import CheckboxGroup, { type Option as CheckboxOption } from '../../components/utils/checkboxGroup';
 import CustomButton from '../../components/utils/button';
 import api from '../../lib/api';
@@ -563,6 +564,17 @@ const MagicBento: React.FC<BentoProps> = ({
   clickEffect = true,
   enableMagnetism = true,
 }) => {
+  // Fetch all countries and cities for autocomplete
+  const [allCountries, setAllCountries] = useState<Country[]>([]);
+  const [allCities, setAllCities] = useState<City[]>([]);
+  useEffect(() => {
+    (async () => {
+      const countries = await getCountries();
+      setAllCountries(countries);
+      const cities = await getCities();
+      setAllCities(cities);
+    })();
+  }, []);
   const gridRef = useRef<HTMLDivElement>(null);
   const isMobile = useMobileDetection();
   const shouldDisableAnimations = disableAnimations || isMobile;
@@ -1015,28 +1027,33 @@ const MagicBento: React.FC<BentoProps> = ({
                         {/* Country search */}
                         <Box>
                           <Typography variant="subtitle2" sx={{ fontWeight: 500, mb: 1, color: 'grey.500' }}>Countries</Typography>
-                          <TagSearchInput
-                            label="Countries"
-                            placeholder=""
-                            value={selectedCountries}
-                            onChange={setSelectedCountries}
-                            fetchSuggestions={async (q) => {
-                              const list = await searchCountries(q);
-                              return list;
+                          <CustomAutocomplete
+                            label="Country"
+                            value={selectedCountries[0]?.id ?? ''}
+                            onChange={(val) => {
+                              const country = allCountries.find(c => c.id === val);
+                              setSelectedCountries(country ? [{ id: country.id, label: country.name }] : []);
                             }}
+                            options={allCountries.map(c => ({ value: c.id, label: c.name }))}
+                            placeholder="Select country"
                           />
                         </Box>
                         <Box>
                           <Typography variant="subtitle2" sx={{ fontWeight: 500, mb: 1, color: 'grey.500' }}>Cities</Typography>
-                          <TagSearchInput
-                            label="Cities"
-                            placeholder=""
-                            value={selectedCities}
-                            onChange={setSelectedCities}
-                            fetchSuggestions={async (q) => {
-                              const list = await searchCities(q);
-                              return list;
+                          <CustomAutocomplete
+                            label="City"
+                            value={selectedCities[0]?.id ?? ''}
+                            onChange={(val) => {
+                              const city = allCities.find(c => c.id === val);
+                              setSelectedCities(city ? [{ id: city.id, label: city.name }] : []);
+                              // Update country if city is selected
+                              if (city && city.countryId) {
+                                const country = allCountries.find(c => c.id === city.countryId);
+                                setSelectedCountries(country ? [{ id: country.id, label: country.name }] : []);
+                              }
                             }}
+                            options={allCities.map(c => ({ value: c.id, label: c.name }))}
+                            placeholder="Select city"
                           />
                         </Box>
 

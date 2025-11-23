@@ -17,12 +17,15 @@ export default function PropertyForm() {
     e.preventDefault();
     try {
       setSubmitting(true);
+      console.log('[PropertyForm] Submitting property creation:', formData);
       const res = await createProperty(formData);
+      console.log('[PropertyForm] Property creation response:', res);
       if (typeof window !== 'undefined') {
         alert('Property created successfully.');
       }
       // TODO: navigate to details page if route exists
     } catch (err: unknown) {
+      console.error('[PropertyForm] Error during property creation:', err);
       const message = err instanceof Error ? err.message : 'Failed to create property';
       if (typeof window !== 'undefined') {
         alert(message);

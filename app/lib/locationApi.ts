@@ -1,13 +1,39 @@
+export async function getCities(): Promise<City[]> {
+  try {
+    const { data } = await api.get('/cities/retrieve/get-all');
+    return Array.isArray(data) ? (data as City[]) : [];
+  } catch {
+    return [];
+  }
+}
 import api from '@/app/lib/api';
 
 export interface LocationSuggestion { id: string | number; label: string }
 
 export async function searchCountries(q: string): Promise<LocationSuggestion[]> {
   const query = (q || '').trim();
-  if (!query) return [];
   try {
-    const res = await api.get('/countries/retrieve/search', { params: { q: query } });
-    const arr = Array.isArray(res.data) ? (res.data as Array<Record<string, unknown>>) : [];
+    let arr: Array<Record<string, unknown>> = [];
+    if (!query) {
+      // If no query, return all countries
+      const all = await api.get('/countries/retrieve/get-all');
+      arr = Array.isArray(all.data) ? all.data : [];
+    } else {
+      const res = await api.get('/countries/retrieve/search', { params: { q: query } });
+      arr = Array.isArray(res.data) ? res.data : [];
+      // Fallback: if search returns too few, get all and filter client-side
+      if (arr.length < 3) {
+        const all = await api.get('/countries/retrieve/get-all');
+        const allArr = Array.isArray(all.data) ? all.data : [];
+        arr = allArr.filter((c) => {
+          const name = typeof (c as { name?: string }).name === 'string' ? (c as { name?: string }).name : '';
+          const code = typeof (c as { code?: string }).code === 'string' ? (c as { code?: string }).code : '';
+          const norm = (s: string) => (s ?? '').toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
+          const qNorm = norm(query);
+          return norm(name ?? '').includes(qNorm) || norm(code ?? '').includes(qNorm);
+        });
+      }
+    }
     return arr
       .map((c) => {
         const id = 'id' in c ? (c as { id: string | number }).id : (c as never);
@@ -24,10 +50,27 @@ export async function searchCountries(q: string): Promise<LocationSuggestion[]> 
 
 export async function searchCities(q: string): Promise<LocationSuggestion[]> {
   const query = (q || '').trim();
-  if (!query) return [];
   try {
-    const res = await api.get('/cities/retrieve/search', { params: { q: query } });
-    const arr = Array.isArray(res.data) ? (res.data as Array<Record<string, unknown>>) : [];
+    let arr: Array<Record<string, unknown>> = [];
+    if (!query) {
+      // If no query, return all cities
+      const all = await api.get('/cities/retrieve/get-all');
+      arr = Array.isArray(all.data) ? all.data : [];
+    } else {
+      const res = await api.get('/cities/retrieve/search', { params: { q: query } });
+      arr = Array.isArray(res.data) ? res.data : [];
+      // Fallback: if search returns too few, get all and filter client-side
+      if (arr.length < 3) {
+        const all = await api.get('/cities/retrieve/get-all');
+        const allArr = Array.isArray(all.data) ? all.data : [];
+        arr = allArr.filter((c) => {
+          const name = typeof (c as { name?: string }).name === 'string' ? (c as { name?: string }).name : '';
+          const norm = (s: string) => (s ?? '').toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
+          const qNorm = norm(query);
+          return norm(name ?? '').includes(qNorm);
+        });
+      }
+    }
     return arr
       .map((c) => {
         const id = 'id' in c ? (c as { id: string | number }).id : (c as never);
