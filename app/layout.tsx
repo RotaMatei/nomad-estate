@@ -3,6 +3,7 @@ import './globals.css';
 import 'leaflet/dist/leaflet.css';
 import Providers from '@/app/providers';
 import { Montserrat } from 'next/font/google';
+import { ErrorBoundary } from '@/app/components/ErrorBoundary';
 
 const montserrat = Montserrat({
   subsets: ['latin'],
@@ -25,7 +26,9 @@ export default function RootLayout({
     <html lang="en">
       <head />
       <body className={montserrat.className}>
-        <Providers>{children}</Providers>
+        <ErrorBoundary>
+          <Providers>{children}</Providers>
+        </ErrorBoundary>
       </body>
     </html>
   );

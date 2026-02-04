@@ -15,6 +15,7 @@ import ChooseAgency from '@/app/components/register/chooseAgency';
 import ChooseInvestor from '@/app/components/register/chooseInvestor';
 import SignUpAsAgency from '@/app/components/register/signUpAsAgency';
 import SignUpAsInvestor from '@/app/components/register/signUpAsInvestor';
+import { tokenStorage } from '@/app/lib/auth/tokenStorage';
 
 export default function RegisterPage() {
   const [isAgencyRegister, setIsAgencyRegister] = useState(false);
@@ -164,12 +165,16 @@ export default function RegisterPage() {
 
     try {
       const res = await api.post('/auth/user/register', payload);
-      localStorage.setItem('token', res.data.accessToken);
-      localStorage.setItem('refreshToken', res.data.refreshToken);
-      localStorage.setItem('jti', res.data.RefreshJTI);
-      localStorage.setItem('user', res.data.firstName + ' ' + res.data.lastName);
+      tokenStorage.setToken(res.data.accessToken);
+      tokenStorage.setRefreshToken(res.data.refreshToken);
+      if (res.data.RefreshJTI && typeof window !== 'undefined') {
+        localStorage.setItem('jti', res.data.RefreshJTI);
+      }
+      tokenStorage.setUserName(res.data.firstName + ' ' + res.data.lastName);
       // Persist role for UI (investor)
-      try { localStorage.setItem('role', 'INVESTOR'); } catch {}
+      if (typeof window !== 'undefined') {
+        try { localStorage.setItem('role', 'INVESTOR'); } catch {}
+      }
       router.push('/');
     } catch (err: unknown) {
       // Log and keep UI simple; surface errors via toasts in the future
@@ -233,14 +238,18 @@ export default function RegisterPage() {
         setShowAgencyPrompt(true);
       }
       // Persist tokens
-      localStorage.setItem('token', res.data.accessToken);
-      localStorage.setItem('refreshToken', res.data.refreshToken);
-      if (res.data.RefreshJTI) localStorage.setItem('jti', res.data.RefreshJTI);
+      tokenStorage.setToken(res.data.accessToken);
+      tokenStorage.setRefreshToken(res.data.refreshToken);
+      if (res.data.RefreshJTI && typeof window !== 'undefined') {
+        localStorage.setItem('jti', res.data.RefreshJTI);
+      }
       if (data.payload?.firstName && data.payload?.lastName) {
-        localStorage.setItem('user', `${data.payload.firstName} ${data.payload.lastName}`);
+        tokenStorage.setUserName(`${data.payload.firstName} ${data.payload.lastName}`);
       }
       // Persist role for UI (agency)
-      try { localStorage.setItem('role', 'AGENCY'); } catch {}
+      if (typeof window !== 'undefined') {
+        try { localStorage.setItem('role', 'AGENCY'); } catch {}
+      }
 
       // Extract agencyId from access token (sub)
       const decoded = jwtDecode<{ sub?: string }>(res.data.accessToken);

@@ -6,21 +6,8 @@ import PropertyCard from './PropertyCard';
 
 import React from 'react';
 import axios from 'axios';
-
-interface CountryMarketData {
-  country_name: string;
-  ai_market_score: string;
-  rental_yield_proxy: string;
-  appreciation: string;
-  price: string;
-  monthly_income: string;
-  regulation_legal: string;
-  transaction_friction: string;
-  currency_stability: string;
-  market_liquidity_proxy: string;
-  mortgage_availability: string;
-  macro_economics: string;
-}
+import { env } from '@/app/config/env';
+import { CountryMarketData } from '@/app/lib/types/api';
 
 interface TopCitiesProps {
   colorScheme?: 'primary' | 'secondary';
@@ -34,9 +21,13 @@ export default function TopCities({ colorScheme = 'secondary' }: TopCitiesProps)
   const cols = isLgUp ? 4 : isSmUp ? 2 : 1;
   const [countries, setCountries] = React.useState<CountryMarketData[]>([]);
   React.useEffect(() => {
-    axios.get('https://ai.nomadestatehub.com/country-market-data/all')
+    axios.get<{ data: CountryMarketData[] }>(`${env.aiApiUrl}/api/country-market-data/all`)
       .then(res => {
-        const arr = Array.isArray(res.data) ? res.data : [];
+        // Handle paginated response structure
+        const responseData = res.data as { data?: CountryMarketData[] } | CountryMarketData[];
+        const arr = Array.isArray(responseData) 
+          ? responseData 
+          : (Array.isArray(responseData.data) ? responseData.data : []);
         setCountries(arr.slice(0, 4));
       })
       .catch(() => setCountries([]));
@@ -75,16 +66,32 @@ export default function TopCities({ colorScheme = 'secondary' }: TopCitiesProps)
             >
               <Box sx={{ width: '100%' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                  <Typography variant="h6" sx={{ color: mainColor, flexGrow: 1 }}>{c.country_name}</Typography>
-                  <Chip label={`Score: ${Math.round(Number(c.ai_market_score))}`} color="success" size="small" sx={{ ml: 'auto' }} />
+                  <Typography variant="h6" sx={{ color: mainColor, flexGrow: 1 }}>{c.countryName}</Typography>
+                  {c.aiMarketScore && (
+                    <Chip label={`Score: ${Math.round(Number(c.aiMarketScore))}`} color="success" size="small" sx={{ ml: 'auto' }} />
+                  )}
                 </Box>
-                <Typography variant="body2">Rental Yield Proxy: {Math.round(Number(c.rental_yield_proxy))}</Typography>
-                <Typography variant="body2">Regulation & Legal: {Math.round(Number(c.regulation_legal))}</Typography>
-                <Typography variant="body2">Transaction Friction: {Math.round(Number(c.transaction_friction))}</Typography>
-                <Typography variant="body2">Currency Stability: {Math.round(Number(c.currency_stability))}</Typography>
-                <Typography variant="body2">Market Liquidity Proxy: {Math.round(Number(c.market_liquidity_proxy))}</Typography>
-                <Typography variant="body2">Mortgage Availability: {Math.round(Number(c.mortgage_availability))}</Typography>
-                <Typography variant="body2">Macro Economics: {Math.round(Number(c.macro_economics))}</Typography>
+                {c.rentalYieldProxy && (
+                  <Typography variant="body2">Rental Yield Proxy: {Math.round(Number(c.rentalYieldProxy))}</Typography>
+                )}
+                {c.regulationLegal && (
+                  <Typography variant="body2">Regulation & Legal: {Math.round(Number(c.regulationLegal))}</Typography>
+                )}
+                {c.transactionFriction && (
+                  <Typography variant="body2">Transaction Friction: {Math.round(Number(c.transactionFriction))}</Typography>
+                )}
+                {c.currencyStability && (
+                  <Typography variant="body2">Currency Stability: {Math.round(Number(c.currencyStability))}</Typography>
+                )}
+                {c.marketLiquidityProxy && (
+                  <Typography variant="body2">Market Liquidity Proxy: {Math.round(Number(c.marketLiquidityProxy))}</Typography>
+                )}
+                {c.mortgageAvailability && (
+                  <Typography variant="body2">Mortgage Availability: {Math.round(Number(c.mortgageAvailability))}</Typography>
+                )}
+                {c.macroEconomics && (
+                  <Typography variant="body2">Macro Economics: {Math.round(Number(c.macroEconomics))}</Typography>
+                )}
                 <Button
                   variant="contained"
                   fullWidth

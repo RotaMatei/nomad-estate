@@ -12,6 +12,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import MobileStaggeredDrawer from './MobileStaggeredDrawer';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import { getTokenData } from '../../lib/auth';
+import { tokenStorage } from '../../lib/auth/tokenStorage';
 
 export default function Navbar(
   { navColor = 'background.default', mobileNavColor }: { navColor?: string; mobileNavColor?: string }
@@ -75,11 +76,11 @@ export default function Navbar(
     prevPathRef.current = pathname;
   }, [pathname]);
 
-  // Detect auth state from localStorage token
+  // Detect auth state from token storage
   useEffect(() => {
     let mounted = true;
     const fetchUser = async () => {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = tokenStorage.getToken();
       const storedRole = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
       if (!mounted) return;
       setIsLoggedIn(!!token);
@@ -135,11 +136,11 @@ export default function Navbar(
 
   const handleLogout = () => {
     try {
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('jti');
-      localStorage.removeItem('user');
-      localStorage.removeItem('userId');
+      tokenStorage.clearAll();
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('jti');
+        localStorage.removeItem('role');
+      }
       setIsLoggedIn(false);
     } catch { }
     router.push('/login');

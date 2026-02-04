@@ -1,8 +1,8 @@
 import api from '@/app/lib/api';
+import { tokenStorage } from './auth/tokenStorage';
 
 function getSubjectIdFromToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  const token = localStorage.getItem('token');
+  const token = tokenStorage.getToken();
   if (!token) return null;
   try {
     const [, payload] = token.split('.');

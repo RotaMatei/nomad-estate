@@ -19,6 +19,7 @@ import GradientButton from '@/app/GradientText/GradientButton';
 import GradientIcon from '@/app/GradientText/GradientIcon';
 import Glare from '@/app/reactDevBits/Glare/Glare';
 import dynamic from 'next/dynamic';
+import { tokenStorage } from '@/app/lib/auth/tokenStorage';
 
 const WorldMap = dynamic(() => import('@/app/components/loginComponents/WorldMap'), {
   ssr: false,
@@ -73,14 +74,20 @@ export default function LoginPage() {
     // helper to persist tokens, role and optional name
     const persistAndRedirect = (data: LoginResponse, role: string) => {
       if (!data) return;
-      localStorage.setItem('token', data.accessToken);
-      localStorage.setItem('refreshToken', data.refreshToken);
-      if (data.RefreshJTI) localStorage.setItem('jti', data.RefreshJTI);
-      if (data.sub) localStorage.setItem('userId', data.sub);
+      tokenStorage.setToken(data.accessToken);
+      tokenStorage.setRefreshToken(data.refreshToken);
+      if (data.RefreshJTI && typeof window !== 'undefined') {
+        localStorage.setItem('jti', data.RefreshJTI);
+      }
+      if (data.sub) {
+        tokenStorage.setUserId(data.sub);
+      }
       // store role so navbar and other UI can react immediately
-      try {
-        localStorage.setItem('role', role);
-      } catch {}
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('role', role);
+        } catch {}
+      }
       router.push('/');
     };
 

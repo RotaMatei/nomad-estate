@@ -1,10 +1,11 @@
 import api from './api';
 import { PropertyFormData } from '../components/createPropertyComponents/types';
 import axios from 'axios';
+import { env } from '../config/env';
 
 // Simple axios instance without interceptors for public endpoints
 const publicApi = axios.create({
-  baseURL: 'https://api.nomadestatehub.com',
+  baseURL: env.apiUrl,
 });
 
 import type {
@@ -54,16 +55,16 @@ const REQUIRED_FIELDS = [
   'totalArea',
 ] as const;
 
+import { getArrayData } from './api/client';
+
 /**
  * Fetch available agents for an agency
  */
 export async function getAgentsForAgency(agencyId: string) {
-  try {
-    const { data } = await api.get(`/agent/retrieve/agents-for-agency/${agencyId}`);
-    return data;
-  } catch {
-    return [];
-  }
+  return getArrayData(
+    () => api.get(`/agent/retrieve/agents-for-agency/${agencyId}`),
+    'getAgentsForAgency',
+  );
 }
 
 type RequiredField = (typeof REQUIRED_FIELDS)[number];

@@ -2,6 +2,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import api from '@/app/lib/api';
 import axios from 'axios';
+import { tokenStorage } from '@/app/lib/auth/tokenStorage';
 
 export interface UnifiedProfile {
   firstName?: string | null;
@@ -25,7 +26,7 @@ export function useAuth() {
   const [profile, setProfile] = useState<UnifiedProfile | null>(null);
 
   useEffect(() => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const token = tokenStorage.getToken();
     if (!token) {
       router.push('/login');
       return;
@@ -33,14 +34,14 @@ export function useAuth() {
     let cancelled = false;
     (async () => {
       try {
-        let subjectId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
+        let subjectId = tokenStorage.getUserId();
         if (!subjectId) {
           try {
             const [, payload] = token.split('.');
             const json = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
             if (json?.sub) {
               subjectId = String(json.sub);
-              localStorage.setItem('userId', subjectId);
+              tokenStorage.setUserId(subjectId);
             }
           } catch {}
         }
@@ -81,9 +82,9 @@ export function useAuth() {
         };
         setProfile(unified);
         if (unified.firstName && !isAgency) {
-          localStorage.setItem('user', unified.firstName);
+          tokenStorage.setUserName(unified.firstName);
         } else if (unified.companyName && isAgency) {
-          localStorage.setItem('user', unified.companyName); // reuse key for display name
+          tokenStorage.setUserName(unified.companyName); // reuse key for display name
         }
       } catch {}
     })();
