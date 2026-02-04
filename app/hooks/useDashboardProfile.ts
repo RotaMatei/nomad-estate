@@ -70,9 +70,9 @@ export function useDashboardProfile() {
         }
 
         interface FetchedAgency {
-          companyName?: string;
-          email?: string;
-          profilePictureData?: string;
+          companyName?: string | null;
+          email?: string | null;
+          profilePictureData?: string | null;
         }
 
         const fetchUser = async (): Promise<FetchedUser | null> => {
@@ -80,8 +80,8 @@ export function useDashboardProfile() {
             const resUser = await api.get<FetchedUser>(`/user/retrieve/${entityId}`);
             const u = (resUser.data || {}) as FetchedUser;
             if (!cancelled) {
-              if (u.firstName) setProfile((prev) => ({ ...prev, name: u.firstName }));
-              if (u.email) setProfile((prev) => ({ ...prev, email: u.email }));
+              if (u.firstName) setProfile((prev) => ({ ...prev, name: u.firstName || '' }));
+              if (u.email) setProfile((prev) => ({ ...prev, email: u.email || '' }));
               if (u.role) setProfile((prev) => ({ ...prev, role: String(u.role) }));
               const avatar =
                 u.avatarUrl ||

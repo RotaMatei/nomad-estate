@@ -21,6 +21,7 @@ import StraightenIcon from '@mui/icons-material/Straighten';
 // Restored required icon imports used in JSX
 import { useEffect, useState } from 'react';
 import { getAgentsForAgency } from '@/app/lib/propertyApi';
+import type { AgentRecord } from '@/app/lib/agentApi';
 
 interface DetailsProps {
   formData: PropertyFormData;
@@ -45,12 +46,7 @@ export default function DetailsSection({ formData, setFormData }: DetailsProps) 
     areaMin: 0,
     areaMax: 1_000_000, // m² cap
   } as const;
-  const [agents, setAgents] = useState<
-    Array<{
-      userId: string;
-      user?: { firstName?: string; lastName?: string; email?: string } | null;
-    }>
-  >([]);
+  const [agents, setAgents] = useState<AgentRecord[]>([]);
 
   const numberFloat = (v: string) => (v === '' ? undefined : parseFloat(v));
   const numberInt = (v: string) => (v === '' ? undefined : parseInt(v, 10));

@@ -56,12 +56,13 @@ const REQUIRED_FIELDS = [
 ] as const;
 
 import { getArrayData } from './api/client';
+import type { AgentRecord } from './agentApi';
 
 /**
  * Fetch available agents for an agency
  */
-export async function getAgentsForAgency(agencyId: string) {
-  return getArrayData(
+export async function getAgentsForAgency(agencyId: string): Promise<AgentRecord[]> {
+  return getArrayData<AgentRecord>(
     () => api.get(`/agent/retrieve/agents-for-agency/${agencyId}`),
     'getAgentsForAgency',
   );
@@ -352,6 +353,9 @@ export interface PortfolioProperty {
   rooms?: number;
   cityId?: number;
   countryId?: number;
+  picture?: Array<{ imageData?: string; id?: string }>;
+  city?: { name?: string; id?: number };
+  country?: { name?: string; id?: number };
 }
 
 export async function getPortfolioForAgency(agencyId: string): Promise<PortfolioProperty[]> {

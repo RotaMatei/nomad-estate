@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "allowSyntheticDefaultImports": true,
     "target": "ES2017",
     "lib": [
@@ -34,7 +34,8 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "next-env.d.ts",
-    ".next_build/types/**/*.ts"
+    ".next_build/types/**/*.ts",
+    ".next_build/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
