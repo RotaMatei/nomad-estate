@@ -1,11 +1,11 @@
 import api from './api';
 import { PropertyFormData } from '../components/createPropertyComponents/types';
 import axios from 'axios';
-import { env } from '../config/env';
+import { apiConfig } from '../config/env';
 
 // Simple axios instance without interceptors for public endpoints
 const publicApi = axios.create({
-  baseURL: env.apiUrl,
+  baseURL: apiConfig.baseURL,
 });
 
 import type {

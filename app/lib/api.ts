@@ -1,11 +1,11 @@
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { env } from '../config/env';
+import { apiConfig } from '../config/env';
 import { tokenStorage } from './auth/tokenStorage';
 import { TokenService } from './auth/tokenService';
 import { UnauthorizedError, handleApiError, logError } from './api/errors';
 
 const api = axios.create({
-  baseURL: env.apiUrl,
+  baseURL: apiConfig.baseURL,
   withCredentials: true,
 });
 

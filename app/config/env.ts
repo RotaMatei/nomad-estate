@@ -17,3 +17,18 @@ export const env = {
   apiUrl: getEnvVar('NEXT_PUBLIC_API_URL', 'https://api.nomadestatehub.com'),
   aiApiUrl: getEnvVar('NEXT_PUBLIC_AI_API_URL', 'https://ai.nomadestatehub.com'),
 } as const;
+
+// Helper to get API URL with /api prefix for database-api
+function getApiUrlWithPrefix(): string {
+  const url = env.apiUrl;
+  // Ensure the URL ends with /api prefix
+  if (url.endsWith('/api')) {
+    return url;
+  }
+  // Remove trailing slash if present, then add /api
+  return url.replace(/\/$/, '') + '/api';
+}
+
+export const apiConfig = {
+  baseURL: getApiUrlWithPrefix(),
+} as const;

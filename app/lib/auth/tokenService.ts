@@ -1,6 +1,6 @@
 import { jwtDecode } from 'jwt-decode';
 import { tokenStorage } from './tokenStorage';
-import { env } from '@/app/config/env';
+import { apiConfig } from '@/app/config/env';
 import axios from 'axios';
 
 export interface TokenPayload {
@@ -87,8 +87,9 @@ export class TokenService {
     }
 
     try {
+      // Refresh endpoint is at /api/refresh (controller is @Controller('') with @Post('refresh'))
       const { data } = await axios.post<{ accessToken: string; refreshToken: string }>(
-        `${env.apiUrl}/api/refresh`,
+        `${apiConfig.baseURL}/refresh`,
         { refreshToken },
         { withCredentials: true },
       );
