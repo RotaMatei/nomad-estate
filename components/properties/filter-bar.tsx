@@ -198,7 +198,6 @@ export function FilterBar({ filters, setFilters, countries, hasArea, onClearArea
             </PopoverTrigger>
             <PopoverContent align="start" className="w-80">
               <PriceRange
-                key={`${filters.minPrice}-${filters.maxPrice}`}
                 min={filters.minPrice}
                 max={filters.maxPrice}
                 onCommit={(min, max) => setFilters({ minPrice: min, maxPrice: max })}
@@ -212,7 +211,6 @@ export function FilterBar({ filters, setFilters, countries, hasArea, onClearArea
             </PopoverTrigger>
             <PopoverContent align="start" className="w-80 space-y-6">
               <SingleSlider
-                key={`y-${filters.minYield}`}
                 label="Minimum gross yield"
                 value={filters.minYield ?? 0}
                 max={12}
@@ -221,7 +219,6 @@ export function FilterBar({ filters, setFilters, countries, hasArea, onClearArea
                 onCommit={(v) => setFilters({ minYield: v === 0 ? null : v })}
               />
               <SingleSlider
-                key={`s-${filters.minScore}`}
                 label="Minimum investment score"
                 value={filters.minScore ?? 0}
                 max={95}

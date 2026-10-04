@@ -90,6 +90,7 @@ export default function PropertyGlobe({
     latest.current = { listings, onHover, onSelect, onUserMove, theme };
   });
   const lastInteraction = React.useRef(0);
+  const userGesture = React.useRef(false);
   const litUp = React.useRef(false);
 
   // ── create / destroy ────────────────────────────────────────────────────────
@@ -137,15 +138,23 @@ export default function PropertyGlobe({
     container.addEventListener('keydown', touch);
     container.addEventListener('pointerenter', touch);
 
+    // A move counts as the user's when it follows their own input. MapLibre's `originalEvent` is missing on the
+    // `moveend` of a wheel zoom, so the gesture is tracked here; programmatic fly-tos clear the flag first.
+    const gesture = () => {
+      userGesture.current = true;
+    };
+    for (const ev of ['mousedown', 'touchstart', 'wheel'] as const) map.on(ev, gesture);
+    container.addEventListener('keydown', gesture);
+
     map.on('load', () => setReady(true));
     map.on('error', (e) => {
       // Tile or glyph hiccups are not fatal: the bundled country layer keeps the globe usable.
       if (process.env.NODE_ENV !== 'production') console.warn('[globe]', e.error?.message ?? e);
     });
 
-    map.on('moveend', (e) => {
-      // `originalEvent` is only set for moves the user made with pointer, wheel or keyboard.
-      if (!(e as { originalEvent?: unknown }).originalEvent) return;
+    map.on('moveend', () => {
+      if (!userGesture.current) return;
+      userGesture.current = false;
       const b = map.getBounds();
       latest.current.onUserMove?.(
         [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()],
@@ -225,6 +234,7 @@ export default function PropertyGlobe({
       resize.disconnect();
       container.removeEventListener('keydown', touch);
       container.removeEventListener('pointerenter', touch);
+      container.removeEventListener('keydown', gesture);
       mapRef.current = null;
       map.remove();
     };
@@ -358,6 +368,7 @@ export default function PropertyGlobe({
     if (!map || !ready || selLng == null || selLat == null) return;
     lastInteraction.current = performance.now();
     const zoom = Math.max(map.getZoom(), 9.5);
+    userGesture.current = false; // flying to a selection is not "the user moved the map"
     if (prefersReducedMotion()) map.jumpTo({ center: [selLng, selLat], zoom });
     else map.flyTo({ center: [selLng, selLat], zoom, speed: 1.1, curve: 1.5, essential: true });
   }, [ready, selLng, selLat]);
