@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 18:43 Europe/Bucharest (Claude Code local session — B4 part 3 done, analytics next)
+- **Last heartbeat:** 2026-10-04 18:51 Europe/Bucharest (Claude Code local session — B4 part 4 done)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -264,3 +264,6 @@ ode-v20.19.5-win-x64`
 - **2026-10-04 18:43 (Claude Code, local):** B4 part 3 done: the Nest-style property routes (features, tags, pictures, base create/update, score,
   status, old search) exist in Rust with ownership checks; 31 Rust tests pass. `rust/ENDPOINTS.md` tracks what is ported per route.
   Next: analytics, then inquiry/mail, preference, nearby amenities, remaining account routes, Google OAuth, schema endpoint + socket.
+- **2026-10-04 18:51 (Claude Code, local):** B4 part 4 done: all 46 analytics routes ported with explicit access rules (visitor events public,
+  listing numbers for the owning agency, platform data for ADMIN/MODERATOR users) and listing reads count a view. 34 Rust tests pass.
+  Next: inquiry, mail, remaining account routes, preference, nearby amenities, Google OAuth, schema endpoint + socket.
