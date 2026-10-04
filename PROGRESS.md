@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 15:05 Europe/Bucharest (Claude Code local session — A3 done, starting A4)
+- **Last heartbeat:** 2026-10-04 15:25 Europe/Bucharest (Claude Code local session — A4 done, starting A5)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -52,7 +52,7 @@
 ### A3 Home / landing
 - [x] Hero with live globe + headline + search entry, stats, value props, "choose path" (investor / agency), CTA, footer
 ### A4 Property details
-- [ ] Gallery (lightbox), key metrics, investment panel (yield, score, price/m²), features, map, agency card, inquiry form, save
+- [x] Gallery (lightbox), key metrics, investment panel (yield, score, price/m²), features, map, agency card, inquiry form, save
 ### A5 Auth
 - [ ] Login, register (investor + agency multi-step), verify, change password, logout
 ### A6 Dashboards
@@ -124,3 +124,9 @@ ode-v20.19.5-win-x64`
   (hero with non-interactive `PropertyGlobe`, search → `/properties?q=`, stats band from `/property/stats-home` with NumberTicker,
   featured markets computed from the catalogue), `components/site/site-footer.tsx`. Screens reviewed light/dark, 1440/390.
   Legacy `app/components/homeComponents/*` is now unused by `/` (delete in A8). Next: A4 `/details/[id]`.
+- **2026-10-04 15:25 (Claude Code, local):** A4 details done: `lib/properties/details.ts` (`usePropertyDetails`, `sendInquiry` → `POST /inquiry/create`),
+  `components/details/property-details.tsx` (Embla gallery + Dialog lightbox, investment panel, key facts, grouped features, tags,
+  mini MapLibre map, agency card + inquiry form with react-hook-form/zod, similar properties), `/details` redirects to `/properties`.
+  Not verified: lightbox and inquiry submit while signed in (needs a session; mock API has no auth routes yet). Feature enum values are
+  humanised from the API names (e.g. `CCTV` shows as "Cctv"). On a 390 px screen the page was 6 px wider than the viewport; clipped on
+  the article for now, the offending element still needs finding. Next: A5 auth.

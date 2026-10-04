@@ -113,6 +113,10 @@ MARKETS.forEach(([, , , , list], ci) => {
 const agencies = ['Meridian Estates', 'Northlight Property', 'Atlas & Vale', 'Harbour Row Realty', 'Longitude Homes'].map((name, i) => ({
   id: uuid(900 + i),
   name,
+  companyName: name,
+  companyWebsite: `https://${name.toLowerCase().replace(/[^a-z]+/g, '')}.example`,
+  establishedYear: 2004 + i * 3,
+  phoneNumber: `+40 21 555 01${String(i).padStart(2, '0')}`,
   email: `hello@${name.toLowerCase().replace(/[^a-z]+/g, '')}.example`,
   phone: `+40 21 555 01${String(i).padStart(2, '0')}`,
   description: `${name} lists verified investment property and handles viewings, due diligence and closing.`,
@@ -305,6 +309,8 @@ const server = http.createServer(async (req, res) => {
     saved.get(m[1])?.delete(m[2]);
     return send(200, { ok: true });
   }
+
+  if (method === 'POST' && path === '/inquiry/create') return send(201, { ...(await readBody(req)), status: 'PENDING' });
 
   console.warn(`[mock-api] no fixture for ${method} ${url.pathname}`);
   return send(404, { statusCode: 404, message: `No fixture for ${method} ${url.pathname}` });

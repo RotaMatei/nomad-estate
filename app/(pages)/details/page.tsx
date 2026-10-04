@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 
-// Fallback for /details without an id
+/** `/details` without an id has nothing to show: send people to the search. */
 export default function DetailsIndex() {
-  // Redirect to home or a not-found route; adjust as needed
-  redirect('/');
+  redirect('/properties');
 }
