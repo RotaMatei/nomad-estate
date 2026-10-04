@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 22:16 Europe/Bucharest (B6 (visualizer) pushed; next B7 parity suite)
+- **Last heartbeat:** 2026-10-04 22:28 Europe/Bucharest (B7 parity suite pushed; switch + Nest removal await owner approval)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -288,3 +288,9 @@ ode-v20.19.5-win-x64`
 - **2026-10-04 22:16 (Claude Code, local):** B6 done: the schema visualizer runs unchanged against the Rust API (schema load, socket, live reload
   on file change, checked in a browser) and is restyled to the app tokens with light and dark themes. Decision: `prisma/schema.prisma` stays the
   schema documentation; no SQL introspection. Next: B7 parity suite (Nest vs Rust on one local database), then the switch needs owner approval.
+- **2026-10-04 22:28 (Claude Code, local):** B7 part 1, parity suite: `rust/tools/parity.mjs` runs 58 read requests against the Nest app and the
+  Rust port on one seeded database and writes `rust/PARITY.md`. It found three real gaps, now fixed: timestamps had no zone (a browser would read
+  them as local time; every JSON response now carries `...Z` with milliseconds, `src/dates.rs`), name search ignored `offset`/`limit`, and the
+  primary-picture route returned an object where Nest returns a list. `fullName` added to user search. Result: 0 unexplained differences; the
+  explained ones are access rules, ACTIVE-only listings, and extra or dropped fields. Tokens work across both apps. 44 Rust tests pass; the
+  frontend end-to-end run on the Rust API passes. Left in B7: switching the deployment and removing Nest, both need owner approval.
