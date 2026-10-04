@@ -1,6 +1,6 @@
 // Fixture API for local UI work and screenshots.
 //   npm run mock-api            → http://localhost:4010/api
-//   NEXT_PUBLIC_API_URL=http://localhost:4010 npm run dev
+//   NEXT_PUBLIC_API_URL=http://localhost:4010 NEXT_PUBLIC_API_FLAVOR=nest npm run dev   (the fixtures imitate the Nest app)
 // Mirrors the Nest routes the frontend reads. Data is deterministic (seeded), nothing is persisted.
 import http from 'node:http';
 

@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 22:28 Europe/Bucharest (B7 parity suite pushed; switch + Nest removal await owner approval)
+- **Last heartbeat:** 2026-10-04 22:36 Europe/Bucharest (Google sign-in + switch prepared; deploy and Nest removal await owner)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -74,10 +74,10 @@
 - [x] B1 Inventory: every endpoint the frontend calls + all Nest controllers (`nomad-estate-database-api/rust/ENDPOINTS.md`)
 - [x] B2 Move frontend logic to backend: `create-full`, `update-full` (one transaction, server-side score), `search` (joined names, coordinates, cover photo, tags, pagination), `geo` — implemented and tested in Rust; the frontend still calls the Nest routes
 - [x] B3 Rust service skeleton (Axum, SQLx, config, tracing, errors, JWT auth, CORS, compression, rate limit, OpenAPI)
-- [x] B4 Port modules (auth/tokens/users/agencies/agents → properties → analytics → mail/inquiry/subscription): 177 of 179 Nest routes. Open: Google OAuth (2 routes, owner decision on the flow). Stripe subscription is commented out in Nest, nothing to port.
+- [x] B4 Port modules (auth/tokens/users/agencies/agents → properties → analytics → mail/inquiry/subscription): all 179 Nest routes, Google sign-in included. Stripe subscription is commented out in Nest, nothing to port.
 - [x] B5 AI API (`nomad-estate-ai-api`) port to Rust (`rust/` in that repo)
 - [x] B6 Schema visualizer: keeps `prisma/schema.prisma` as the schema documentation, served by the Rust API; restyled to the app tokens
-- [ ] B7 Parity tests, switch frontend to Rust API, decommission Nest
+- [ ] B7 Parity tests (done, `rust/PARITY.md`), frontend default switched to the Rust flavor (done), deployment prepared (`rust/DEPLOY.md`). Open, owner only: deploy, then approve removing Nest
 
 ## Session log
 
@@ -294,3 +294,12 @@ ode-v20.19.5-win-x64`
   primary-picture route returned an object where Nest returns a list. `fullName` added to user search. Result: 0 unexplained differences; the
   explained ones are access rules, ACTIVE-only listings, and extra or dropped fields. Tokens work across both apps. 44 Rust tests pass; the
   frontend end-to-end run on the Rust API passes. Left in B7: switching the deployment and removing Nest, both need owner approval.
+- **2026-10-04 22:36 (Claude Code, local):** Owner decisions: finish Google sign-in properly; prepare the switch but keep Nest. Done: Google
+  sign-in on the Rust API (signed `state`, verified email required, creates or links an investor account, returns the normal token pair, agency
+  emails refused), tested against a stand-in for Google. All 179 Nest routes are now ported. Deployment files: `rust/Dockerfile` (not built yet),
+  `rust/railway.example.json`, `rust/DEPLOY.md` with the environment checklist, what changes for people, and the order of the switch.
+  45 Rust tests pass. Not started, needs approval: removing the Nest source.
+  Frontend: Google sign-in keeps the `state` in the tab and refuses an answer it did not ask for; **the Rust flavor is now the default**
+  (`NEXT_PUBLIC_API_FLAVOR=nest` keeps the Nest behaviour and is REQUIRED for any deploy whose `NEXT_PUBLIC_API_URL` still points at Nest;
+  the mock API and `npm run screens` set it themselves). The browser side of Google sign-in is not exercised end to end: it needs real Google
+  credentials.

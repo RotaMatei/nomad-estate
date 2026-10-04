@@ -9,11 +9,10 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import { AuthShell } from './auth-shell';
 import { env } from '@/app/config/env';
-import api from '@/app/lib/api';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { errorStatus, googleSignInUrl, persistSession, signIn, type AuthResponse } from '@/lib/auth/session';
+import { errorStatus, finishGoogleSignIn, googleSignInUrl, persistSession, signIn } from '@/lib/auth/session';
 
 const schema = z.object({
   email: z.string().trim().toLowerCase().email('Enter a valid email address.'),
@@ -39,14 +38,14 @@ export function LoginForm() {
   const [googleBusy, setGoogleBusy] = React.useState(false);
   const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { email: '', password: '' } });
 
-  // Google sends people back with `?code=`; exchange it for a session.
+  // Google sends people back with `?code=&state=`; exchange them for a session.
   const code = params.get('code');
+  const state = params.get('state');
   React.useEffect(() => {
     if (!code) return;
     let cancelled = false;
-    api
-      .get<AuthResponse>('/oauth/user/google/callback', { params: { code } })
-      .then(({ data }) => {
+    finishGoogleSignIn(code, state)
+      .then((data) => {
         if (cancelled || !data?.accessToken) return;
         persistSession(data, 'user');
         router.replace('/properties');
@@ -55,7 +54,7 @@ export function LoginForm() {
     return () => {
       cancelled = true;
     };
-  }, [code, router]);
+  }, [code, state, router]);
 
   const onSubmit = async ({ email, password }: Values) => {
     setFormError(null);

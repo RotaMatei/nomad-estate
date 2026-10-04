@@ -39,7 +39,7 @@ const VIEWPORTS = [
 ];
 const THEMES = ['light', 'dark'];
 
-const env = { ...process.env, NEXT_PUBLIC_API_URL: `http://localhost:${API_PORT}`, NEXT_TELEMETRY_DISABLED: '1' };
+const env = { ...process.env, NEXT_PUBLIC_API_URL: `http://localhost:${API_PORT}`, NEXT_PUBLIC_API_FLAVOR: 'nest', NEXT_TELEMETRY_DISABLED: '1' };
 const nextBin = path.join(root, 'node_modules', 'next', 'dist', 'bin', 'next');
 const children = [];
 

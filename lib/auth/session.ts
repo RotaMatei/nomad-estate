@@ -1,6 +1,7 @@
 'use client';
 
 import { jwtDecode } from 'jwt-decode';
+import { env } from '@/app/config/env';
 import api from '@/app/lib/api';
 import { tokenStorage } from '@/app/lib/auth/tokenStorage';
 import { notifySessionChange } from '@/hooks/use-session';
@@ -96,7 +97,29 @@ export async function sendVerificationEmail() {
   await api.post('/mail/send-verify', {});
 }
 
+const GOOGLE_STATE_KEY = 'google-sign-in-state';
+
+/** The consent URL. The Rust API also issues a `state`, kept in this tab so the answer can be matched to the request. */
 export async function googleSignInUrl() {
-  const { data } = await api.get<{ url: string }>('/oauth/user/google');
+  const { data } = await api.get<{ url: string; state?: string }>('/oauth/user/google');
+  try {
+    if (data.state) sessionStorage.setItem(GOOGLE_STATE_KEY, data.state);
+    else sessionStorage.removeItem(GOOGLE_STATE_KEY);
+  } catch {}
   return data.url;
+}
+
+/** Google sent the browser back with `?code=&state=`: trade them for a session. */
+export async function finishGoogleSignIn(code: string, state: string | null): Promise<AuthResponse> {
+  let expected: string | null = null;
+  try {
+    expected = sessionStorage.getItem(GOOGLE_STATE_KEY);
+  } catch {}
+  // A sign-in this tab did not start is refused: someone else's link must not sign you in to their account.
+  if (env.apiFlavor === 'rust' ? !state || state !== expected : !!expected && state !== expected) throw new Error('Google sign-in was not started here');
+  const { data } = await api.get<AuthResponse>('/oauth/user/google/callback', { params: state ? { code, state } : { code } });
+  try {
+    sessionStorage.removeItem(GOOGLE_STATE_KEY);
+  } catch {}
+  return data;
 }
