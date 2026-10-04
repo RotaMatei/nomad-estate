@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 17:05 Europe/Bucharest (Claude Code local session — B1 done, waiting on owner for the Rust toolchain)
+- **Last heartbeat:** 2026-10-04 17:39 Europe/Bucharest (Claude Code local session — B2 + B3 done, B4 next)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -72,8 +72,8 @@
 ## Plan — Part B: Backend → Rust (see `nomad-estate-database-api/PROGRESS.md`)
 
 - [x] B1 Inventory: every endpoint the frontend calls + all Nest controllers (`nomad-estate-database-api/rust/ENDPOINTS.md`)
-- [ ] B2 Move frontend logic to backend (atomic create/update property, server-side score, single search endpoint with joined city/country names + coordinates, clustering)
-- [ ] B3 Rust service skeleton (Axum, SQLx, config, tracing, errors, JWT auth, OpenAPI)
+- [x] B2 Move frontend logic to backend: `create-full`, `update-full` (one transaction, server-side score), `search` (joined names, coordinates, cover photo, tags, pagination), `geo` — implemented and tested in Rust; the frontend still calls the Nest routes
+- [x] B3 Rust service skeleton (Axum, SQLx, config, tracing, errors, JWT auth, CORS, compression, rate limit, OpenAPI)
 - [ ] B4 Port modules (auth/tokens/users/agencies/agents → properties → analytics → mail/inquiry/subscription)
 - [ ] B5 AI API (`nomad-estate-ai-api`) port to Rust
 - [ ] B6 Schema visualizer: keep `prisma/schema.prisma` as schema documentation/migrations source, or switch to SQL introspection
@@ -209,3 +209,10 @@ ode-v20.19.5-win-x64`
     build tools are needed too. Nothing in Part B after B1 has been started.
   - Open in Part A: MapTiler satellite layer (needs a key to verify), Lighthouse 59/56 vs target 90 (see the performance entry), pin → list
     hover scroll and unsave not verified, 6 px overflow source on `/details` at 390 px (clipped, not found).
+- **2026-10-04 17:39 (Claude Code, local):** Part B started with the owner's go-ahead: Rust 1.99 (GNU toolchain) and a portable PostgreSQL 17 were
+  installed for development (`~/.cargo`, `~/.rustup`, `D:\Desktop\NomadEstate\.tools`). **B2 and B3 are done** in `nomad-estate-database-api/rust`:
+  fmt, clippy `-D warnings` and 15 tests pass (9 of them integration tests against Postgres). Details, decisions and next steps are in that repo's
+  PROGRESS.md and `rust/README.md`.
+  - Frontend follow-up (not started): point `lib/properties/queries.ts` at `/property/search` + `/property/geo` and the property form at
+    `create-full` / `update-full` once the Rust API is the one deployed; that removes the per-city lookups and should fix `/properties` LCP.
+  - Next: B4 (tokens/auth/users first).
