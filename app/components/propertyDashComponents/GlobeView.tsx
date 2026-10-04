@@ -1,112 +1,152 @@
 'use client';
 
-import { Canvas, useLoader } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
-import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import * as THREE from 'three';
-import { MapProps } from './location';
-import { Suspense, useMemo, useRef, useEffect, useState } from 'react';
-import { Waypoint } from './Waypoint';
-import { useTheme } from '@emotion/react';
-import { text } from 'stream/consumers';
+import React, { useEffect, useRef, useState } from 'react';
+import Globe from 'globe.gl';
+import type { FeatureCollection } from 'geojson';
+import type { MapProps } from './location';
 
-const GlobeMesh = () => {
-  useTheme();
-  const texture = useLoader(THREE.TextureLoader, '/earth-green.png');
-  texture.colorSpace = THREE.SRGBColorSpace;
+const DARK_BLUE = '#0C2239';
+const OUTLINE_BLUE = '#4f88c8';
 
-  const landMaterial = useMemo(() => {
-    return new THREE.MeshBasicMaterial({
-      map: texture,
-      color: new THREE.Color('#89dfe5'),
-      transparent: true,
-      side: THREE.FrontSide,
-      depthWrite: true,
-      toneMapped: false,
-    });
-  }, [texture]);
+let countriesGeoJsonCache: FeatureCollection | null = null;
+let countriesGeoJsonPromise: Promise<FeatureCollection> | null = null;
 
-  const waterMaterial = useMemo(() => {
-    return new THREE.MeshBasicMaterial({
-      color: new THREE.Color('#0C2239'),
-      side: THREE.FrontSide,
-      toneMapped: false,
-    });
-  }, []);
-
-  return (
-    <group>
-      <mesh>
-        <sphereGeometry args={[0.999, 64, 64]} />
-        <primitive object={waterMaterial} attach="material" />
-      </mesh>
-      <mesh renderOrder={1}>
-        <sphereGeometry args={[1.001, 64, 64]} />
-        <primitive object={landMaterial} attach="material" />
-      </mesh>
-    </group>
-  );
+const loadCountriesGeoJson = async (): Promise<FeatureCollection> => {
+  if (countriesGeoJsonCache) return countriesGeoJsonCache;
+  if (!countriesGeoJsonPromise) {
+    countriesGeoJsonPromise = fetch('/earth-countries.json')
+      .then((res) => res.json() as Promise<FeatureCollection>)
+      .then((json) => {
+        countriesGeoJsonCache = json;
+        return json;
+      });
+  }
+  return countriesGeoJsonPromise;
 };
 
-function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
-function colorForIndex(idx: number, total: number): string {
-  if (total <= 1) return '#ff0000';
-  const t = Math.max(0, Math.min(1, idx / (total - 1))); // 0 => first (red), 1 => last (white)
-  const r = 255; // stays red channel full
-  const g = Math.round(lerp(0, 255, t));
-  const b = Math.round(lerp(0, 255, t));
-  const toHex = (n: number) => n.toString(16).padStart(2, '0');
-  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-}
-
-const GlobeView = ({ locations, zoom: _zoom }: MapProps) => {
-  const controlsRef = useRef<OrbitControlsImpl | null>(null);
-  const [, setSelectedId] = useState<number | null>(null);
+const GlobeView = ({
+  locations,
+  zoom,
+  highlightCountryCodes: _highlightCountryCodes,
+  onSelect,
+}: MapProps) => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const globeRef = useRef<any>(null);
+  const countriesRef = useRef<FeatureCollection | null>(null);
+  const onSelectRef = useRef<typeof onSelect>(onSelect);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (controlsRef.current) {
-      controlsRef.current.zoomToCursor = true;
-    }
+    onSelectRef.current = onSelect;
+  }, [onSelect]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const json = await loadCountriesGeoJson();
+        if (cancelled) return;
+        countriesRef.current = json;
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  // Debug: log locations received by the globe
+  // Create globe once
   useEffect(() => {
-    try {
-      // eslint-disable-next-line no-console
-      console.log('[GlobeView] locations count =', locations?.length ?? 0, locations?.slice?.(0, 5));
-    } catch {}
-  }, [locations]);
+    if (!containerRef.current || globeRef.current) return;
+    if (!countriesRef.current) return;
 
-  return (
-    <Suspense fallback={<div>Loading globe...</div>}>
-      <Canvas style={{ height: '100%', width: '100%' }}>
-        <PerspectiveCamera makeDefault position={[0, 0, 2.5]} fov={50} />
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[5, 5, 5]} intensity={1} />
-        <GlobeMesh />
-        {locations.map((loc, i) => (
-          <Waypoint
-            key={loc.id}
-            id={loc.id}
-            lat={loc.lat}
-            lng={loc.lng}
-            color={colorForIndex(i, locations.length)}
-            onSelect={setSelectedId}
-          />
-        ))}
-        <OrbitControls
-          ref={controlsRef}
-          enableZoom
-          enableRotate
-          enablePan={false}
-          minPolarAngle={Math.PI / 4}
-          maxPolarAngle={(3 * Math.PI) / 4}
-          minDistance={0.5}
-          maxDistance={2.5}
-        />
-      </Canvas>
-    </Suspense>
-  );
+    const g = new Globe(containerRef.current, {
+      waitForGlobeReady: true,
+      animateIn: false,
+      rendererConfig: { alpha: true, antialias: true },
+    });
+
+    globeRef.current = g;
+
+    // Globe base styling
+    g.showGlobe(false)
+      .backgroundColor('rgba(0,0,0,0)')
+      .showAtmosphere(false)
+      .globeOffset([0, 0]);
+
+    const w = containerRef.current.clientWidth || 400;
+    const h = containerRef.current.clientHeight || 400;
+    g.width(w).height(h).pointOfView({ lat: 20, lng: 0, altitude: 2.1 }, 0);
+
+    const controls = g.controls();
+    controls.enablePan = false;
+
+    // Country polygons
+    g.polygonCapColor(() => DARK_BLUE)
+      // Keep side walls dark for both base and highlighted countries.
+      .polygonSideColor(() => DARK_BLUE)
+      // Lighter blue outlines for country borders.
+      .polygonStrokeColor(() => OUTLINE_BLUE)
+      .polygonAltitude(0.0012)
+      // Lower curvature resolution reduces triangle count and speeds initial render.
+      .polygonCapCurvatureResolution(2)
+      .polygonsTransitionDuration(0);
+
+    g.polygonsData(countriesRef.current.features)
+      .polygonsTransitionDuration(0);
+
+    // Waypoints
+    const radius = Math.max(0.055, Math.min(0.16, 0.16 - zoom * 0.005));
+    g.pointsMerge(false)
+      .pointsData(locations)
+      .pointLat('lat')
+      .pointLng('lng')
+      // Align visual intent with Leaflet waypoints (indigo/purple emphasis).
+      .pointColor(() => '#6366f1')
+      .pointAltitude(0.025)
+      .pointResolution(20)
+      .pointRadius(radius)
+      .pointLabel('name')
+      .pointsTransitionDuration(0);
+
+    g.onPointClick((point: any) => {
+      if (!onSelectRef.current) return;
+      const pid = point?.id;
+      if (typeof pid === 'number') onSelectRef.current(pid);
+    });
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      const { width, height } = entry.contentRect;
+      if (width > 0 && height > 0) g.width(width).height(height).globeOffset([0, 0]);
+    });
+    resizeObserver.observe(containerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+      try {
+        globeRef.current?._destructor?.();
+      } catch {}
+      globeRef.current = null;
+    };
+  }, [loading]);
+
+  // Update points when locations/zoom changes
+  useEffect(() => {
+    const g = globeRef.current;
+    if (!g) return;
+
+    g.pointsData(locations);
+    // Bigger points when zoomed out, smaller points when zoomed in.
+    const radius = Math.max(0.055, Math.min(0.16, 0.16 - zoom * 0.005));
+    g.pointRadius(radius);
+  }, [locations, zoom]);
+
+  if (loading) return <div style={{ height: '100%', width: '100%' }}>Loading globe...</div>;
+
+  return <div ref={containerRef} style={{ height: '100%', width: '100%' }} />;
 };
 
 export default GlobeView;

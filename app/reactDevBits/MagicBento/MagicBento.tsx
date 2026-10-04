@@ -601,6 +601,8 @@ const MagicBento: React.FC<BentoProps> = ({
 
   // Globe locations derived from search results
   const [globeLocations, setGlobeLocations] = useState<Location[]>([]);
+  // Used to color the globe/map country polygons for the current tag match.
+  const [matchedCountryCodes, setMatchedCountryCodes] = useState<string[]>([]);
   // Simple hash fallback to turn string IDs into numeric keys when needed
   const hashCode = (str: string): number => {
     let h = 0;
@@ -849,15 +851,71 @@ const MagicBento: React.FC<BentoProps> = ({
             );
           };
 
-          // Keep only entries that have coercible coordinates and then take top N for the current layout
-          const candidates = list
-            .map((p) => ({ p, lat: getLat(p), lng: getLng(p) }))
-            .filter(({ lat, lng }) => typeof lat === 'number' && typeof lng === 'number');
-
-          const limited = candidates.slice(0, globePageSize);
-
-          const locs: Location[] = limited.map(({ p, lat, lng }) => {
+          const getCountryCode = (p: unknown): string | undefined => {
             const obj = (p ?? {}) as Record<string, unknown>;
+
+            const direct =
+              typeof obj?.['countryCode'] === 'string'
+                ? obj.countryCode
+                : typeof obj?.['countryISOCode'] === 'string'
+                  ? obj.countryISOCode
+                  : undefined;
+            if (typeof direct === 'string' && direct.trim().length) return direct.trim();
+
+            const countryId =
+              toNum(obj?.['countryId']) ??
+              toNum(obj?.['CountryId']) ??
+              toNum((obj as { country?: { id?: unknown } })?.country?.id) ??
+              toNum((obj as { Country?: { id?: unknown } })?.Country?.id);
+
+            if (typeof countryId === 'number') {
+              const match = allCountries.find((c) => c.id === countryId);
+              const code = match?.code;
+              if (typeof code === 'string' && code.trim().length) return code.trim();
+            }
+
+            return undefined;
+          };
+
+          const candidates = list
+            .map((p) => {
+              const lat = getLat(p);
+              const lng = getLng(p);
+              const obj = (p ?? {}) as Record<string, unknown>;
+              const idVal = obj['id'];
+              const titleVal = obj['title'];
+
+              const propertyKey =
+                typeof idVal === 'string'
+                  ? idVal
+                  : typeof idVal === 'number'
+                    ? String(idVal)
+                    : `${String(titleVal ?? '').slice(0, 20)}-${lat}-${lng}`;
+
+              return {
+                p,
+                lat,
+                lng,
+                countryCode: getCountryCode(p),
+                propertyKey,
+              };
+            })
+            .filter(
+              (item): item is {
+                p: unknown;
+                lat: number;
+                lng: number;
+                countryCode: string | undefined;
+                propertyKey: string;
+              } => typeof item.lat === 'number' && typeof item.lng === 'number'
+            );
+
+          const matchedCodes = Array.from(
+            new Set(candidates.map((c) => c.countryCode).filter((v): v is string => typeof v === 'string' && v.trim().length > 0))
+          );
+
+          const makeLocation = (c: { p: unknown; lat: number; lng: number; countryCode?: string }): Location => {
+            const obj = (c.p ?? {}) as Record<string, unknown>;
             const idVal = obj['id'];
             const titleVal = obj['title'];
             return {
@@ -869,10 +927,41 @@ const MagicBento: React.FC<BentoProps> = ({
                 typeof titleVal === 'string' && titleVal.trim().length
                   ? titleVal
                   : `Property ${String(idVal ?? '').slice(0, 6)}`,
-              lat: lat as number,
-              lng: lng as number,
+              lat: c.lat,
+              lng: c.lng,
+              countryCode: c.countryCode,
             };
-          });
+          };
+
+          const singleCountryMatch = matchedCodes.length === 1;
+          const waypointCandidates = singleCountryMatch
+            ? candidates
+            : (() => {
+                const firstPerCountry = new Map<string, (typeof candidates)[number]>();
+                for (const c of candidates) {
+                  if (!c.countryCode) continue;
+                  if (!firstPerCountry.has(c.countryCode)) firstPerCountry.set(c.countryCode, c);
+                }
+                const base = Array.from(firstPerCountry.values());
+                const usedKeys = new Set(base.map((c) => c.propertyKey));
+
+                const remainingNeeded = Math.max(0, globePageSize - base.length);
+                const remaining = candidates
+                  .filter((c) => !usedKeys.has(c.propertyKey))
+                  .slice(0, remainingNeeded);
+
+                return [...base, ...remaining];
+              })();
+
+          const locs: Location[] = waypointCandidates.map(makeLocation);
+          const waypointCountryCodes = Array.from(
+            new Set(
+              waypointCandidates
+                .map((c) => c.countryCode)
+                .filter((v): v is string => typeof v === 'string' && v.trim().length > 0)
+            )
+          );
+          setMatchedCountryCodes(waypointCountryCodes);
           // eslint-disable-next-line no-console
           console.log('[MagicBento] derived globe locations =', locs.length, locs.slice(0, 5));
           setGlobeLocations(locs);
@@ -880,6 +969,7 @@ const MagicBento: React.FC<BentoProps> = ({
           // eslint-disable-next-line no-console
           console.warn('[MagicBento] failed to derive globe locations', e);
           setGlobeLocations([]);
+          setMatchedCountryCodes([]);
         }
       })
       .catch(() => {
@@ -932,21 +1022,122 @@ const MagicBento: React.FC<BentoProps> = ({
             toNum(obj?.['longitude']) ?? toNum(obj?.['lng']) ?? toNum(obj?.['lon']) ?? toNum(loc?.['lng']) ?? toNum(loc?.['lon']) ?? toNum(loc?.['longitude']) ?? toNum(loc2?.['lng']) ?? toNum(loc2?.['lon']) ?? toNum(loc2?.['longitude']) ?? null
           );
         };
-        const candidates = list.map((p) => ({ p, lat: getLat(p), lng: getLng(p) })).filter(({ lat, lng }) => typeof lat === 'number' && typeof lng === 'number');
-        const limited = candidates.slice(0, globePageSize);
-        const locs: Location[] = limited.map(({ p, lat, lng }) => {
+        const getCountryCode = (p: unknown): string | undefined => {
           const obj = (p ?? {}) as Record<string, unknown>;
+
+          const direct =
+            typeof obj?.['countryCode'] === 'string'
+              ? obj.countryCode
+              : typeof obj?.['countryISOCode'] === 'string'
+                ? obj.countryISOCode
+                : undefined;
+          if (typeof direct === 'string' && direct.trim().length) return direct.trim();
+
+          const countryId =
+            toNum(obj?.['countryId']) ??
+            toNum(obj?.['CountryId']) ??
+            toNum((obj as { country?: { id?: unknown } })?.country?.id) ??
+            toNum((obj as { Country?: { id?: unknown } })?.Country?.id);
+
+          if (typeof countryId === 'number') {
+            const match = allCountries.find((c) => c.id === countryId);
+            const code = match?.code;
+            if (typeof code === 'string' && code.trim().length) return code.trim();
+          }
+
+          return undefined;
+        };
+
+        const candidates = list
+          .map((p) => {
+            const lat = getLat(p);
+            const lng = getLng(p);
+            const obj = (p ?? {}) as Record<string, unknown>;
+            const idVal = obj['id'];
+            const titleVal = obj['title'];
+
+            const propertyKey =
+              typeof idVal === 'string'
+                ? idVal
+                : typeof idVal === 'number'
+                  ? String(idVal)
+                  : `${String(titleVal ?? '').slice(0, 20)}-${lat}-${lng}`;
+
+            return {
+              p,
+              lat,
+              lng,
+              countryCode: getCountryCode(p),
+              propertyKey,
+            };
+          })
+          .filter(
+            (item): item is {
+              p: unknown;
+              lat: number;
+              lng: number;
+              countryCode: string | undefined;
+              propertyKey: string;
+            } => typeof item.lat === 'number' && typeof item.lng === 'number'
+          );
+
+        const matchedCodes = Array.from(
+          new Set(candidates.map((c) => c.countryCode).filter((v): v is string => typeof v === 'string' && v.trim().length > 0))
+        );
+
+        const makeLocation = (c: { p: unknown; lat: number; lng: number; countryCode?: string }): Location => {
+          const obj = (c.p ?? {}) as Record<string, unknown>;
           const idVal = obj['id'];
           const titleVal = obj['title'];
           return {
-            id: typeof idVal === 'string' ? Number(Math.abs(hashCode(idVal))) : (typeof idVal === 'number' ? idVal : Math.floor(Math.random() * 1e9)),
-            name: typeof titleVal === 'string' && titleVal.trim().length ? titleVal : `Property ${String(idVal ?? '').slice(0, 6)}`,
-            lat: lat as number,
-            lng: lng as number,
+            id:
+              typeof idVal === 'string'
+                ? Number(Math.abs(hashCode(idVal)))
+                : (typeof idVal === 'number' ? idVal : Math.floor(Math.random() * 1e9)),
+            name:
+              typeof titleVal === 'string' && titleVal.trim().length
+                ? titleVal
+                : `Property ${String(idVal ?? '').slice(0, 6)}`,
+            lat: c.lat,
+            lng: c.lng,
+            countryCode: c.countryCode,
           };
-        });
+        };
+
+        const singleCountryMatch = matchedCodes.length === 1;
+        const waypointCandidates = singleCountryMatch
+          ? candidates
+          : (() => {
+              const firstPerCountry = new Map<string, (typeof candidates)[number]>();
+              for (const c of candidates) {
+                if (!c.countryCode) continue;
+                if (!firstPerCountry.has(c.countryCode)) firstPerCountry.set(c.countryCode, c);
+              }
+              const base = Array.from(firstPerCountry.values());
+              const usedKeys = new Set(base.map((c) => c.propertyKey));
+
+              const remainingNeeded = Math.max(0, globePageSize - base.length);
+              const remaining = candidates
+                .filter((c) => !usedKeys.has(c.propertyKey))
+                .slice(0, remainingNeeded);
+
+              return [...base, ...remaining];
+            })();
+
+        const locs: Location[] = waypointCandidates.map(makeLocation);
+        const waypointCountryCodes = Array.from(
+          new Set(
+            waypointCandidates
+              .map((c) => c.countryCode)
+              .filter((v): v is string => typeof v === 'string' && v.trim().length > 0)
+          )
+        );
+        setMatchedCountryCodes(waypointCountryCodes);
         setGlobeLocations(locs);
-      } catch { setGlobeLocations([]); }
+      } catch {
+        setGlobeLocations([]);
+        setMatchedCountryCodes([]);
+      }
     } catch {
       // swallow
     }
@@ -1252,7 +1443,12 @@ const MagicBento: React.FC<BentoProps> = ({
                       <div className="card__label">Global Locations</div>
                     </div>
                     <div className="card__content" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                      <MapGlobeSwitcher locations={globeLocations} onReload={handleReload} onSelect={setSelectedId} />
+                      <MapGlobeSwitcher
+                        locations={globeLocations}
+                        matchedCountryCodes={matchedCountryCodes}
+                        onReload={handleReload}
+                        onSelect={setSelectedId}
+                      />
                       <p className="card__description" style={{ marginTop: 'auto' }}>Explore the locations on map or globe.</p>
                     </div>
                   </Box>

@@ -1,7 +1,6 @@
 import dynamic from "next/dynamic";
 import { useState, useMemo, useEffect } from "react";
 import { Location, MapProps } from "./location";
-import { shouldShowGlobe } from "./utils";
 import styles from "./mapGlobe.module.css";
 
 const LeafletMap = dynamic(() => import("./LeafletMap"), {
@@ -16,11 +15,16 @@ const GlobeView = dynamic(() => import("./GlobeView"), {
 
 interface Props {
   locations: Location[];
+  /**
+   * Countries that have at least one property matching the current search tags.
+   * Used to color country polygons on both the globe and the flat map.
+   */
+  matchedCountryCodes?: string[];
   onReload?: () => void;
   onSelect?: (id: number) => void;
 }
 
-export const MapGlobeSwitcher = ({ locations, onReload, onSelect }: Props) => {
+export const MapGlobeSwitcher = ({ locations, matchedCountryCodes, onReload, onSelect }: Props) => {
   const [zoom, setZoom] = useState(5);
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
@@ -33,9 +37,12 @@ export const MapGlobeSwitcher = ({ locations, onReload, onSelect }: Props) => {
     } catch {}
   }, [locations]);
 
+  const focusCountryCode = (matchedCountryCodes?.length ?? 0) === 1 ? matchedCountryCodes?.[0] ?? null : null;
+
   const showGlobe = useMemo(() => {
-    return zoom < 3 || shouldShowGlobe(locations);
-  }, [zoom, locations]);
+    // Per requirement: stay on the globe unless the search matches a single country.
+    return !focusCountryCode;
+  }, [focusCountryCode]);
 
   const handleZoomChange = (delta: number) => {
     setZoom(prev => Math.max(1, Math.min(20, prev + delta)));
@@ -52,9 +59,20 @@ export const MapGlobeSwitcher = ({ locations, onReload, onSelect }: Props) => {
       </div>
 
       {showGlobe ? (
-        <GlobeView locations={locations} zoom={zoom} onSelect={setSelectedId} />
+        <GlobeView
+          locations={locations}
+          zoom={zoom}
+          highlightCountryCodes={matchedCountryCodes ?? []}
+          onSelect={setSelectedId}
+        />
       ) : (
-        <LeafletMap locations={locations} zoom={zoom} onSelect={setSelectedId} />
+        <LeafletMap
+          locations={locations}
+          zoom={zoom}
+          highlightCountryCodes={matchedCountryCodes ?? []}
+          focusCountryCode={focusCountryCode}
+          onSelect={setSelectedId}
+        />
       )}
 
       {selectedLocation && (
