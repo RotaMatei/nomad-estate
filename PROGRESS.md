@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 22:02 Europe/Bucharest (B4 part 7 (mail + reset flow) pushed; Google OAuth awaits owner decision; next B5)
+- **Last heartbeat:** 2026-10-04 22:11 Europe/Bucharest (B5 (AI API port) pushed; next B6 visualizer, B7 parity)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -74,8 +74,8 @@
 - [x] B1 Inventory: every endpoint the frontend calls + all Nest controllers (`nomad-estate-database-api/rust/ENDPOINTS.md`)
 - [x] B2 Move frontend logic to backend: `create-full`, `update-full` (one transaction, server-side score), `search` (joined names, coordinates, cover photo, tags, pagination), `geo` — implemented and tested in Rust; the frontend still calls the Nest routes
 - [x] B3 Rust service skeleton (Axum, SQLx, config, tracing, errors, JWT auth, CORS, compression, rate limit, OpenAPI)
-- [ ] B4 Port modules (auth/tokens/users/agencies/agents → properties → analytics → mail/inquiry/subscription)
-- [ ] B5 AI API (`nomad-estate-ai-api`) port to Rust
+- [x] B4 Port modules (auth/tokens/users/agencies/agents → properties → analytics → mail/inquiry/subscription): 177 of 179 Nest routes. Open: Google OAuth (2 routes, owner decision on the flow). Stripe subscription is commented out in Nest, nothing to port.
+- [x] B5 AI API (`nomad-estate-ai-api`) port to Rust (`rust/` in that repo)
 - [ ] B6 Schema visualizer: keep `prisma/schema.prisma` as schema documentation/migrations source, or switch to SQL introspection
 - [ ] B7 Parity tests, switch frontend to Rust API, decommission Nest
 
@@ -281,3 +281,7 @@ ode-v20.19.5-win-x64`
   the profile (all three only on the Rust flavor, since Nest mails placeholder links). `scripts/e2e-mail.mjs` drives the whole flow in a browser
   against the Rust API and a local SMTP sink: passes.
   **Owner decisions pending:** (1) Google OAuth flow for the Rust API; (2) real `SUPPORT_EMAIL`, `MAIL_FROM` and SMTP credentials for production.
+- **2026-10-04 22:11 (Claude Code, local):** B5 done: `nomad-estate-ai-api/rust` (crate `nomad-ai-api`) serves `GET /api` and
+  `GET /api/country-market-data/all` with the Nest response shapes, plus `/api/health` and an OpenAPI document. Run side by side with the Nest
+  app on one local database: identical except two deliberate fixes (countries without a score come last, not first; ties ordered by id).
+  5 tests pass. Dockerfile written but not built (no Docker here). Next: B6 visualizer, then the B7 parity suite.
