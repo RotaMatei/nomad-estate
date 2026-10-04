@@ -79,7 +79,20 @@ export class TokenService {
   /**
    * Refresh access token using refresh token
    */
-  static async refreshToken(): Promise<{ accessToken: string; refreshToken: string } | null> {
+  static refreshToken(): Promise<{ accessToken: string; refreshToken: string } | null> {
+    // One refresh at a time: several requests that hit 401 together share the same call. A refresh token works
+    // once (the API rotates it), so parallel refreshes would invalidate each other and sign the user out.
+    if (!this.refreshInFlight) {
+      this.refreshInFlight = this.performRefresh().finally(() => {
+        this.refreshInFlight = null;
+      });
+    }
+    return this.refreshInFlight;
+  }
+
+  private static refreshInFlight: Promise<{ accessToken: string; refreshToken: string } | null> | null = null;
+
+  private static async performRefresh(): Promise<{ accessToken: string; refreshToken: string } | null> {
     const refreshToken = tokenStorage.getRefreshToken();
     if (!refreshToken) {
       console.warn('[TokenService] No refresh token available');
@@ -88,7 +101,7 @@ export class TokenService {
 
     try {
       // Refresh endpoint is at /api/refresh (controller is @Controller('') with @Post('refresh'))
-      const { data } = await axios.post<{ accessToken: string; refreshToken: string }>(
+      const { data } = await axios.post<{ accessToken: string; refreshToken: string; RefreshJTI?: string }>(
         `${apiConfig.baseURL}/refresh`,
         { refreshToken },
         { withCredentials: true },
@@ -96,9 +109,21 @@ export class TokenService {
 
       tokenStorage.setToken(data.accessToken);
       tokenStorage.setRefreshToken(data.refreshToken);
+      // logout revokes by jti, so it has to follow the rotated token
+      if (data.RefreshJTI && typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('jti', data.RefreshJTI);
+        } catch {}
+      }
 
       return data;
     } catch (error) {
+      // Another tab may have refreshed in the meantime (storage is shared): use the pair it stored instead of signing out.
+      const current = tokenStorage.getRefreshToken();
+      const access = tokenStorage.getToken();
+      if (current && current !== refreshToken && access) {
+        return { accessToken: access, refreshToken: current };
+      }
       console.error('[TokenService] Token refresh failed:', error);
       // Clear tokens on refresh failure
       tokenStorage.clearAll();

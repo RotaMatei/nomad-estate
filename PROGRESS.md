@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 17:48 Europe/Bucharest (Claude Code local session — B4 in progress: auth ported)
+- **Last heartbeat:** 2026-10-04 18:01 Europe/Bucharest (Claude Code local session — B4 in progress)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -221,3 +221,8 @@ ode-v20.19.5-win-x64`
   Behaviour changes that the frontend should know about when it switches: a refresh token works once (the axios interceptor already stores
   the new one), sign-up `role` must be INVESTOR or AGENT, repeated wrong passwords return 403 "Account is locked".
   Next in B4: users, agencies/agents, remaining property read routes.
+- **2026-10-04 18:01 (Claude Code, local):** Token refresh made safe for rotation. Frontend `app/lib/auth/tokenService.ts`: one refresh at a
+  time (parallel 401s share the call), the rotated `RefreshJTI` is stored so logout revokes the right token, and a failed refresh first checks
+  whether another tab already stored a new pair before signing out. Rust API: a used refresh token replayed within 10 s is a plain 401; only a
+  later replay revokes every session. Jest 31/31, Rust 23/23.
+  - Dev note: the local PostgreSQL must be started detached (PowerShell `Start-Process pg_ctl …`); started from a tool shell it dies with it.
