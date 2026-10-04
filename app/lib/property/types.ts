@@ -14,7 +14,7 @@ import type {
   OtherFeatureEnum,
   InvestmentGoalTagEnum,
   LocationBenefitTagEnum,
-} from './Enums';
+} from './enums';
 
 export interface PropertyFormData {
   streetAddress?: string;

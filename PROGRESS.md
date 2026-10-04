@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 15:35 Europe/Bucharest (Claude Code local session — A7 done, starting A8 cleanup)
+- **Last heartbeat:** 2026-10-04 15:51 Europe/Bucharest (Claude Code local session — A8 cleanup done, performance pass open)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -48,7 +48,8 @@
 - [x] URL state for every filter (shareable searches), plus `selected` and `area`
 - [x] Verified in a browser (headless + dev pane): list → pin hover, select → fly-to + URL + preview card, cluster click, country filter popover, live theme switch, stable zoom while auto-rotating
 - [ ] Still to verify by hand: pin → list hover scroll, "Search this area" result, Price/Returns/Home popovers and More filters sheet, mobile sheet drag, save/unsave while signed in
-- [ ] Optional MapTiler satellite layer (`NEXT_PUBLIC_MAPTILER_KEY`); remove legacy `propertyDashComponents` + `MagicBento` once nothing imports them
+- [ ] Optional MapTiler satellite layer (`NEXT_PUBLIC_MAPTILER_KEY`)
+- [x] Legacy `propertyDashComponents` + `MagicBento` removed (A8)
 ### A3 Home / landing
 - [x] Hero with live globe + headline + search entry, stats, value props, "choose path" (investor / agency), CTA, footer
 ### A4 Property details
@@ -62,9 +63,10 @@
 ### A7 User profile, 404/sorry page
 - [x] `/user` profile (investor: saved properties; agency: link to dashboard), `app/not-found.tsx`, `/sorry` as a coming-soon page
 ### A8 Cleanup & performance
-- [ ] Remove MUI, Emotion, styled-components, globe.gl, @openglobus/og, three/R3F (if unused), leaflet, d3, gsap, wave-gradient
-- [ ] Lazy-load map chunk, image optimisation (next/image), route-level code splitting, Lighthouse ≥ 90 perf
-- [ ] Update README
+- [x] Remove MUI, Emotion, styled-components, globe.gl, @openglobus/og, three/R3F, leaflet, d3, gsap, wave-gradient, legacy `app/components`, `app/reactDevBits`, `app/hooks`, unused `public/` assets
+- [x] Map chunk is lazy and absent from non-map routes (verified with `scripts/bundle-report.mjs`)
+- [ ] Performance pass: Lighthouse on `/` and `/properties` (not run yet), shrink first-load JS, real image optimisation
+- [x] Update README
 
 ## Plan — Part B: Backend → Rust (see `nomad-estate-database-api/PROGRESS.md`)
 
@@ -163,3 +165,16 @@ ode-v20.19.5-win-x64`
 - **2026-10-04 15:35 (Claude Code, local):** A7 done: `components/account/profile-view.tsx` (`/user`), `components/site/notice-page.tsx` used by
   `app/not-found.tsx` and `/sorry`. Screens reviewed. Every route under `app/(pages)` now renders new components; nothing imports MUI except
   `app/providers.tsx` and the legacy folders. Next: A8 (delete legacy code and dependencies, bundle check, README).
+- **2026-10-04 15:51 (Claude Code, local):** A8 cleanup. Deleted `app/components`, `app/reactDevBits`, `app/GradientText`, `app/hooks`, `app/theme.ts`,
+  unused `app/lib` files and every legacy `public/` asset; removed 25 dependencies (152 packages). `app/lib/property/{types,enums}.ts` keep the
+  two type files `propertyApi.ts` needs. New `components/site/error-boundary.tsx`. ESLint legacy override removed: lint is 0 errors / 6 warnings.
+  `typecheck`, `lint`, `jest` (31 tests), `build` pass; `npm run screens` captured all 12 routes x 2 themes x 2 widths after the cleanup.
+  - `three-geojson/` was a nested git checkout with local modifications: it is untracked from this repo and git-ignored, but **left on disk**
+    (owner decides whether to delete the folder). The Natural Earth source moved to `scripts/data/earth-countries.json` (no longer served).
+  - **Performance, measured but not yet fixed** (`node scripts/bundle-report.mjs`, compressed JS including Next link prefetches): `/login` 547 kB,
+    `/dashboard` 875 kB, `/` and `/properties` 974 kB. Largest chunks: MapLibre 271 kB gz (map routes only), Recharts 119 kB gz, zod 102 kB gz,
+    react-dom 68 kB gz. `optimizePackageImports` for `radix-ui`/`recharts` made no measurable difference. Candidates: `zod/mini` or lighter
+    validation on auth pages, lazy-load Topography and the lightbox, review which Links prefetch. Lighthouse has not been run.
+  - Listing photos use `next/image` with `unoptimized` (the API returns data URIs or arbitrary hosts): real optimisation needs image URLs from B2.
+  - Part A status: A1–A8 implemented. Open items are the unchecked boxes above (MapTiler layer, a few manual A2 checks, performance pass).
+  - Next: performance pass, then Part B. Part B needs the Rust toolchain on this machine (`cargo` is not installed).

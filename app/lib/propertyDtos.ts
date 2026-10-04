@@ -11,7 +11,7 @@ import type {
   OtherFeatureEnum,
   InvestmentGoalTagEnum,
   LocationBenefitTagEnum,
-} from '../components/createPropertyComponents/Enums';
+} from './property/enums';
 
 export interface PictureCreateDto {
   propertyId: string;

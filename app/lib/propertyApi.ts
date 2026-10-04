@@ -1,5 +1,5 @@
 import api from './api';
-import { PropertyFormData } from '../components/createPropertyComponents/types';
+import { PropertyFormData } from './property/types';
 import axios from 'axios';
 import { apiConfig } from '../config/env';
 
@@ -18,7 +18,7 @@ import type {
   OtherFeatureEnum,
   InvestmentGoalTagEnum,
   LocationBenefitTagEnum,
-} from '../components/createPropertyComponents/Enums';
+} from './property/enums';
 import type {
   CoolingSystemCreateDto,
   HeatingSystemCreateDto,

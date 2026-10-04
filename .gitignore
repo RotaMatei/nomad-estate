@@ -43,3 +43,6 @@ next-env.d.ts
 
 # screenshots from scripts/screens.mjs
 /.screens/
+
+# nested checkout of a three.js helper, no longer used by the app
+/three-geojson/

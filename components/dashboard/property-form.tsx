@@ -11,7 +11,7 @@ import * as React from 'react';
 import { useForm, type Path, type UseFormReturn } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import type { PropertyFormData } from '@/app/components/createPropertyComponents/types';
+import type { PropertyFormData } from '@/app/lib/property/types';
 import { createProperty, updateProperty } from '@/app/lib/propertyApi';
 import { INVESTMENT_GOAL_TAGS, LOCATION_BENEFIT_TAGS } from '@/app/enums';
 import { LocationFields } from '@/components/auth/location-fields';

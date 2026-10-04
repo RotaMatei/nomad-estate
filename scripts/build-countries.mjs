@@ -1,9 +1,9 @@
-// Slims public/earth-countries.json (Natural Earth, ~1.5 MB of attributes) down to what the globe needs:
+// Slims scripts/data/earth-countries.json (Natural Earth, ~1.5 MB of attributes) down to what the globe needs:
 // geometry + ISO code + name, coordinates rounded to 3 decimals.  →  public/map/countries.json
 //   node scripts/build-countries.mjs
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 
-const src = JSON.parse(await readFile(new URL('../public/earth-countries.json', import.meta.url), 'utf8'));
+const src = JSON.parse(await readFile(new URL('./data/earth-countries.json', import.meta.url), 'utf8'));
 const round = (c) => (typeof c[0] === 'number' ? [Math.round(c[0] * 1000) / 1000, Math.round(c[1] * 1000) / 1000] : c.map(round));
 const valid = (v) => typeof v === 'string' && /^[A-Z]{2}$/.test(v);
 

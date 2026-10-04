@@ -1,10 +1,9 @@
 import type { Metadata, Viewport } from 'next';
 import '@fontsource-variable/archivo/wdth.css';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import 'leaflet/dist/leaflet.css';
 import './globals.css';
 import Providers from '@/app/providers';
-import { ErrorBoundary } from '@/app/components/ErrorBoundary';
+import { ErrorBoundary } from '@/components/site/error-boundary';
 
 export const metadata: Metadata = {
   title: {
