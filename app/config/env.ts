@@ -3,19 +3,11 @@
  * Validates and exports environment variables for the application
  */
 
-function getEnvVar(key: string, defaultValue?: string): string {
-  const value = process.env[key];
-  if (!value && !defaultValue) {
-    throw new Error(
-      `Missing required environment variable: ${key}. Check .env or .env.example.`,
-    );
-  }
-  return value || defaultValue || '';
-}
-
+// NEXT_PUBLIC_* values are inlined at build time only when read as literal `process.env.NAME`.
+// A dynamic lookup (`process.env[key]`) is always undefined in the browser, which silently fell back to production.
 export const env = {
-  apiUrl: getEnvVar('NEXT_PUBLIC_API_URL', 'https://api.nomadestatehub.com'),
-  aiApiUrl: getEnvVar('NEXT_PUBLIC_AI_API_URL', 'https://ai.nomadestatehub.com'),
+  apiUrl: process.env.NEXT_PUBLIC_API_URL || 'https://api.nomadestatehub.com',
+  aiApiUrl: process.env.NEXT_PUBLIC_AI_API_URL || 'https://ai.nomadestatehub.com',
 } as const;
 
 // Helper to get API URL with /api prefix for database-api

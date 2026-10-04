@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 13:47 Europe/Bucharest (Claude Code local session — A1 build verified, finishing A1 verification scripts)
+- **Last heartbeat:** 2026-10-04 14:37 Europe/Bucharest (Claude Code local session — A2 in progress)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -36,16 +36,18 @@
 - [x] Install Tailwind v4, shadcn/ui (components.json), `next-themes`, `lucide-react`, Motion, TanStack Query, nuqs
 - [x] Design tokens (light + dark) in `app/globals.css`, fonts via @fontsource (no network at build)
 - [x] Build green: `npm run typecheck`, `npm run lint` (ESLint CLI, flat config), `npm run build`; CI workflow runs on `redesign`
-- [ ] `scripts/mock-api.mjs` (fixtures on :4010) + `scripts/screens.mjs` (Playwright, light/dark, 1440 + 390)
+- [x] `scripts/mock-api.mjs` (fixtures on :4010) + `scripts/screens.mjs` (Playwright, light/dark, 1440 + 390)
 - [ ] App shell: new header (glass, theme toggle, auth menu), footer, mobile nav (shadcn Sheet)
 - [x] Typed API client (`lib/api`) kept; add query hooks in `lib/queries/*`
 ### A2 Properties search (flagship)
-- [ ] `components/globe/PropertyGlobe.tsx` — MapLibre globe, atmosphere, auto-spin (pauses on interaction), light/dark styles
-- [ ] GPU pins: GeoJSON source + circle/symbol layers with glow + pulse; clustering
+- [x] `components/globe/property-globe.tsx` — MapLibre globe, atmosphere, auto-spin (pauses on interaction), light/dark styles (`lib/map/style.ts`)
+- [x] GPU pins: GeoJSON source + circle/symbol layers with glow + pulse; clustering
 - [ ] Pin ↔ list sync (hover highlights, click flies to property, preview card)
 - [ ] Filter bar (shadcn Popover/Slider/Command/ToggleGroup): price, yield, score, beds/baths, area, type, investment-goal tags, location-benefit tags, country/city
 - [ ] Results panel: virtualized list/grid, sort, skeletons, empty state; "search as I move the globe"
-- [ ] URL state for every filter (shareable searches)
+- [x] URL state for every filter (shareable searches), plus `selected` and `area`
+- [ ] Verify by hand in a browser: pin ↔ list hover sync, cluster click, "Search this area", live theme switch, filter popovers, mobile sheet drag
+- [ ] Optional MapTiler satellite layer (`NEXT_PUBLIC_MAPTILER_KEY`); remove legacy `propertyDashComponents` + `MagicBento` once nothing imports them
 ### A3 Home / landing
 - [ ] Hero with live globe + headline + search entry, stats, value props, "choose path" (investor / agency), CTA, footer
 ### A4 Property details
@@ -99,3 +101,18 @@ ode-v20.19.5-win-x64`
   - New code fixed: `theme-toggle` (useSyncExternalStore for mounted), `queries.ts` (`useQueries` + `combine`).
   - Nothing has been looked at in a browser yet. Next: `scripts/mock-api.mjs` + `scripts/screens.mjs`, review screenshots of the
     header/tokens in both themes, add the footer, then A2 (`components/globe/PropertyGlobe.tsx`).
+- **2026-10-04 14:37 (Claude Code, local):** A2 first pass is in and builds (`typecheck`, `lint` 0 errors, `build`).
+  - New: `lib/map/style.ts` (light/dark MapLibre style: bundled `public/map/countries.json` below zoom 3.5, OpenFreeMap tiles above,
+    graticule, match-country fill, clustered pins, active pulse), `components/globe/{index,property-globe}.tsx` (lazy, `ssr: false`,
+    auto-spin with 8 s idle resume, reduced-motion aware, lights-on intro, fly-to, destroyed on unmount),
+    `components/properties/{properties-view,filter-bar,results-panel,preview-card,listing-parts}.tsx`, `lib/properties/saved.ts`,
+    `app/(pages)/properties/page.tsx` now renders the new view (legacy MUI components are no longer used by this route).
+  - `scripts/build-countries.mjs` slims `earth-countries.json` (1.5 MB) to `public/map/countries.json` (180 kB).
+  - **Bug fixed:** `app/config/env.ts` read `process.env[key]` dynamically, so `NEXT_PUBLIC_API_URL` was never applied in the browser
+    (always fell back to production). Now uses literal `process.env.NEXT_PUBLIC_*`.
+  - Screenshots (`npm run screens -- --only=properties`) reviewed in both themes, 1440 and 390: globe, pins, clusters, filters chips,
+    selected preview card all render. Flag emoji show as two letters on Windows (no flag glyphs in Segoe UI) — acceptable for now.
+  - Not done yet / not verified: the interactive checks listed under A2, the filter popovers/sheet visuals, legacy `/` `/details` etc.
+    still MUI. Legacy `/properties`-style WebGL pages hang headless screenshots; the script now times out per page instead of blocking.
+  - Local dev: `node scripts/mock-api.mjs` + `.env.development.local` with `NEXT_PUBLIC_API_URL=http://localhost:4010` (git-ignored).
+  - Next: browser-verify A2 interactions, then A3 home (hero reuses `PropertyGlobe` with `interactive={false}`).

@@ -80,3 +80,24 @@ export function toSearchBody(f: SearchFilters, countryNames: (id: number) => str
   for (const k of Object.keys(body)) if (body[k] === undefined) delete body[k];
   return body;
 }
+
+/** Selected listing and the "Search this area" box (west, south, east, north). */
+export function useSelection() {
+  return useQueryStates({ ...selectionParsers, area: parseAsArrayOf(parseAsFloat) }, { history: 'replace' });
+}
+
+export type Area = [west: number, south: number, east: number, north: number];
+
+export function inArea(lat: number | null, lng: number | null, area: number[] | null) {
+  if (!area || area.length !== 4) return true;
+  if (lat == null || lng == null) return false;
+  const [w, s, e, n] = area;
+  if (lat < s || lat > n) return false;
+  // a box that crosses the antimeridian has west > east
+  return w <= e ? lng >= w && lng <= e : lng >= w || lng <= e;
+}
+
+export const flagEmoji = (code: string | null | undefined) =>
+  code && /^[A-Za-z]{2}$/.test(code)
+    ? String.fromCodePoint(...[...code.toUpperCase()].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65))
+    : '';
