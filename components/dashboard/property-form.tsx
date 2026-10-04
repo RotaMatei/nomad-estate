@@ -12,6 +12,8 @@ import { useForm, type Path, type UseFormReturn } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import type { PropertyFormData } from '@/app/lib/property/types';
+import { env } from '@/app/config/env';
+import api from '@/app/lib/api';
 import { createProperty, updateProperty } from '@/app/lib/propertyApi';
 import { INVESTMENT_GOAL_TAGS, LOCATION_BENEFIT_TAGS } from '@/app/enums';
 import { LocationFields } from '@/components/auth/location-fields';
@@ -273,7 +275,14 @@ function PropertyForm({ agencyId, defaults, propertyId }: { agencyId: string; de
     setBusy(true);
     try {
       const payload: PropertyFormData = { ...v, agencyId } as unknown as PropertyFormData;
-      const saved = propertyId ? await updateProperty(propertyId, payload) : await createProperty(payload);
+      // The Rust API saves the property, its photos, features and tags in one transaction and scores it itself;
+      // against Nest the legacy helpers still send the separate requests.
+      const saved =
+        env.apiFlavor === 'rust'
+          ? (await (propertyId ? api.patch(`/property/update-full/${propertyId}`, payload) : api.post('/property/create-full', payload))).data
+          : propertyId
+            ? await updateProperty(propertyId, payload)
+            : await createProperty(payload);
       await Promise.all([
         client.invalidateQueries({ queryKey: ['portfolio'] }),
         client.invalidateQueries({ queryKey: ['property-search'] }),

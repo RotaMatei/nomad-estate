@@ -83,7 +83,7 @@ async function main() {
   await mkdir(OUT, { recursive: true });
 
   // SwiftShader gives headless Chromium a software WebGL context, which MapLibre needs.
-  const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
+  const browser = await chromium.launch({ args: ['--no-proxy-server', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const problems = [];
 
   // First WebGL page under SwiftShader compiles shaders for several seconds: do that once, off the record.

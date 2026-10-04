@@ -29,6 +29,7 @@ npm run dev
 |---|---|
 | `NEXT_PUBLIC_API_URL` | Database API origin. `/api` is appended automatically. Default `https://api.nomadestatehub.com` |
 | `NEXT_PUBLIC_AI_API_URL` | AI API origin. Default `https://ai.nomadestatehub.com` |
+| `NEXT_PUBLIC_API_FLAVOR` | `nest` (default) or `rust`. `rust` uses the joined search and one-request property saves of the Rust API |
 | `NEXT_PUBLIC_IMGBB_KEY` | Optional. Enables photo upload in the property form |
 
 ### Working without the backend

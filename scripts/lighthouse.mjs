@@ -13,6 +13,7 @@ const PORT = 9333;
 const browser = await chromium.launch({
   args: [
     `--remote-debugging-port=${PORT}`,
+    '--no-proxy-server', // localhost only; skips Chromium's proxy auto-detection, which can stall the first request for half a minute
     '--ignore-gpu-blocklist',
     ...(process.env.LH_GL === 'swiftshader' ? ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] : ['--enable-gpu', '--use-angle=d3d11']),
   ],

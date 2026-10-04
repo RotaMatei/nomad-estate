@@ -27,7 +27,7 @@ try {
     if (await fetch(`http://localhost:${PORT}/login`).then((r) => r.ok, () => false)) break;
     await new Promise((r) => setTimeout(r, 500));
   }
-  const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
+  const browser = await chromium.launch({ args: ['--no-proxy-server', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   console.log('route'.padEnd(52), 'JS files', 'JS kB (compressed)', 'maplibre');
   for (const route of ROUTES) {
     const page = await browser.newPage();

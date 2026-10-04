@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 18:07 Europe/Bucharest (Claude Code local session — B4 part 2 done, frontend switch to the Rust endpoints next)
+- **Last heartbeat:** 2026-10-04 18:16 Europe/Bucharest (Claude Code local session — frontend verified end to end on the Rust API)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -231,3 +231,16 @@ ode-v20.19.5-win-x64`
   Rust except Google sign-in. Details in that repo's PROGRESS.md.
   - Next: switch `lib/properties/queries.ts`, `lib/dashboard/queries.ts` and the property form to the new Rust endpoints and run the whole
     frontend against the Rust binary + local Postgres (seed script needed), then the rest of B4.
+- **2026-10-04 18:16 (Claude Code, local):** The redesigned frontend now runs end to end on the Rust API.
+  - `NEXT_PUBLIC_API_FLAVOR=rust` (default `nest`) switches the data layer: `lib/properties/queries.ts` uses `POST /property/search` (one
+    request, no per-city lookups, sorted in SQL) and the property form uses `create-full` / `update-full`. Everything else already used
+    paths that exist in both backends. With `nest` nothing changes, so the branch still works against production.
+  - `scripts/e2e-rust.mjs`: headless run against the Rust binary + seeded local Postgres (`nomad-estate-database-api/rust/tools/seed-dev.mjs`).
+    Passed: search (44 listings), country filter, investor sign-in, save, details with agency card and gallery, inquiry, profile with saved
+    list, agency sign-in, dashboard KPIs and agents, publishing a property through the five-step form with the score computed by the server.
+  - **Cause of the flaky headless runs found:** headless Chromium spent up to 40 s on proxy auto-detection before its first request.
+    `--no-proxy-server` is now passed in `screens.mjs`, `lighthouse.mjs`, `bundle-report.mjs`; first navigation takes ~15 ms.
+  - Known limits of the `rust` flavor: one page of 200 results (the list should page on scroll and the pins should come from
+    `/property/geo`); Google sign-in and per-listing analytics are not ported; seed photos are remote placeholder images.
+  - Next: (1) paged list + `/property/geo` pins in the `rust` flavor, then re-run Lighthouse on `/properties`; (2) rest of B4: view tracking,
+    analytics, mail, Google OAuth, pictures, subscription, schema endpoint + socket; (3) B5 AI API, B6 visualizer, B7 parity suite.
