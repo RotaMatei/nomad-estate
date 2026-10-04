@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 13:30 Europe/Bucharest (interactive session)
+- **Last heartbeat:** 2026-10-04 13:35 Europe/Bucharest (interactive session, paused — owner moving to Claude Code)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -73,4 +73,11 @@
 ## Session log
 
 - **2026-10-04 (interactive):** Audited all repos. Decisions recorded above. Created `redesign` branches,
-  imported local WIP. Starting A1.
+  imported local WIP. Started A1 (NOT yet build-verified — cloud sandbox had no npm registry access):
+  - `package.json`: new deps added with version `latest` → run `npm install`, then pin the resolved versions.
+  - `postcss.config.mjs`, `components.json`, `app/globals.css` (light/dark tokens), `app/layout.tsx`, `app/providers.tsx`
+  - `components/ui/*` (shadcn new-york-v4, copied from shadcn-ui/ui), `components/magicui/*` (theme toggler, number ticker, blur fade, marquee, border beam)
+  - `components/site/{logo,theme-toggle,site-header}.tsx`, `hooks/{use-mobile,use-session}.ts`, `lib/utils.ts`
+  - `lib/properties/{labels,types,normalize,format,filters,queries}.ts` (nuqs URL filters + TanStack Query search)
+  - Next: `npm install`, `npx tsc --noEmit`, `npm run build`, fix errors, then A2 (MapLibre globe).
+  - Backend security note for B2/B4: property create/update/delete routes are `@Public()` in Nest — must require agency auth in Rust.

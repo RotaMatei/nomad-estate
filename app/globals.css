@@ -1,42 +1,251 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/*
+ * Nomad Estate design tokens
+ * Concept: "Earth at night" (dark) / "Day chart" (light).
+ * Listings glow like city lights; the globe is the one bold element.
+ */
+
+@custom-variant dark (&:is(.dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --radius: 0.875rem;
+
+  /* Day chart */
+  --background: #eef2f6;
+  --foreground: #0e1a2e;
+  --card: #ffffff;
+  --card-foreground: #0e1a2e;
+  --popover: #ffffff;
+  --popover-foreground: #0e1a2e;
+  --primary: #f5a524;
+  --primary-foreground: #0e1a2e;
+  --secondary: #dce4ee;
+  --secondary-foreground: #0e1a2e;
+  --muted: #e3e9f0;
+  --muted-foreground: #5a6880;
+  --accent: #e3e9f0;
+  --accent-foreground: #0e1a2e;
+  --destructive: #d6453d;
+  --border: #cfd8e3;
+  --input: #c3cedb;
+  --ring: #c97a06;
+
+  --beacon: #c97a06;
+  --beacon-glow: #f5a524;
+  --atmosphere: #2e86c1;
+  --positive: #1f8a5b;
+  --ocean: #c9d8e6;
+  --land: #f7f9fb;
+  --land-line: #b3c2d3;
+  --glass: rgb(255 255 255 / 0.72);
+  --glass-border: rgb(14 26 46 / 0.08);
+  --shadow-color: 215 40% 20%;
+
+  --chart-1: #c97a06;
+  --chart-2: #2e86c1;
+  --chart-3: #1f8a5b;
+  --chart-4: #7a5cc2;
+  --chart-5: #5a6880;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+.dark {
+  /* Earth at night */
+  --background: #0a1222;
+  --foreground: #e6ecf5;
+  --card: #111c30;
+  --card-foreground: #e6ecf5;
+  --popover: #111c30;
+  --popover-foreground: #e6ecf5;
+  --primary: #ffb547;
+  --primary-foreground: #0a1222;
+  --secondary: #1a2740;
+  --secondary-foreground: #e6ecf5;
+  --muted: #152038;
+  --muted-foreground: #8a98ae;
+  --accent: #1a2740;
+  --accent-foreground: #e6ecf5;
+  --destructive: #ff6b5e;
+  --border: rgb(230 236 245 / 0.09);
+  --input: rgb(230 236 245 / 0.14);
+  --ring: #ffb547;
+
+  --beacon: #ffb547;
+  --beacon-glow: #ffcf7a;
+  --atmosphere: #5ec8e5;
+  --positive: #4fd197;
+  --ocean: #070e1b;
+  --land: #16243c;
+  --land-line: #26395a;
+  --glass: rgb(17 28 48 / 0.72);
+  --glass-border: rgb(230 236 245 / 0.08);
+  --shadow-color: 220 60% 2%;
+
+  --chart-1: #ffb547;
+  --chart-2: #5ec8e5;
+  --chart-3: #4fd197;
+  --chart-4: #a98cf0;
+  --chart-5: #8a98ae;
+}
+
+@theme inline {
+  --font-sans: 'Archivo Variable', 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Archivo Variable', 'Archivo', ui-sans-serif, system-ui, sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-beacon: var(--beacon);
+  --color-beacon-glow: var(--beacon-glow);
+  --color-atmosphere: var(--atmosphere);
+  --color-positive: var(--positive);
+  --color-ocean: var(--ocean);
+  --color-land: var(--land);
+  --color-glass: var(--glass);
+  --color-glass-border: var(--glass-border);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 6px);
+  --radius-2xl: calc(var(--radius) + 12px);
+
+  /* Type scale (classical: 12 14 16 18 21 24 36 48 60 72) */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.3125rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 2.25rem;
+  --text-4xl: 3rem;
+  --text-5xl: 3.75rem;
+  --text-6xl: 4.5rem;
+
+  --animate-marquee: marquee var(--duration) infinite linear;
+  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+  --animate-beacon-pulse: beacon-pulse 2.4s ease-out infinite;
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(calc(-100% - var(--gap))); }
+  }
+  @keyframes marquee-vertical {
+    from { transform: translateY(0); }
+    to { transform: translateY(calc(-100% - var(--gap))); }
+  }
+  @keyframes beacon-pulse {
+    0% { transform: scale(0.6); opacity: 0.9; }
+    100% { transform: scale(2.4); opacity: 0; }
   }
 }
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Montserrat, Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
   html {
-    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
   }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: 'ss01', 'cv11';
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+}
+
+@layer utilities {
+  /* Expanded width, like the lettering on a nautical chart */
+  .font-display {
+    font-family: var(--font-display);
+    font-variation-settings: 'wdth' 125;
+    letter-spacing: -0.015em;
+  }
+  .font-display-wide {
+    font-family: var(--font-display);
+    font-variation-settings: 'wdth' 125;
+    letter-spacing: 0.02em;
+  }
+  .font-condensed {
+    font-variation-settings: 'wdth' 82;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  .glass {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
+    backdrop-filter: blur(18px) saturate(1.4);
+  }
+  .shadow-float {
+    box-shadow:
+      0 1px 2px hsl(var(--shadow-color) / 0.08),
+      0 12px 32px -8px hsl(var(--shadow-color) / 0.22);
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Theme-switch view transition (Magic UI animated theme toggler) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* MapLibre: restyle built-in controls/attribution to match tokens */
+.maplibregl-ctrl-attrib {
+  background: var(--glass) !important;
+  color: var(--muted-foreground) !important;
+  font-size: 10px !important;
+  border-radius: 8px 0 0 0;
+}
+.maplibregl-ctrl-attrib a {
+  color: inherit !important;
+}
+.maplibregl-canvas:focus-visible {
+  outline: none;
 }
