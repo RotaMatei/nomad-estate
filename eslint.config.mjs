@@ -7,7 +7,7 @@ const eslintConfig = [
   ...nextTs,
   prettier,
   {
-    files: ['*.config.js', 'jest.setup.js'],
+    files: ['*.config.js', 'jest.setup.js', 'scripts/**/*.cjs'],
     rules: { '@typescript-eslint/no-require-imports': 'off' },
   },
   {
