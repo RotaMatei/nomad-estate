@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 17:39 Europe/Bucharest (Claude Code local session — B2 + B3 done, B4 next)
+- **Last heartbeat:** 2026-10-04 17:48 Europe/Bucharest (Claude Code local session — B4 in progress: auth ported)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -216,3 +216,8 @@ ode-v20.19.5-win-x64`
   - Frontend follow-up (not started): point `lib/properties/queries.ts` at `/property/search` + `/property/geo` and the property form at
     `create-full` / `update-full` once the Rust API is the one deployed; that removes the per-city lookups and should fix `/properties` LCP.
   - Next: B4 (tokens/auth/users first).
+- **2026-10-04 17:48 (Claude Code, local):** B4 part 1 done in `nomad-estate-database-api/rust`: register, login, logout, change-password,
+  confirm and refresh for users and agencies; 23 tests pass, including compatibility with password hashes and tokens created by Nest.
+  Behaviour changes that the frontend should know about when it switches: a refresh token works once (the axios interceptor already stores
+  the new one), sign-up `role` must be INVESTOR or AGENT, repeated wrong passwords return 403 "Account is locked".
+  Next in B4: users, agencies/agents, remaining property read routes.
