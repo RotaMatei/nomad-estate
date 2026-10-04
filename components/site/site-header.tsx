@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { QuietLink as Link } from '@/components/site/quiet-link';
 import { usePathname, useRouter } from 'next/navigation';
 import * as React from 'react';
 import { Globe2, LayoutDashboard, LogOut, Menu, UserRound } from 'lucide-react';

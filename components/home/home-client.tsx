@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { ArrowUpRight, Search } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import Link from 'next/link';
+import { QuietLink as Link } from '@/components/site/quiet-link';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
 import api from '@/app/lib/api';
@@ -28,16 +28,19 @@ export function HomeHero() {
 
   return (
     <section className="relative isolate flex min-h-[100svh] flex-col overflow-hidden">
-      {/* The one bold element: the live globe, bleeding off the right edge on desktop and the bottom on phones. */}
+      {/* The box has a fixed height on purpose: the globe is drawn in perspective from a camera whose distance follows
+          the height of the box, so a fixed height keeps the still frame and the live globe identical on every screen. */}
+      {/* The one bold element: the globe (a still frame first, live once the page is quiet), bleeding off the right edge on desktop and the bottom on phones. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-[-16%] -z-10 h-[44%] lg:inset-x-auto lg:top-[-6%] lg:right-[-14%] lg:bottom-[-6%] lg:h-auto lg:w-[72%]"
+        className="pointer-events-none absolute inset-x-0 bottom-[-130px] -z-10 h-[372px] lg:inset-x-auto lg:top-1/2 lg:right-[-14%] lg:bottom-auto lg:h-[1010px] lg:w-[72%] lg:-translate-y-1/2"
       >
         <PropertyGlobe
           listings={pins}
           theme={resolvedTheme === 'dark' ? 'dark' : 'light'}
           interactive={false}
           transparent
+          poster
           initialView={{ center: [14, 24], zoom: 2.35, zoomMobile: 0.9 }}
         />
       </div>

@@ -1,5 +1,5 @@
 import { Building2, TrendingUp } from 'lucide-react';
-import Link from 'next/link';
+import { QuietLink as Link } from '@/components/site/quiet-link';
 import { FeaturedMarkets, HomeHero, HomeStatsBand } from '@/components/home/home-client';
 import { SiteFooter } from '@/components/site/site-footer';
 import { SiteHeader } from '@/components/site/site-header';

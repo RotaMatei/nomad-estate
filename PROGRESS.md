@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 22:36 Europe/Bucharest (Google sign-in + switch prepared; deploy and Nest removal await owner)
+- **Last heartbeat:** 2026-10-04 00:43 Europe/Bucharest (Lighthouse work on home pushed; /properties needs an owner decision)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -303,3 +303,22 @@ ode-v20.19.5-win-x64`
   (`NEXT_PUBLIC_API_FLAVOR=nest` keeps the Nest behaviour and is REQUIRED for any deploy whose `NEXT_PUBLIC_API_URL` still points at Nest;
   the mock API and `npm run screens` set it themselves). The browser side of Google sign-in is not exercised end to end: it needs real Google
   credentials.
+- **2026-10-05 00:43 (Claude Code, local):** Part A leftover, Lighthouse (mobile). Cause found by profiling: MapLibre compiles 12 WebGL
+  programs on the main thread at start (about 430ms on this machine, counted four times over by Lighthouse's CPU throttle); bundle size was not
+  the problem. Done:
+  - Home: the hero globe starts as a still frame (`public/globe/*.webp`, 12 to 36 KiB, made by `scripts/globe-posters.mjs`) and the live globe
+    takes over in the same position when the visitor interacts or the page has been idle for 5s (`hooks/use-when-quiet.ts`). The hero box now
+    has a fixed height, because the globe's perspective follows the height of its box. Link prefetching on the home page waits for the same
+    moment (`components/site/quiet-link.tsx`).
+  - Map style: 3 fewer programs (fills not antialiased, the pin layers share one circle program, no count labels on the backdrop globe).
+  - `scripts/lighthouse.mjs`: `LH_THROTTLING=devtools` for real throttling, retries, IPv4 by default, and it now kills its browser.
+  Scores, same build, two runs each. Home: 85 with Lighthouse's default simulated throttling (was 61 to 67), 96 with real throttling
+  (TBT 1,900ms -> 40 to 140ms; in simulated mode LCP is estimated at 4.3s because on localhost every script arrives before the first paint,
+  with real throttling LCP = FCP = 2.0s). `/properties`: 48 to 54 in both modes (TBT about 900ms, LCP 5 to 7s). **The >= 90 target is met on
+  the home page only under real throttling and is not met on `/properties`.** There the map is the first screen, so it cannot wait behind a
+  still without hiding the product; getting further needs an owner decision (see the summary to the owner). Accessibility and best practices
+  stay at 100.
+  - Not re-verified after the last two edits beyond one browser check per theme: the still/live alignment comparison (0.00% difference on
+    phones, under 1% on desktop when measured). A `<picture>` version of the still was tried and dropped.
+  - Tooling lesson: killing GPU headless browsers with `process.exit()` left about 20 processes Windows could not end, and until they cleared
+    every browser run hung at load. The scripts now use `launchServer()` + `kill()`.

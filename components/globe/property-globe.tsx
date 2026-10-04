@@ -35,6 +35,8 @@ export interface PropertyGlobeProps {
   initialView?: { center: [number, number]; zoom: number; zoomMobile?: number };
   /** No backdrop of its own: the globe floats on whatever is behind it. */
   transparent?: boolean;
+  /** Fires once, when the map has drawn its first complete frame. */
+  onReady?: () => void;
   className?: string;
   ref?: React.Ref<PropertyGlobeHandle>;
 }
@@ -77,6 +79,7 @@ export default function PropertyGlobe({
   interactive = true,
   initialView,
   transparent,
+  onReady,
   className,
   ref,
 }: PropertyGlobeProps) {
@@ -86,9 +89,9 @@ export default function PropertyGlobe({
   const [failed, setFailed] = React.useState(false);
 
   // Latest props for the long-lived map event handlers.
-  const latest = React.useRef({ listings, onHover, onSelect, onUserMove, theme });
+  const latest = React.useRef({ listings, onHover, onSelect, onUserMove, onReady, theme });
   React.useEffect(() => {
-    latest.current = { listings, onHover, onSelect, onUserMove, theme };
+    latest.current = { listings, onHover, onSelect, onUserMove, onReady, theme };
   });
   const lastInteraction = React.useRef(0);
   const userGesture = React.useRef(false);
@@ -103,7 +106,8 @@ export default function PropertyGlobe({
     try {
       map = new maplibregl.Map({
         container,
-        style: buildStyle(latest.current.theme),
+        // the backdrop globe has no use for cluster counts
+        style: buildStyle(latest.current.theme, { counts: interactive }),
         center: initialView?.center ?? [18, 28],
         zoom:
           container.clientWidth < 640
@@ -147,7 +151,14 @@ export default function PropertyGlobe({
     for (const ev of ['mousedown', 'touchstart', 'wheel'] as const) map.on(ev, gesture);
     container.addEventListener('keydown', gesture);
 
-    map.on('load', () => setReady(true));
+    // The globe holds still while it fades in (700ms), so it lines up with whatever still image it replaces.
+    let settled = false;
+    let settle = 0;
+    map.on('load', () => {
+      setReady(true);
+      latest.current.onReady?.();
+      settle = window.setTimeout(() => (settled = true), 800);
+    });
     map.on('error', (e) => {
       // Tile or glyph hiccups are not fatal: the bundled country layer keeps the globe usable.
       if (process.env.NODE_ENV !== 'production') console.warn('[globe]', e.error?.message ?? e);
@@ -218,7 +229,7 @@ export default function PropertyGlobe({
       raf = requestAnimationFrame(spin);
       const dt = Math.min(now - prev, 100);
       prev = now;
-      if (reduced || document.hidden) return;
+      if (reduced || document.hidden || !settled) return;
       if (now - lastInteraction.current < IDLE_BEFORE_SPIN_MS && lastInteraction.current !== 0)
         return;
       if (map.getZoom() > SPIN_MAX_ZOOM || map.isMoving()) return;
@@ -232,6 +243,7 @@ export default function PropertyGlobe({
 
     return () => {
       cancelAnimationFrame(raf);
+      window.clearTimeout(settle);
       resize.disconnect();
       container.removeEventListener('keydown', touch);
       container.removeEventListener('pointerenter', touch);
@@ -290,7 +302,7 @@ export default function PropertyGlobe({
     appliedTheme.current = theme;
     // setStyle diffs in place (no `style.load`) and resets the GeoJSON sources to the empty data in the style,
     // so put the pins back straight away; `styledata` covers the fallback where MapLibre reloads the whole style.
-    map.setStyle(buildStyle(theme));
+    map.setStyle(buildStyle(theme, { counts: interactive }));
     syncData();
     map.once('styledata', syncData);
   }, [theme, ready, syncData]);
@@ -424,7 +436,7 @@ export default function PropertyGlobe({
           ready ? 'opacity-100' : 'opacity-0',
         )}
       />
-      {failed && (
+      {failed && interactive && (
         <p className="absolute inset-0 flex items-center justify-center p-8 text-center text-sm text-muted-foreground">
           The map needs WebGL, which this browser has switched off. You can still browse the results
           list.

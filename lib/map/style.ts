@@ -68,9 +68,18 @@ const GRATICULE: GeoJSON.FeatureCollection<GeoJSON.LineString> = {
   ].map((coordinates) => ({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates } })),
 };
 
-export function buildStyle(theme: MapTheme): StyleSpecification {
+/**
+ * Every distinct combination of layer type and data-driven paint properties is a WebGL program that MapLibre compiles
+ * on the main thread the first time it draws (30 to 90ms each on Windows). The style keeps that number down:
+ * fills are not antialiased (the border line layer draws their edges, and it saves the outline program), the three
+ * pin layers share one circle program because their radius is the same kind of expression, and the count labels,
+ * which need the text program and a glyph download, can be left out.
+ */
+export function buildStyle(theme: MapTheme, { counts = true }: { counts?: boolean } = {}): StyleSpecification {
   const c = MAP_PALETTE[theme];
   const dark = theme === 'dark';
+  /** A per-feature radius written as a zoom expression, so every pin layer uses the same circle program. */
+  const radius = (perFeature: ExpressionSpecification): ExpressionSpecification => ['interpolate', ['linear'], ['zoom'], 0, perFeature, 24, perFeature];
 
   const detail: LayerSpecification[] = [
     {
@@ -207,7 +216,7 @@ export function buildStyle(theme: MapTheme): StyleSpecification {
         type: 'fill',
         source: SOURCE.countries,
         maxzoom: FADE_END,
-        paint: { 'fill-color': c.land, 'fill-opacity': fadeOut },
+        paint: { 'fill-color': c.land, 'fill-opacity': fadeOut, 'fill-antialias': false },
       },
       ...detail.slice(0, 1),
       {
@@ -218,6 +227,7 @@ export function buildStyle(theme: MapTheme): StyleSpecification {
         filter: ['in', ['get', 'code'], ['literal', []]],
         paint: {
           'fill-color': c.match,
+          'fill-antialias': false,
           'fill-opacity': ['interpolate', ['linear'], ['zoom'], 0, dark ? 0.16 : 0.2, 4, dark ? 0.1 : 0.14, 6, 0],
         },
       },
@@ -239,7 +249,7 @@ export function buildStyle(theme: MapTheme): StyleSpecification {
           'circle-color': c.beaconGlow,
           'circle-blur': 1,
           'circle-opacity': dark ? 0.55 : 0.4,
-          'circle-radius': ['case', ['has', 'point_count'], ['step', ['get', 'point_count'], 26, 10, 34, 40, 44], 13],
+          'circle-radius': radius(['case', ['has', 'point_count'], ['step', ['get', 'point_count'], 26, 10, 34, 40, 44], 13]),
           'circle-pitch-alignment': 'map',
         },
       },
@@ -250,7 +260,8 @@ export function buildStyle(theme: MapTheme): StyleSpecification {
         filter: ['!', ['has', 'point_count']],
         paint: {
           'circle-color': c.beacon,
-          'circle-radius': ['interpolate', ['linear'], ['zoom'], 0, 3.2, 6, 4.5, 14, 7],
+          // `d` is on every listing; multiplying it by zero only makes this a per-feature expression like the other two
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 0, ['+', 3.2, ['*', 0, ['coalesce', ['get', 'd'], 0]]], 6, 4.5, 14, 7],
           'circle-stroke-color': dark ? c.beaconInk : '#ffffff',
           'circle-stroke-width': 1.25,
         },
@@ -262,24 +273,28 @@ export function buildStyle(theme: MapTheme): StyleSpecification {
         filter: ['has', 'point_count'],
         paint: {
           'circle-color': c.beacon,
-          'circle-radius': ['step', ['get', 'point_count'], 13, 10, 17, 40, 22],
+          'circle-radius': radius(['step', ['get', 'point_count'], 13, 10, 17, 40, 22]),
           'circle-stroke-color': dark ? c.beaconInk : '#ffffff',
           'circle-stroke-width': 1.5,
         },
       },
-      {
-        id: LAYER.clusterCount,
-        type: 'symbol',
-        source: SOURCE.listings,
-        filter: ['has', 'point_count'],
-        layout: {
-          'text-field': ['get', 'point_count_abbreviated'],
-          'text-font': ['Noto Sans Bold'],
-          'text-size': 12,
-          'text-allow-overlap': true,
-        },
-        paint: { 'text-color': dark ? c.beaconInk : '#ffffff' },
-      },
+      ...(counts
+        ? [
+            {
+              id: LAYER.clusterCount,
+              type: 'symbol',
+              source: SOURCE.listings,
+              filter: ['has', 'point_count'],
+              layout: {
+                'text-field': ['get', 'point_count_abbreviated'],
+                'text-font': ['Noto Sans Bold'],
+                'text-size': 12,
+                'text-allow-overlap': true,
+              },
+              paint: { 'text-color': dark ? c.beaconInk : '#ffffff' },
+            } satisfies LayerSpecification,
+          ]
+        : []),
       {
         id: LAYER.activePulse,
         type: 'circle',

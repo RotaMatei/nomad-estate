@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { QuietLink as Link } from '@/components/site/quiet-link';
 import { Logo } from './logo';
 
 const LINKS = [
