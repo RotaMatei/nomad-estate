@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 18:01 Europe/Bucharest (Claude Code local session — B4 in progress)
+- **Last heartbeat:** 2026-10-04 18:07 Europe/Bucharest (Claude Code local session — B4 part 2 done, frontend switch to the Rust endpoints next)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -226,3 +226,8 @@ ode-v20.19.5-win-x64`
   whether another tab already stored a new pair before signing out. Rust API: a used refresh token replayed within 10 s is a plain 401; only a
   later replay revokes every session. Jest 31/31, Rust 23/23.
   - Dev note: the local PostgreSQL must be started detached (PowerShell `Start-Process pg_ctl …`); started from a tool shell it dies with it.
+- **2026-10-04 18:07 (Claude Code, local):** B4 part 2 done in `nomad-estate-database-api/rust`: locations, listing details / portfolio / delete,
+  users, agencies, agents, saved properties and inquiries (22 routes). 27 Rust tests pass. Every route the redesigned frontend calls now exists in
+  Rust except Google sign-in. Details in that repo's PROGRESS.md.
+  - Next: switch `lib/properties/queries.ts`, `lib/dashboard/queries.ts` and the property form to the new Rust endpoints and run the whole
+    frontend against the Rust binary + local Postgres (seed script needed), then the rest of B4.
