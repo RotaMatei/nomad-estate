@@ -5,6 +5,8 @@ import { BadgeCheck, Heart, UserRound } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
+import { toast } from 'sonner';
+import { env } from '@/app/config/env';
 import { getAgencyDetails, getUserProfile } from '@/app/lib/propertyApi';
 import { ListingFacts, ListingImage, ListingPlace, SaveButton } from '@/components/properties/listing-parts';
 import { SiteFooter } from '@/components/site/site-footer';
@@ -13,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSession, type Session } from '@/hooks/use-session';
+import { errorStatus, sendVerificationEmail } from '@/lib/auth/session';
 import { formatPrice, formatYield } from '@/lib/properties/format';
 import { useListingsByIds } from '@/lib/properties/queries';
 import { useSavedProperties } from '@/lib/properties/saved';
@@ -50,6 +53,34 @@ export function ProfileView() {
   );
 }
 
+function ConfirmEmailButton() {
+  const [state, setState] = React.useState<'idle' | 'sending' | 'sent'>('idle');
+  if (state === 'sent') return <p className="mt-1 text-xs text-muted-foreground">Confirmation link sent. Check your inbox.</p>;
+  return (
+    <Button
+      variant="link"
+      size="sm"
+      className="h-auto p-0 text-xs"
+      disabled={state === 'sending'}
+      onClick={async () => {
+        setState('sending');
+        try {
+          await sendVerificationEmail();
+          setState('sent');
+        } catch (e) {
+          const status = errorStatus(e);
+          setState(status === 429 ? 'sent' : 'idle');
+          if (status === 400) toast.success('This address is already confirmed.');
+          else if (status === 503) toast.error('Confirmation emails are not available right now.');
+          else if (status !== 429) toast.error('The email was not sent. Try again in a moment.');
+        }
+      }}
+    >
+      {state === 'sending' ? 'Sending the link' : 'Not confirmed yet. Send a confirmation link'}
+    </Button>
+  );
+}
+
 function Profile({ session }: { session: Session }) {
   const router = useRouter();
   const { signOut } = useSession();
@@ -59,10 +90,10 @@ function Profile({ session }: { session: Session }) {
     queryFn: async () => {
       if (session.isAgency) {
         const a = await getAgencyDetails(session.id);
-        return a ? { name: a.companyName, email: a.email, phone: a.phoneNumber, extra: a.establishedYear ? `Founded in ${a.establishedYear}` : undefined, verified: false } : null;
+        return a ? { name: a.companyName, email: a.email, phone: a.phoneNumber, extra: a.establishedYear ? `Founded in ${a.establishedYear}` : undefined, verified: (a as { emailVerified?: boolean }).emailVerified } : null;
       }
       const u = await getUserProfile(session.id);
-      return u ? { name: [u.firstName, u.lastName].filter(Boolean).join(' '), email: u.email, phone: u.phoneNumber, extra: undefined, verified: !!u.emailVerified } : null;
+      return u ? { name: [u.firstName, u.lastName].filter(Boolean).join(' '), email: u.email, phone: u.phoneNumber, extra: undefined, verified: u.emailVerified as boolean | undefined } : null;
     },
   });
   const name = profile.data?.name || session.name || 'Your account';
@@ -94,6 +125,7 @@ function Profile({ session }: { session: Session }) {
                         </>
                       )}
                     </dd>
+                    {env.apiFlavor === 'rust' && profile.data.verified === false && <ConfirmEmailButton />}
                   </div>
                 )}
                 {profile.data.phone && (

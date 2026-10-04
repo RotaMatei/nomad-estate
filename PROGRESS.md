@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 21:45 Europe/Bucharest (B4 part 6 (schema + socket) pushed; next mail)
+- **Last heartbeat:** 2026-10-04 22:02 Europe/Bucharest (B4 part 7 (mail + reset flow) pushed; Google OAuth awaits owner decision; next B5)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -272,3 +272,12 @@ ode-v20.19.5-win-x64`
 - **2026-10-04 21:45 (Claude Code, local):** B4 part 6: `GET /api/schema` and the Socket.IO `schema:updated` broadcast (socketioxide, EIO 3 and 4,
   websocket and polling). Checked with the visualizer's own socket.io-client on all transports. The visualizer needs no code change (B6 compatibility).
   New variable `SCHEMA_PATH`. 39 Rust tests pass. Left in B4: mail, Google OAuth.
+- **2026-10-04 22:02 (Claude Code, local):** B4 part 7: mail module (lettre over SMTP, same `SMTP_*` variables). `send-verify` now needs a session
+  and mails only the caller's own address; `send-reset` mails only existing accounts with one answer for all; real tokens instead of the Nest
+  placeholders; new `POST /auth/reset-password` (single-use, 30 min); contact form with attachment stored in `Email`/`EmailAttachment`; email-log
+  deletes limited to the owner or an admin. New variables `MAIL_FROM`, `SUPPORT_EMAIL`, `FRONTEND_URL`. Checked against a local SMTP sink.
+  41 Rust tests pass (the earlier "39" was 38). Left in B4: Google OAuth only (needs an owner decision on the flow).
+  Frontend: `/forgot-password` and `/reset-password` pages, a "Forgot your password?" link on sign-in and a "send a confirmation link" button on
+  the profile (all three only on the Rust flavor, since Nest mails placeholder links). `scripts/e2e-mail.mjs` drives the whole flow in a browser
+  against the Rust API and a local SMTP sink: passes.
+  **Owner decisions pending:** (1) Google OAuth flow for the Rust API; (2) real `SUPPORT_EMAIL`, `MAIL_FROM` and SMTP credentials for production.

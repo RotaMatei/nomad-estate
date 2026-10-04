@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { AuthShell } from './auth-shell';
+import { env } from '@/app/config/env';
 import api from '@/app/lib/api';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -121,6 +122,13 @@ export function LoginForm() {
                   <Input type="password" autoComplete="current-password" {...field} />
                 </FormControl>
                 <FormMessage />
+                {env.apiFlavor === 'rust' && (
+                  <p className="text-sm">
+                    <Link href="/forgot-password" className="text-muted-foreground underline underline-offset-4 hover:text-foreground">
+                      Forgot your password?
+                    </Link>
+                  </p>
+                )}
               </FormItem>
             )}
           />

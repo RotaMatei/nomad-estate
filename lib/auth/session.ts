@@ -82,6 +82,20 @@ export async function confirmEmail(token: string): Promise<AccountKind> {
   }
 }
 
+/** The API answers the same way whether or not the address has an account. Rust API only: Nest mails a placeholder link. */
+export async function requestPasswordReset(email: string) {
+  await api.post('/mail/send-reset', { email });
+}
+
+export async function resetPassword(token: string, newPassword: string) {
+  await api.post('/auth/reset-password', { token, newPassword });
+}
+
+/** Mails the signed-in account a new confirmation link. */
+export async function sendVerificationEmail() {
+  await api.post('/mail/send-verify', {});
+}
+
 export async function googleSignInUrl() {
   const { data } = await api.get<{ url: string }>('/oauth/user/google');
   return data.url;
