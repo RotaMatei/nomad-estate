@@ -75,8 +75,10 @@ const between = (lo, hi) => lo + rand() * (hi - lo);
 const uuid = (n) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 const emojiU = (code) => [...code].map((c) => `U+${(0x1f1e6 + c.charCodeAt(0) - 65).toString(16).toUpperCase()}`).join(' ');
 
-// Placeholder photo: an inline SVG so screenshots never depend on the network.
-function picture(seed, label) {
+// Placeholder photos are served by this mock (GET /api/img/<seed>.svg), so listings carry a URL like the real API.
+const picture = (seed, label) => `http://localhost:${PORT}/api/img/${seed}.svg?label=${encodeURIComponent(label)}`;
+
+function pictureSvg(seed, label) {
   const hue = (seed * 47) % 360;
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">` +
@@ -87,7 +89,7 @@ function picture(seed, label) {
     `<rect x="${190 + (seed % 5) * 30}" y="300" width="70" height="130" fill="hsl(${hue} 30% 38%)"/>` +
     `<text x="24" y="580" font-family="sans-serif" font-size="22" fill="hsl(${hue} 20% 88%)">${label}</text>` +
     `</svg>`;
-  return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
+  return svg;
 }
 
 const countries = MARKETS.map(([name, code, currency, currencySymbol], i) => ({
@@ -289,6 +291,10 @@ const server = http.createServer(async (req, res) => {
   let m;
 
   if (method === 'GET' && path === '/health') return send(200, { ok: true });
+  if (method === 'GET' && (m = path.match(/^\/img\/(\d+)\.svg$/))) {
+    res.writeHead(200, { 'Content-Type': 'image/svg+xml', 'Cache-Control': 'public, max-age=86400', 'Access-Control-Allow-Origin': '*' });
+    return res.end(pictureSvg(Number(m[1]), (url.searchParams.get('label') || '').replace(/[<>&"]/g, '')));
+  }
   // Mock-only: a ready-made session for scripts/screens.mjs ("user" or "agency")
   if (method === 'GET' && (m = path.match(/^\/__demo-session\/(user|agency)$/))) {
     const account = DEMO_ACCOUNTS.find((a) => a.kind === m[1]);

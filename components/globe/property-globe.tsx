@@ -41,7 +41,7 @@ export interface PropertyGlobeProps {
 const IDLE_BEFORE_SPIN_MS = 8000;
 const SPIN_DEG_PER_SEC = 2.4;
 const SPIN_MAX_ZOOM = 3.2;
-const SWITCH_ON_MS = 1700;
+const SWITCH_ON_MS = 1200;
 
 const prefersReducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -285,44 +285,33 @@ export default function PropertyGlobe({
   }, [theme, ready, syncData]);
 
   // ── first load: pins switch on like city lights at dusk ─────────────────────
+  // Paint transitions run on the GPU: one setPaintProperty per layer, no per-frame JavaScript and no re-bucketing.
   React.useEffect(() => {
     const map = mapRef.current;
     if (!map || !ready || litUp.current || collection.features.length === 0) return;
     litUp.current = true;
     if (prefersReducedMotion()) return;
-    const targets: [string, 'circle-opacity', number][] = [
-      [LAYER.pin, 'circle-opacity', 1],
-      [LAYER.pinGlow, 'circle-opacity', theme === 'dark' ? 0.55 : 0.4],
-      [LAYER.cluster, 'circle-opacity', 1],
+    // [layer, property, final value, delay]: the glow comes up first, then the lights, then the counts
+    const stages: [string, string, number, number][] = [
+      [LAYER.pinGlow, 'circle-opacity', theme === 'dark' ? 0.55 : 0.4, 0],
+      [LAYER.pin, 'circle-opacity', 1, 250],
+      [LAYER.pin, 'circle-stroke-opacity', 1, 250],
+      [LAYER.cluster, 'circle-opacity', 1, 250],
+      [LAYER.cluster, 'circle-stroke-opacity', 1, 250],
+      [LAYER.clusterCount, 'text-opacity', 1, 700],
     ];
-    const start = performance.now();
-    let raf = 0;
-    const frame = (now: number) => {
-      const t = Math.min((now - start) / SWITCH_ON_MS, 1);
-      for (const [layer, prop, full] of targets) {
+    for (const [layer, prop] of stages) {
+      if (!map.getLayer(layer)) continue;
+      map.setPaintProperty(layer, `${prop}-transition`, { duration: 0, delay: 0 });
+      map.setPaintProperty(layer, prop, 0);
+    }
+    const raf = requestAnimationFrame(() => {
+      for (const [layer, prop, value, delay] of stages) {
         if (!map.getLayer(layer)) continue;
-        // each point has its own delay `d` (0..1); it ramps up over the last 30% of the timeline
-        map.setPaintProperty(
-          layer,
-          prop,
-          t >= 1
-            ? full
-            : [
-                '*',
-                full,
-                ['max', 0, ['min', 1, ['/', ['-', t * 1.3, ['coalesce', ['get', 'd'], 0.5]], 0.3]]],
-              ],
-        );
+        map.setPaintProperty(layer, `${prop}-transition`, { duration: SWITCH_ON_MS, delay });
+        map.setPaintProperty(layer, prop, value);
       }
-      if (map.getLayer(LAYER.clusterCount))
-        map.setPaintProperty(
-          LAYER.clusterCount,
-          'text-opacity',
-          t >= 1 ? 1 : Math.max(0, t * 2 - 1),
-        );
-      if (t < 1) raf = requestAnimationFrame(frame);
-    };
-    raf = requestAnimationFrame(frame);
+    });
     return () => cancelAnimationFrame(raf);
     // runs once, the first time there is something to light up
     // eslint-disable-next-line react-hooks/exhaustive-deps

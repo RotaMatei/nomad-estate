@@ -62,7 +62,7 @@ function sortListings(list: Listing[], sort: SortKey) {
   }
 }
 
-export function usePropertySearch(filters: SearchFilters) {
+export function usePropertySearch(filters: SearchFilters, options?: { enabled?: boolean }) {
   const countries = useCountries();
   const countryById = React.useMemo(
     () => new Map((countries.data ?? []).map((c) => [c.id, c] as const)),
@@ -74,6 +74,7 @@ export function usePropertySearch(filters: SearchFilters) {
 
   const search = useQuery({
     queryKey: ['property-search', serverFilters.q, body],
+    enabled: options?.enabled ?? true,
     queryFn: async ({ signal }) => {
       if (serverFilters.q.trim()) {
         const { data } = await api.get<ApiPropertySummary[]>('/property/retrieve-search-by-name', {
@@ -108,6 +109,7 @@ export function usePropertySearch(filters: SearchFilters) {
     listings,
     countries: countries.data ?? [],
     isLoading: search.isLoading,
+    isPending: search.isPending,
     isFetching: search.isFetching,
     isError: search.isError,
     refetch: search.refetch,

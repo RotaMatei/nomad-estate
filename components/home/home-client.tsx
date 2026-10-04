@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import * as React from 'react';
 import api from '@/app/lib/api';
 import { PropertyGlobe } from '@/components/globe';
+import { useAfterFirstPaint } from '@/hooks/use-after-first-paint';
 import { NumberTicker } from '@/components/magicui/number-ticker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +18,7 @@ import { formatPrice, formatYield } from '@/lib/properties/format';
 import { usePropertySearch } from '@/lib/properties/queries';
 
 /** The catalogue is fetched once and shared (TanStack Query cache) by the hero globe, featured markets and /properties. */
-const useCatalogue = () => usePropertySearch(DEFAULT_FILTERS);
+const useCatalogue = () => usePropertySearch(DEFAULT_FILTERS, { enabled: useAfterFirstPaint() });
 
 export function HomeHero() {
   const router = useRouter();
@@ -127,7 +128,7 @@ export function HomeStatsBand() {
 }
 
 export function FeaturedMarkets() {
-  const { listings, isLoading, isError } = useCatalogue();
+  const { listings, isLoading, isPending, isError } = useCatalogue();
 
   const markets = React.useMemo(() => {
     const by = new Map<number, { id: number; name: string; code: string | null; count: number; yieldSum: number; from: number }>();
@@ -142,7 +143,7 @@ export function FeaturedMarkets() {
     return [...by.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name)).slice(0, 6);
   }, [listings]);
 
-  if (isError || (!isLoading && markets.length === 0)) return null;
+  if (isError || (!isLoading && !isPending && markets.length === 0)) return null;
 
   return (
     <section aria-labelledby="markets-title" className="mx-auto max-w-[1200px] px-5 py-20 sm:px-8 lg:py-28">
@@ -159,7 +160,7 @@ export function FeaturedMarkets() {
       </div>
 
       <ol className="mt-10 divide-y border-y">
-        {isLoading
+        {isLoading || isPending
           ? Array.from({ length: 6 }, (_, i) => (
               <li key={i} className="py-5">
                 <Skeleton className="h-7 w-full" />

@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 16:42 Europe/Bucharest (Claude Code local session — performance pass)
+- **Last heartbeat:** 2026-10-04 16:56 Europe/Bucharest (Claude Code local session — performance pass done, Part B inventory next)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -65,7 +65,7 @@
 ### A8 Cleanup & performance
 - [x] Remove MUI, Emotion, styled-components, globe.gl, @openglobus/og, three/R3F, leaflet, d3, gsap, wave-gradient, legacy `app/components`, `app/reactDevBits`, `app/hooks`, unused `public/` assets
 - [x] Map chunk is lazy and absent from non-map routes (verified with `scripts/bundle-report.mjs`)
-- [ ] Performance pass: Lighthouse on `/` and `/properties` (not run yet), shrink first-load JS, real image optimisation
+- [ ] Performance: Lighthouse mobile is 59 on `/` and 56 on `/properties` (target 90, **not met**); accessibility and best practices are 100 on both. See the session log for what is left
 - [x] Update README
 
 ## Plan — Part B: Backend → Rust (see `nomad-estate-database-api/PROGRESS.md`)
@@ -178,3 +178,17 @@ ode-v20.19.5-win-x64`
   - Listing photos use `next/image` with `unoptimized` (the API returns data URIs or arbitrary hosts): real optimisation needs image URLs from B2.
   - Part A status: A1–A8 implemented. Open items are the unchecked boxes above (MapTiler layer, a few manual A2 checks, performance pass).
   - Next: performance pass, then Part B. Part B needs the Rust toolchain on this machine (`cargo` is not installed).
+- **2026-10-04 16:56 (Claude Code, local):** Performance pass. Tooling: `node scripts/lighthouse.mjs` (Lighthouse through Playwright's headless
+  Chromium on the real GPU; `LH_GL=swiftshader` for machines without one), `scripts/lighthouse-summary.cjs`, reports in `.lighthouse/` (git-ignored).
+  - Baseline (mobile, simulated slow 4G + 4x CPU): `/` 45, `/properties` 49. After the changes: **`/` 59, `/properties` 56**; accessibility 100,
+    best practices 100, CLS 0. FCP 1.5 s / 1.1 s, LCP 3.7 s / 6.9 s, TBT 2.5 s / 0.76 s.
+  - Done: the globe (MapLibre chunk) and the home catalogue request start after first paint (`hooks/use-after-first-paint.ts`); `/properties` has a
+    server-rendered shell instead of a blank Suspense fallback; the pins "lights on" moment uses GPU paint transitions instead of per-frame
+    data-driven `setPaintProperty`; the mock API serves photos as URLs like the real API (search payload 832 kB → 380 kB).
+  - **Why 90 is not reached yet, in order of impact:** (1) `/properties` LCP is the first result row, which waits for the whole catalogue: needs the
+    paginated `/property/search` + lightweight `/property/geo` from B2; (2) MapLibre costs 4–5 s of main-thread time under 4x CPU throttling
+    (several 250–550 ms tasks on the home hero) — not yet profiled, candidates are a smaller hero canvas on phones and pausing the spin off-screen;
+    (3) first-load JS: zod 102 kB gz and Recharts 119 kB gz are on routes that could lazy-load them.
+  - Headless Chromium on this machine can use the GPU with `--use-angle=d3d11 --enable-gpu`; the full `chrome.exe` fails to spawn, so Lighthouse
+    is driven through Playwright's headless shell. `npm run screens` still uses SwiftShader as specified.
+  - Next: B1 endpoint inventory (`nomad-estate-database-api/rust/ENDPOINTS.md`). B3 onwards needs `cargo`, which is not installed here.
