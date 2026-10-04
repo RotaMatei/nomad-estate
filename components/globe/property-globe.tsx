@@ -245,8 +245,11 @@ export default function PropertyGlobe({
     const map = mapRef.current;
     if (!map || !ready || appliedTheme.current === theme) return;
     appliedTheme.current = theme;
+    // setStyle diffs in place (no `style.load`) and resets the GeoJSON sources to the empty data in the style,
+    // so put the pins back straight away; `styledata` covers the fallback where MapLibre reloads the whole style.
     map.setStyle(buildStyle(theme));
-    map.once('style.load', syncData);
+    syncData();
+    map.once('styledata', syncData);
   }, [theme, ready, syncData]);
 
   // ── first load: pins switch on like city lights at dusk ─────────────────────

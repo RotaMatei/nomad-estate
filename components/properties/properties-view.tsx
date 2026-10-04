@@ -12,6 +12,7 @@ import { SiteHeader } from '@/components/site/site-header';
 import { Button } from '@/components/ui/button';
 import { countActiveFilters, inArea, useSearchFilters, useSelection } from '@/lib/properties/filters';
 import { usePropertySearch } from '@/lib/properties/queries';
+import { cn } from '@/lib/utils';
 
 const RAIL_WIDTH = 392;
 const SNAP_PEEK = '132px';
@@ -56,7 +57,8 @@ export function PropertiesView() {
     setPendingArea(null);
   }, [setSelection]);
 
-  const hasFilters = countActiveFilters(filters) > 0 || !!filters.q || !!area;
+  const hasChips = countActiveFilters(filters) > 0 || !!area;
+  const hasFilters = hasChips || !!filters.q;
   const results = (
     <ResultsPanel
       listings={listings}
@@ -112,7 +114,7 @@ export function PropertiesView() {
         />
 
         {pendingArea && (
-          <div className="pointer-events-none absolute inset-x-0 top-[176px] z-20 flex justify-center lg:top-[192px] lg:pl-[412px]">
+          <div className="pointer-events-none absolute inset-x-0 top-[176px] z-20 flex justify-center lg:top-[148px] lg:pl-[412px]">
             <Button
               variant="secondary"
               className="glass shadow-float pointer-events-auto h-9 rounded-full px-4"
@@ -127,7 +129,13 @@ export function PropertiesView() {
         )}
 
         {isDesktop ? (
-          <aside className="glass shadow-float absolute top-[192px] bottom-5 left-5 z-20 overflow-hidden rounded-xl" style={{ width: RAIL_WIDTH }}>
+          <aside
+            className={cn(
+              'glass shadow-float absolute bottom-5 left-5 z-20 overflow-hidden rounded-xl transition-[top] duration-200',
+              hasChips ? 'top-[184px]' : 'top-[148px]',
+            )}
+            style={{ width: RAIL_WIDTH }}
+          >
             {results}
           </aside>
         ) : (

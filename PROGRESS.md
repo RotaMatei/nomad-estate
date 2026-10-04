@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 14:37 Europe/Bucharest (Claude Code local session — A2 in progress)
+- **Last heartbeat:** 2026-10-04 14:42 Europe/Bucharest (Claude Code local session — A2 verification)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -46,7 +46,8 @@
 - [ ] Filter bar (shadcn Popover/Slider/Command/ToggleGroup): price, yield, score, beds/baths, area, type, investment-goal tags, location-benefit tags, country/city
 - [ ] Results panel: virtualized list/grid, sort, skeletons, empty state; "search as I move the globe"
 - [x] URL state for every filter (shareable searches), plus `selected` and `area`
-- [ ] Verify by hand in a browser: pin ↔ list hover sync, cluster click, "Search this area", live theme switch, filter popovers, mobile sheet drag
+- [x] Verified in a browser (headless + dev pane): list → pin hover, select → fly-to + URL + preview card, cluster click, country filter popover, live theme switch, stable zoom while auto-rotating
+- [ ] Still to verify by hand: pin → list hover scroll, "Search this area" result, Price/Returns/Home popovers and More filters sheet, mobile sheet drag, save/unsave while signed in
 - [ ] Optional MapTiler satellite layer (`NEXT_PUBLIC_MAPTILER_KEY`); remove legacy `propertyDashComponents` + `MagicBento` once nothing imports them
 ### A3 Home / landing
 - [ ] Hero with live globe + headline + search entry, stats, value props, "choose path" (investor / agency), CTA, footer
@@ -116,3 +117,6 @@ ode-v20.19.5-win-x64`
     still MUI. Legacy `/properties`-style WebGL pages hang headless screenshots; the script now times out per page instead of blocking.
   - Local dev: `node scripts/mock-api.mjs` + `.env.development.local` with `NEXT_PUBLIC_API_URL=http://localhost:4010` (git-ignored).
   - Next: browser-verify A2 interactions, then A3 home (hero reuses `PropertyGlobe` with `interactive={false}`).
+- **2026-10-04 14:42 (Claude Code, local):** Fixed: pins and country highlights disappeared after a theme switch (`setStyle` diff resets
+  GeoJSON sources) — data is now re-applied after every style change. Results rail sits closer to the filter bar when no chips are shown.
+  Local preview config lives in `.claude/launch.json` (untracked, machine-specific Node path).
