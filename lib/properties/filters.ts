@@ -101,3 +101,19 @@ export const flagEmoji = (code: string | null | undefined) =>
   code && /^[A-Za-z]{2}$/.test(code)
     ? String.fromCodePoint(...[...code.toUpperCase()].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65))
     : '';
+
+/** "No filters": used where the full catalogue is shown outside the search page (home hero, featured markets). */
+export const DEFAULT_FILTERS: SearchFilters = {
+  q: '',
+  countries: [],
+  cities: [],
+  type: null,
+  minPrice: null,
+  maxPrice: null,
+  minYield: null,
+  minScore: null,
+  beds: null,
+  goals: [],
+  benefits: [],
+  sort: 'relevance',
+};

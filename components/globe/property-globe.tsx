@@ -1,6 +1,10 @@
 'use client';
 
-import maplibregl, { type GeoJSONSource, type MapGeoJSONFeature, type MapMouseEvent } from 'maplibre-gl';
+import maplibregl, {
+  type GeoJSONSource,
+  type MapGeoJSONFeature,
+  type MapMouseEvent,
+} from 'maplibre-gl';
 import * as React from 'react';
 import { LAYER, MAP_PALETTE, SOURCE, buildStyle, type MapTheme } from '@/lib/map/style';
 import type { Listing } from '@/lib/properties/types';
@@ -27,7 +31,9 @@ export interface PropertyGlobeProps {
   padding?: { top?: number; right?: number; bottom?: number; left?: number };
   /** `false` turns the globe into a backdrop: no pin interaction, no scroll zoom. */
   interactive?: boolean;
-  initialView?: { center: [number, number]; zoom: number };
+  initialView?: { center: [number, number]; zoom: number; zoomMobile?: number };
+  /** No backdrop of its own: the globe floats on whatever is behind it. */
+  transparent?: boolean;
   className?: string;
   ref?: React.Ref<PropertyGlobeHandle>;
 }
@@ -69,6 +75,7 @@ export default function PropertyGlobe({
   padding,
   interactive = true,
   initialView,
+  transparent,
   className,
   ref,
 }: PropertyGlobeProps) {
@@ -96,7 +103,10 @@ export default function PropertyGlobe({
         container,
         style: buildStyle(latest.current.theme),
         center: initialView?.center ?? [18, 28],
-        zoom: initialView?.zoom ?? (container.clientWidth < 640 ? 1 : 2),
+        zoom:
+          container.clientWidth < 640
+            ? (initialView?.zoomMobile ?? initialView?.zoom ?? 1)
+            : (initialView?.zoom ?? 2),
         minZoom: 0.4,
         maxZoom: 18,
         attributionControl: false,
@@ -113,7 +123,8 @@ export default function PropertyGlobe({
       return;
     }
     mapRef.current = map;
-    if (process.env.NODE_ENV !== 'production') (window as unknown as { __globe?: maplibregl.Map }).__globe = map;
+    if (process.env.NODE_ENV !== 'production')
+      (window as unknown as { __globe?: maplibregl.Map }).__globe = map;
     map.touchZoomRotate.disableRotation();
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
     if (!interactive) map.scrollZoom.disable();
@@ -121,7 +132,8 @@ export default function PropertyGlobe({
     const touch = () => {
       lastInteraction.current = performance.now();
     };
-    for (const ev of ['mousedown', 'touchstart', 'wheel', 'dragstart', 'zoomstart'] as const) map.on(ev, touch);
+    for (const ev of ['mousedown', 'touchstart', 'wheel', 'dragstart', 'zoomstart'] as const)
+      map.on(ev, touch);
     container.addEventListener('keydown', touch);
     container.addEventListener('pointerenter', touch);
 
@@ -135,7 +147,10 @@ export default function PropertyGlobe({
       // `originalEvent` is only set for moves the user made with pointer, wheel or keyboard.
       if (!(e as { originalEvent?: unknown }).originalEvent) return;
       const b = map.getBounds();
-      latest.current.onUserMove?.([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], map.getZoom());
+      latest.current.onUserMove?.(
+        [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()],
+        map.getZoom(),
+      );
     });
 
     if (interactive) {
@@ -171,8 +186,14 @@ export default function PropertyGlobe({
         const [lng, lat] = (f.geometry as GeoJSON.Point).coordinates as [number, number];
         if (f.properties.cluster) {
           const source = map.getSource<GeoJSONSource>(SOURCE.listings);
-          const zoom = await source?.getClusterExpansionZoom(f.properties.cluster_id).catch(() => null);
-          map.easeTo({ center: [lng, lat], zoom: Math.min((zoom ?? map.getZoom() + 2) + 0.4, 15), duration: 700 });
+          const zoom = await source
+            ?.getClusterExpansionZoom(f.properties.cluster_id)
+            .catch(() => null);
+          map.easeTo({
+            center: [lng, lat],
+            zoom: Math.min((zoom ?? map.getZoom() + 2) + 0.4, 15),
+            duration: 700,
+          });
           return;
         }
         latest.current.onSelect?.(String(f.properties.id));
@@ -188,7 +209,8 @@ export default function PropertyGlobe({
       const dt = Math.min(now - prev, 100);
       prev = now;
       if (reduced || document.hidden) return;
-      if (now - lastInteraction.current < IDLE_BEFORE_SPIN_MS && lastInteraction.current !== 0) return;
+      if (now - lastInteraction.current < IDLE_BEFORE_SPIN_MS && lastInteraction.current !== 0)
+        return;
       if (map.getZoom() > SPIN_MAX_ZOOM || map.isMoving()) return;
       const c = map.getCenter();
       map.jumpTo({ center: [c.lng + (SPIN_DEG_PER_SEC * dt) / 1000, c.lat] });
@@ -213,7 +235,10 @@ export default function PropertyGlobe({
   // ── data → sources ──────────────────────────────────────────────────────────
   const collection = React.useMemo(() => toFeatureCollection(listings), [listings]);
   const matchCodes = React.useMemo(
-    () => Array.from(new Set(listings.map((l) => l.countryCode).filter((c): c is string => !!c))).sort(),
+    () =>
+      Array.from(
+        new Set(listings.map((l) => l.countryCode).filter((c): c is string => !!c)),
+      ).sort(),
     [listings],
   );
   const activeListing = React.useMemo(() => {
@@ -229,10 +254,17 @@ export default function PropertyGlobe({
     map.getSource<GeoJSONSource>(SOURCE.active)?.setData({
       type: 'FeatureCollection',
       features: activeListing
-        ? [{ type: 'Feature', geometry: { type: 'Point', coordinates: [activeListing.lng!, activeListing.lat!] }, properties: {} }]
+        ? [
+            {
+              type: 'Feature',
+              geometry: { type: 'Point', coordinates: [activeListing.lng!, activeListing.lat!] },
+              properties: {},
+            },
+          ]
         : [],
     });
-    if (map.getLayer(LAYER.matchFill)) map.setFilter(LAYER.matchFill, ['in', ['get', 'code'], ['literal', matchCodes]]);
+    if (map.getLayer(LAYER.matchFill))
+      map.setFilter(LAYER.matchFill, ['in', ['get', 'code'], ['literal', matchCodes]]);
   }, [collection, activeListing, matchCodes]);
 
   React.useEffect(() => {
@@ -273,10 +305,21 @@ export default function PropertyGlobe({
         map.setPaintProperty(
           layer,
           prop,
-          t >= 1 ? full : ['*', full, ['max', 0, ['min', 1, ['/', ['-', t * 1.3, ['coalesce', ['get', 'd'], 0.5]], 0.3]]]],
+          t >= 1
+            ? full
+            : [
+                '*',
+                full,
+                ['max', 0, ['min', 1, ['/', ['-', t * 1.3, ['coalesce', ['get', 'd'], 0.5]], 0.3]]],
+              ],
         );
       }
-      if (map.getLayer(LAYER.clusterCount)) map.setPaintProperty(LAYER.clusterCount, 'text-opacity', t >= 1 ? 1 : Math.max(0, t * 2 - 1));
+      if (map.getLayer(LAYER.clusterCount))
+        map.setPaintProperty(
+          LAYER.clusterCount,
+          'text-opacity',
+          t >= 1 ? 1 : Math.max(0, t * 2 - 1),
+        );
       if (t < 1) raf = requestAnimationFrame(frame);
     };
     raf = requestAnimationFrame(frame);
@@ -308,7 +351,10 @@ export default function PropertyGlobe({
   React.useEffect(() => {
     const map = mapRef.current;
     if (!map || !ready) return;
-    map.easeTo({ padding: { top, right, bottom, left }, duration: prefersReducedMotion() ? 0 : 500 });
+    map.easeTo({
+      padding: { top, right, bottom, left },
+      duration: prefersReducedMotion() ? 0 : 500,
+    });
   }, [ready, top, right, bottom, left]);
 
   // ── fly to the selected listing ─────────────────────────────────────────────
@@ -338,7 +384,11 @@ export default function PropertyGlobe({
         lastInteraction.current = performance.now();
         const map = mapRef.current;
         if (!map) return;
-        map.flyTo({ center: map.getCenter(), zoom: map.getContainer().clientWidth < 640 ? 1 : 2, essential: true });
+        map.flyTo({
+          center: map.getCenter(),
+          zoom: map.getContainer().clientWidth < 640 ? 1 : 2,
+          essential: true,
+        });
       },
       getBounds: () => {
         const b = mapRef.current?.getBounds();
@@ -353,8 +403,9 @@ export default function PropertyGlobe({
     <div
       className={cn('relative size-full overflow-hidden', className)}
       style={{
-        background:
-          theme === 'dark'
+        background: transparent
+          ? undefined
+          : theme === 'dark'
             ? `radial-gradient(120% 90% at 50% 40%, #0d1830 0%, ${space} 62%)`
             : `radial-gradient(120% 90% at 50% 40%, #f9fbfd 0%, ${space} 62%)`,
       }}
@@ -362,12 +413,20 @@ export default function PropertyGlobe({
       <div
         ref={containerRef}
         role="region"
-        aria-label={interactive ? 'Map of matching properties. Use the results list to browse them with the keyboard.' : 'Globe'}
-        className={cn('size-full transition-opacity duration-700', ready ? 'opacity-100' : 'opacity-0')}
+        aria-label={
+          interactive
+            ? 'Map of matching properties. Use the results list to browse them with the keyboard.'
+            : 'Globe'
+        }
+        className={cn(
+          'size-full transition-opacity duration-700',
+          ready ? 'opacity-100' : 'opacity-0',
+        )}
       />
       {failed && (
         <p className="absolute inset-0 flex items-center justify-center p-8 text-center text-sm text-muted-foreground">
-          The map needs WebGL, which this browser has switched off. You can still browse the results list.
+          The map needs WebGL, which this browser has switched off. You can still browse the results
+          list.
         </p>
       )}
     </div>

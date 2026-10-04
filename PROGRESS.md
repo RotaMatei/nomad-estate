@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 14:42 Europe/Bucharest (Claude Code local session — A2 verification)
+- **Last heartbeat:** 2026-10-04 15:05 Europe/Bucharest (Claude Code local session — A3 done, starting A4)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -37,7 +37,7 @@
 - [x] Design tokens (light + dark) in `app/globals.css`, fonts via @fontsource (no network at build)
 - [x] Build green: `npm run typecheck`, `npm run lint` (ESLint CLI, flat config), `npm run build`; CI workflow runs on `redesign`
 - [x] `scripts/mock-api.mjs` (fixtures on :4010) + `scripts/screens.mjs` (Playwright, light/dark, 1440 + 390)
-- [ ] App shell: new header (glass, theme toggle, auth menu), footer, mobile nav (shadcn Sheet)
+- [x] App shell: new header (glass, theme toggle, auth menu), footer, mobile nav (shadcn Sheet)
 - [x] Typed API client (`lib/api`) kept; add query hooks in `lib/queries/*`
 ### A2 Properties search (flagship)
 - [x] `components/globe/property-globe.tsx` — MapLibre globe, atmosphere, auto-spin (pauses on interaction), light/dark styles (`lib/map/style.ts`)
@@ -50,7 +50,7 @@
 - [ ] Still to verify by hand: pin → list hover scroll, "Search this area" result, Price/Returns/Home popovers and More filters sheet, mobile sheet drag, save/unsave while signed in
 - [ ] Optional MapTiler satellite layer (`NEXT_PUBLIC_MAPTILER_KEY`); remove legacy `propertyDashComponents` + `MagicBento` once nothing imports them
 ### A3 Home / landing
-- [ ] Hero with live globe + headline + search entry, stats, value props, "choose path" (investor / agency), CTA, footer
+- [x] Hero with live globe + headline + search entry, stats, value props, "choose path" (investor / agency), CTA, footer
 ### A4 Property details
 - [ ] Gallery (lightbox), key metrics, investment panel (yield, score, price/m²), features, map, agency card, inquiry form, save
 ### A5 Auth
@@ -120,3 +120,7 @@ ode-v20.19.5-win-x64`
 - **2026-10-04 14:42 (Claude Code, local):** Fixed: pins and country highlights disappeared after a theme switch (`setStyle` diff resets
   GeoJSON sources) — data is now re-applied after every style change. Results rail sits closer to the filter bar when no chips are shown.
   Local preview config lives in `.claude/launch.json` (untracked, machine-specific Node path).
+- **2026-10-04 15:05 (Claude Code, local):** A3 home done: `app/(pages)/(home)/page.tsx` (server component), `components/home/home-client.tsx`
+  (hero with non-interactive `PropertyGlobe`, search → `/properties?q=`, stats band from `/property/stats-home` with NumberTicker,
+  featured markets computed from the catalogue), `components/site/site-footer.tsx`. Screens reviewed light/dark, 1440/390.
+  Legacy `app/components/homeComponents/*` is now unused by `/` (delete in A8). Next: A4 `/details/[id]`.

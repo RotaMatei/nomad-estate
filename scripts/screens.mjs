@@ -118,7 +118,17 @@ async function main() {
         }
         try {
           await page.waitForTimeout(1500); // map tiles, fonts, images
-          await page.screenshot({ path: path.join(OUT, `${tag}.png`), timeout: 20000 });
+          // scroll through once so in-view animations (counters, fades) have run before the full-page capture
+          await page.evaluate(async () => {
+            for (let y = 0; y < document.body.scrollHeight; y += 600) {
+              window.scrollTo(0, y);
+              await new Promise((r) => setTimeout(r, 120));
+            }
+            window.scrollTo(0, 0);
+          });
+          await page.waitForTimeout(1200);
+          // the globe page is a fixed full-viewport app; every other route is a scrolling document
+          await page.screenshot({ path: path.join(OUT, `${tag}.png`), timeout: 20000, fullPage: !name.startsWith('properties') });
           console.log(`captured ${tag}`);
         } catch (e) {
           problems.push(`${tag}: screenshot failed: ${e.message.split('\n')[0]}`);
