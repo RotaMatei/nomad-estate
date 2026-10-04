@@ -259,6 +259,15 @@ function session(a) {
   return { accessToken, refreshToken: accessToken, RefreshJTI: 'mock-jti', sub: a.id, firstName: a.firstName, lastName: a.lastName };
 }
 
+const people = [["Ioana", "Marin"], ["Tomas", "Novak"], ["Leila", "Haddad"], ["Marco", "Bianchi"], ["Sofia", "Almeida"], ["Daniel", "Okafor"]].map(([firstName, lastName], i) => ({
+  id: uuid(800 + i),
+  firstName,
+  lastName,
+  email: (firstName + "." + lastName).toLowerCase() + "@nomad.test",
+  phoneNumber: "+40 712 000 10" + i,
+}));
+const agents = people.slice(0, 2).map((user, i) => ({ id: uuid(600 + i), userId: user.id, agencyId: uuid(900), user }));
+
 const saved = new Map(); // userId → Set(propertyId), in memory only
 
 const server = http.createServer(async (req, res) => {
@@ -280,6 +289,11 @@ const server = http.createServer(async (req, res) => {
   let m;
 
   if (method === 'GET' && path === '/health') return send(200, { ok: true });
+  // Mock-only: a ready-made session for scripts/screens.mjs ("user" or "agency")
+  if (method === 'GET' && (m = path.match(/^\/__demo-session\/(user|agency)$/))) {
+    const account = DEMO_ACCOUNTS.find((a) => a.kind === m[1]);
+    return send(200, { ...session(account), role: m[1] === 'agency' ? 'AGENCY' : 'INVESTOR' });
+  }
   if (method === 'GET' && path === '/property/stats-home')
     return send(200, { countries: new Set(properties.map((p) => p.countryId)).size, properties: properties.length, partners: agencies.length });
   if (path === '/property/retrieve-search' && (method === 'POST' || method === 'GET')) {
@@ -321,6 +335,54 @@ const server = http.createServer(async (req, res) => {
     saved.get(m[1])?.delete(m[2]);
     return send(200, { ok: true });
   }
+
+  // Agency dashboard fixtures (in memory)
+  if (method === "GET" && (m = path.match(/^[/]agent[/]retrieve[/]agents-for-agency[/](.+)$/))) return send(200, agents.filter((a) => a.agencyId === m[1]));
+  if (method === "POST" && path === "/agent/create") {
+    const { userId, agencyId } = await readBody(req);
+    const user = people.find((u) => u.id === userId);
+    if (!user) return send(404, { statusCode: 404, message: "User not found" });
+    agents.push({ id: uuid(600 + agents.length), userId, agencyId, user });
+    return send(201, { ok: true });
+  }
+  if (method === "DELETE" && (m = path.match(/^[/]agent[/]delete[/]([^/]+)[/](.+)$/))) {
+    const i = agents.findIndex((a) => a.userId === m[1] && a.agencyId === m[2]);
+    if (i >= 0) agents.splice(i, 1);
+    return send(200, { ok: true });
+  }
+  if (method === "GET" && (m = path.match(/^[/]user[/]search[/](.+)$/))) {
+    const q = decodeURIComponent(m[1]).toLowerCase();
+    return send(200, people.filter((u) => (u.firstName + " " + u.lastName).toLowerCase().includes(q)));
+  }
+  if (method === "DELETE" && (m = path.match(/^[/]property[/]delete-property[/](.+)$/))) {
+    const i = properties.findIndex((p) => p.id === m[1]);
+    if (i >= 0) properties.splice(i, 1);
+    byId.delete(m[1]);
+    return send(200, { ok: true });
+  }
+  if (method === "POST" && path === "/property/create") {
+    const body = await readBody(req);
+    const id = uuid(5000 + properties.length);
+    const created = { ...body, id, price: String(body.price), yield: String(body.yield ?? 0), score: 60, createdAt: new Date().toISOString(), propertyPictures: [], propertyInvestmentGoalTags: [], propertyLocationBenefitTags: [] };
+    properties.push(created);
+    byId.set(id, created);
+    return send(201, created);
+  }
+  if (method === "PATCH" && (m = path.match(/^[/]property[/]update[/](.+)$/))) {
+    const p = byId.get(m[1]);
+    if (!p) return send(404, { statusCode: 404, message: "Property not found" });
+    Object.assign(p, await readBody(req));
+    return send(200, p);
+  }
+  if (method === "POST" && path === "/property/picture/create") {
+    const body = await readBody(req);
+    const p = byId.get(body.propertyId);
+    if (p) p.propertyPictures.push({ id: uuid(9000 + p.propertyPictures.length), ...body });
+    return send(201, body);
+  }
+  if (method === "POST" && (m = path.match(/^[/]property[/]create-score[/](.+)$/))) return send(201, 72);
+  // remaining property sub-resources (features, tags, score update, picture delete) are accepted and ignored
+  if (/^[/]property[/]/.test(path) && ["POST", "PATCH", "DELETE"].includes(method)) return send(method === "POST" ? 201 : 200, { ok: true });
 
   // Auth fixtures. Demo sign-ins (any other email is rejected): see DEMO_ACCOUNTS at the top of this block.
   if (method === 'POST' && (m = path.match(/^\/auth\/(user|agency)\/login$/))) {

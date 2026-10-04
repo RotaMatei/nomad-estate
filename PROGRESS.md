@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 16:00 Europe/Bucharest (Claude Code local session — A5 done, starting A6)
+- **Last heartbeat:** 2026-10-04 15:33 Europe/Bucharest (Claude Code local session — A6 agency side done, on investor profile / A7)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -56,8 +56,8 @@
 ### A5 Auth
 - [x] Login, register (investor + agency multi-step), verify, change password, logout
 ### A6 Dashboards
-- [ ] Agency dashboard: metrics, charts (Recharts restyled), listings table, agents manager
-- [ ] Create / edit property — multi-step form (react-hook-form + zod)
+- [x] Agency dashboard: metrics, charts (Recharts restyled), listings table, agents manager
+- [x] Create / edit property — multi-step form (react-hook-form + zod)
 - [ ] Investor dashboard / saved properties
 ### A7 User profile, 404/sorry page
 ### A8 Cleanup & performance
@@ -144,3 +144,18 @@ ode-v20.19.5-win-x64`
     which is exchanged at `/oauth/user/google/callback`. That only works if the backend `redirectUri` points at the frontend `/login`,
     and the Nest callback currently returns the Google profile, not tokens. Needs a decision in B4 (owner).
   - Next: A6 dashboards (`/dashboard` agency KPIs, listings table, agents, create/edit property; investor saved list).
+- **2026-10-04 15:33 (Claude Code, local):** A6 agency side done. (Heartbeat times in the three entries above were estimates that ran ahead of the
+  clock; from here on they are read from the system clock.)
+  - `lib/dashboard/queries.ts`, `components/dashboard/dashboard-view.tsx` (KPI tiles, shadcn `chart` + Recharts bars, TanStack Table v8 with sort,
+    filter, pagination, delete confirm via `alert-dialog`, agents manager), `components/dashboard/property-form.tsx` (5-step create/edit on the
+    React Bits Stepper; submits through the existing `createProperty` / `updateProperty` in `app/lib/propertyApi.ts`).
+    Routes: `/dashboard`, `/dashboard/properties/new`, `/dashboard/properties/[id]/edit`.
+  - Headless end-to-end check against the mock: sort, filter, add agent, create a property through all five steps, land on its details page,
+    reopen it in the edit form with values prefilled. Not exercised: saving an edit, deleting a property, removing an agent, file upload.
+  - **Security finding:** `app/components/createPropertyComponents/ImageUploadSection.tsx` has a hard-coded ImgBB API key in client code (and in git
+    history). The new form reads `NEXT_PUBLIC_IMGBB_KEY` instead and falls back to pasted image links when it is not set. Owner: rotate that key;
+    move uploads server-side in B4.
+  - `@tanstack/react-table` is pinned to v8 (npm `latest` is v9 with a different API). shadcn CLI refreshed `button.tsx` and `card.tsx`.
+  - Screenshot tooling: fixture sessions are stored after a first navigation (Playwright init scripts that touched localStorage hung navigation).
+  - Per-listing analytics (views, CTR, leads) are not on the dashboard yet: the current API needs one call per property per metric (B2/B4).
+  - Next: investor `/user` profile with saved properties, `/sorry` + 404 (A7), then A8 cleanup.

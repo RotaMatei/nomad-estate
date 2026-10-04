@@ -28,7 +28,8 @@ const ROUTES = [
   ['login', '/login'],
   ['register', '/register'],
   ['register-agency', '/register?as=agency'],
-  ['dashboard', '/dashboard'],
+  ['dashboard', '/dashboard', 'agency'],
+  ['property-new', '/dashboard/properties/new', 'agency'],
 ];
 const VIEWPORTS = [
   ['desktop', { width: 1440, height: 900 }],
@@ -105,9 +106,23 @@ async function main() {
         } catch {}
       }, theme);
 
-      for (const [name, route] of routes) {
+      for (const [name, route, signedInAs] of routes) {
         const page = await context.newPage();
         const tag = `${name}.${viewportName}.${theme}`;
+        if (signedInAs) {
+          // Routes behind a login get a fixture session from the mock API, stored the way the app stores it.
+          const s = await (await fetch(`http://localhost:${API_PORT}/api/__demo-session/${signedInAs}`)).json();
+          // localStorage belongs to the origin, so open any page of the app first, then store the session
+          await page.goto(`http://localhost:${WEB_PORT}/verify`, { waitUntil: 'commit' }).catch(() => {});
+          await page.evaluate((session) => {
+            localStorage.setItem('token', session.accessToken);
+            localStorage.setItem('refreshToken', session.refreshToken);
+            localStorage.setItem('userId', session.sub);
+            localStorage.setItem('user', `${session.firstName} ${session.lastName}`);
+            localStorage.setItem('role', session.role);
+            localStorage.setItem('jti', session.RefreshJTI);
+          }, s);
+        }
         page.on('pageerror', (e) => problems.push(`${tag}: ${e.message}`));
         page.on('console', (m) => {
           if (m.type() === 'error') problems.push(`${tag}: console: ${m.text().slice(0, 200)}`);
