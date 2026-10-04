@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 22:11 Europe/Bucharest (B5 (AI API port) pushed; next B6 visualizer, B7 parity)
+- **Last heartbeat:** 2026-10-04 22:16 Europe/Bucharest (B6 (visualizer) pushed; next B7 parity suite)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -76,7 +76,7 @@
 - [x] B3 Rust service skeleton (Axum, SQLx, config, tracing, errors, JWT auth, CORS, compression, rate limit, OpenAPI)
 - [x] B4 Port modules (auth/tokens/users/agencies/agents → properties → analytics → mail/inquiry/subscription): 177 of 179 Nest routes. Open: Google OAuth (2 routes, owner decision on the flow). Stripe subscription is commented out in Nest, nothing to port.
 - [x] B5 AI API (`nomad-estate-ai-api`) port to Rust (`rust/` in that repo)
-- [ ] B6 Schema visualizer: keep `prisma/schema.prisma` as schema documentation/migrations source, or switch to SQL introspection
+- [x] B6 Schema visualizer: keeps `prisma/schema.prisma` as the schema documentation, served by the Rust API; restyled to the app tokens
 - [ ] B7 Parity tests, switch frontend to Rust API, decommission Nest
 
 ## Session log
@@ -285,3 +285,6 @@ ode-v20.19.5-win-x64`
   `GET /api/country-market-data/all` with the Nest response shapes, plus `/api/health` and an OpenAPI document. Run side by side with the Nest
   app on one local database: identical except two deliberate fixes (countries without a score come last, not first; ties ordered by id).
   5 tests pass. Dockerfile written but not built (no Docker here). Next: B6 visualizer, then the B7 parity suite.
+- **2026-10-04 22:16 (Claude Code, local):** B6 done: the schema visualizer runs unchanged against the Rust API (schema load, socket, live reload
+  on file change, checked in a browser) and is restyled to the app tokens with light and dark themes. Decision: `prisma/schema.prisma` stays the
+  schema documentation; no SQL introspection. Next: B7 parity suite (Nest vs Rust on one local database), then the switch needs owner approval.
