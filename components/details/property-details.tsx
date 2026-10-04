@@ -23,6 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { useSession } from '@/hooks/use-session';
+import { errorStatus } from '@/lib/auth/session';
 import { CONTACT_METHODS, CONTACT_METHOD_LABEL, humanize, sendInquiry, usePropertyDetails, type PropertyDetails } from '@/lib/properties/details';
 import { DEFAULT_FILTERS } from '@/lib/properties/filters';
 import { formatArea, formatCoords, formatPrice, formatYield } from '@/lib/properties/format';
@@ -31,7 +32,7 @@ import { usePropertySearch } from '@/lib/properties/queries';
 
 export function PropertyDetailsView({ id }: { id: string }) {
   const { data, isLoading, isError, error, refetch } = usePropertyDetails(id);
-  const notFound = (error as { response?: { status?: number } } | null)?.response?.status === 404;
+  const notFound = errorStatus(error) === 404;
 
   return (
     <>
@@ -337,7 +338,7 @@ function AgencyCard({ details, agencyName }: { details: PropertyDetails; agencyN
       setSent(true);
       toast.success('Inquiry sent to the agency');
     } catch (e) {
-      const status = (e as { response?: { status?: number } }).response?.status;
+      const status = errorStatus(e);
       toast.error(status === 409 ? 'You already sent an inquiry for this property. The agency will reply to that one.' : 'The inquiry was not sent. Try again in a moment.');
     }
   };

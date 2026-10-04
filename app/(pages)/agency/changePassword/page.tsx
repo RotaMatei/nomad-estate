@@ -1,62 +1,13 @@
-'use client';
-import api from '@/app/lib/api';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import type { Metadata } from 'next';
+import { Suspense } from 'react';
+import { ChangePasswordForm } from '@/components/auth/account-forms';
 
-export default function ChangePasswordPage() {
-  const [agencyId, setAgencyId] = useState();
-  const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [error, setError] = useState('');
-  const router = useRouter();
+export const metadata: Metadata = { title: 'Change password' };
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      if (payload) setAgencyId(payload.sub);
-    }
-  }, []);
-
-  const handlePasswordChange = async () => {
-    try {
-      await api.patch(
-        '/auth/agency/change-password',
-        { agencyId, oldPassword, newPassword },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        },
-      );
-      localStorage.clear();
-      router.push('/');
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('ChangePassword failed!');
-      }
-    }
-  };
-
+export default function Page() {
   return (
-    <div>
-      <h1>Please provide a new password</h1>
-      <input
-        value={oldPassword}
-        onChange={(e) => setOldPassword(e.target.value)}
-        placeholder="old password"
-        type="password"
-      />
-      <input
-        value={newPassword}
-        onChange={(e) => setNewPassword(e.target.value)}
-        placeholder="new password"
-        type="password"
-      />
-      <button onClick={handlePasswordChange}>Login</button>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-    </div>
+    <Suspense>
+      <ChangePasswordForm kind="agency" />
+    </Suspense>
   );
 }

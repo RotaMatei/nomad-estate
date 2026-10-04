@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import api from '@/app/lib/api';
 import { toListing } from './normalize';
+import { errorStatus } from '@/lib/auth/session';
 import type { ApiPropertySummary, Country, Listing } from './types';
 
 interface Picture {
@@ -126,7 +127,7 @@ export function usePropertyDetails(id: string) {
         agency,
       };
     },
-    retry: (count, error) => (error as { response?: { status?: number } }).response?.status !== 404 && count < 1,
+    retry: (count, error) => errorStatus(error) !== 404 && count < 1,
   });
 }
 

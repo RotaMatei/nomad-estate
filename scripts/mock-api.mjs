@@ -247,6 +247,18 @@ function readBody(req) {
   });
 }
 
+// Fixture sign-ins for local UI work only. The tokens are unsigned and accepted by nothing but this mock.
+const DEMO_ACCOUNTS = [
+  { kind: 'user', id: uuid(700), email: 'investor@nomad.test', password: 'demo-investor', firstName: 'Ada', lastName: 'Investor' },
+  { kind: 'agency', id: uuid(900), email: 'agency@nomad.test', password: 'demo-agency', firstName: 'Meridian', lastName: 'Estates' },
+];
+const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
+function session(a) {
+  const exp = Math.floor(Date.now() / 1000) + 86400;
+  const accessToken = [b64({ alg: 'none', typ: 'JWT' }), b64({ sub: a.id, role: a.kind === 'agency' ? 'AGENCY' : 'INVESTOR', exp }), 'mock'].join('.');
+  return { accessToken, refreshToken: accessToken, RefreshJTI: 'mock-jti', sub: a.id, firstName: a.firstName, lastName: a.lastName };
+}
+
 const saved = new Map(); // userId → Set(propertyId), in memory only
 
 const server = http.createServer(async (req, res) => {
@@ -309,6 +321,23 @@ const server = http.createServer(async (req, res) => {
     saved.get(m[1])?.delete(m[2]);
     return send(200, { ok: true });
   }
+
+  // Auth fixtures. Demo sign-ins (any other email is rejected): see DEMO_ACCOUNTS at the top of this block.
+  if (method === 'POST' && (m = path.match(/^\/auth\/(user|agency)\/login$/))) {
+    const { email, password } = await readBody(req);
+    const account = DEMO_ACCOUNTS.find((a) => a.kind === m[1] && a.email === email && a.password === password);
+    return account ? send(201, session(account)) : send(401, { statusCode: 401, message: 'Invalid credentials' });
+  }
+  if (method === 'POST' && (m = path.match(/^\/auth\/(user|agency)\/register$/))) {
+    const body = await readBody(req);
+    if (DEMO_ACCOUNTS.some((a) => a.email === body.email)) return send(409, { statusCode: 409, message: 'Email already registered' });
+    return send(201, session({ kind: m[1], id: uuid(m[1] === 'agency' ? 900 : 700), firstName: body.firstName, lastName: body.lastName }));
+  }
+  if (method === 'POST' && /^\/auth\/(user|agency)\/(logout|confirm)$/.test(path)) return send(201, { ok: true });
+  if (method === 'PATCH' && /^\/auth\/(user|agency)\/change-password\//.test(path)) return send(200, { ok: true });
+  if (method === 'GET' && /^\/states\/retrieve\/get-all\/\d+$/.test(path)) return send(200, []);
+  if (method === 'GET' && (m = path.match(/^\/cities\/retrieve\/get-all-by-country\/(\d+)$/)))
+    return send(200, cities.filter((c) => c.countryId === Number(m[1])).map(publicCity));
 
   if (method === 'POST' && path === '/inquiry/create') return send(201, { ...(await readBody(req)), status: 'PENDING' });
 

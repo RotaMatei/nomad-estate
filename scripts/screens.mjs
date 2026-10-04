@@ -27,6 +27,7 @@ const ROUTES = [
   ['details', `/details/${SAMPLE_ID}`],
   ['login', '/login'],
   ['register', '/register'],
+  ['register-agency', '/register?as=agency'],
   ['dashboard', '/dashboard'],
 ];
 const VIEWPORTS = [

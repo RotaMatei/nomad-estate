@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 15:25 Europe/Bucharest (Claude Code local session — A4 done, starting A5)
+- **Last heartbeat:** 2026-10-04 16:00 Europe/Bucharest (Claude Code local session — A5 done, starting A6)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -54,7 +54,7 @@
 ### A4 Property details
 - [x] Gallery (lightbox), key metrics, investment panel (yield, score, price/m²), features, map, agency card, inquiry form, save
 ### A5 Auth
-- [ ] Login, register (investor + agency multi-step), verify, change password, logout
+- [x] Login, register (investor + agency multi-step), verify, change password, logout
 ### A6 Dashboards
 - [ ] Agency dashboard: metrics, charts (Recharts restyled), listings table, agents manager
 - [ ] Create / edit property — multi-step form (react-hook-form + zod)
@@ -130,3 +130,17 @@ ode-v20.19.5-win-x64`
   Not verified: lightbox and inquiry submit while signed in (needs a session; mock API has no auth routes yet). Feature enum values are
   humanised from the API names (e.g. `CCTV` shows as "Cctv"). On a 390 px screen the page was 6 px wider than the viewport; clipped on
   the article for now, the offending element still needs finding. Next: A5 auth.
+- **2026-10-04 16:00 (Claude Code, local):** A5 auth done. `lib/auth/session.ts` (persistSession + `notifySessionChange`, signIn tries investor then agency,
+  changePassword, confirmEmail, Google URL), `components/auth/{auth-shell,login-form,register-form,location-fields,account-forms}.tsx`,
+  `components/reactbits/{stepper,topography}.tsx` (from the React Bits registry; Stepper restyled with tokens + `onBeforeNext` validation gate).
+  Routes rewritten: `/login`, `/register` (`?as=agency`), `/verify`, `/{user,agency}/changePassword`, `/{user,agency}/logOut`.
+  - Mock API gained auth fixtures (demo accounts are listed in `scripts/mock-api.mjs` under `DEMO_ACCOUNTS`), states/cities-by-country, inquiry.
+  - Headless end-to-end check against the mock: wrong password, sign in, header account menu, inquiry validation + send, save property,
+    investor registration through all three steps. Agency registration submit, verify, change password and sign-out pages are built but
+    were only type-checked and (register) screenshotted, not clicked through.
+  - **Backend mismatches found (frontend now follows the backend):** legacy pages called `PATCH /auth/{user,agency}/change-password` without
+    the `/:id` the Nest route requires; errors from `app/lib/api.ts` are `ApiError` with `statusCode` (not axios `response.status`).
+  - **Assumption to confirm:** Google sign-in calls `GET /oauth/user/google` for the URL and expects Google to return to `/login?code=…`,
+    which is exchanged at `/oauth/user/google/callback`. That only works if the backend `redirectUri` points at the frontend `/login`,
+    and the Nest callback currently returns the Google profile, not tokens. Needs a decision in B4 (owner).
+  - Next: A6 dashboards (`/dashboard` agency KPIs, listings table, agents, create/edit property; investor saved list).
