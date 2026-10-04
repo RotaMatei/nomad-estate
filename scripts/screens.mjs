@@ -30,6 +30,8 @@ const ROUTES = [
   ['register-agency', '/register?as=agency'],
   ['dashboard', '/dashboard', 'agency'],
   ['property-new', '/dashboard/properties/new', 'agency'],
+  ['profile', '/user', 'user'],
+  ['not-found', '/no-such-page'],
 ];
 const VIEWPORTS = [
   ['desktop', { width: 1440, height: 900 }],

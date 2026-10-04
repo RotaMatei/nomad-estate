@@ -336,6 +336,10 @@ const server = http.createServer(async (req, res) => {
     return send(200, { ok: true });
   }
 
+  if (method === "GET" && (m = path.match(/^[/]user[/]retrieve[/](.+)$/))) {
+    const a = DEMO_ACCOUNTS.find((x) => x.id === m[1]) ?? people.find((x) => x.id === m[1]);
+    return a ? send(200, { firstName: a.firstName, lastName: a.lastName, email: a.email, emailVerified: true, phoneNumber: a.phoneNumber ?? "+40 712 000 000", role: "INVESTOR" }) : send(404, { statusCode: 404, message: "User not found" });
+  }
   // Agency dashboard fixtures (in memory)
   if (method === "GET" && (m = path.match(/^[/]agent[/]retrieve[/]agents-for-agency[/](.+)$/))) return send(200, agents.filter((a) => a.agencyId === m[1]));
   if (method === "POST" && path === "/agent/create") {

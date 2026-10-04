@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 15:33 Europe/Bucharest (Claude Code local session — A6 agency side done, on investor profile / A7)
+- **Last heartbeat:** 2026-10-04 15:35 Europe/Bucharest (Claude Code local session — A7 done, starting A8 cleanup)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -58,8 +58,9 @@
 ### A6 Dashboards
 - [x] Agency dashboard: metrics, charts (Recharts restyled), listings table, agents manager
 - [x] Create / edit property — multi-step form (react-hook-form + zod)
-- [ ] Investor dashboard / saved properties
+- [x] Investor dashboard / saved properties (on `/user`)
 ### A7 User profile, 404/sorry page
+- [x] `/user` profile (investor: saved properties; agency: link to dashboard), `app/not-found.tsx`, `/sorry` as a coming-soon page
 ### A8 Cleanup & performance
 - [ ] Remove MUI, Emotion, styled-components, globe.gl, @openglobus/og, three/R3F (if unused), leaflet, d3, gsap, wave-gradient
 - [ ] Lazy-load map chunk, image optimisation (next/image), route-level code splitting, Lighthouse ≥ 90 perf
@@ -159,3 +160,6 @@ ode-v20.19.5-win-x64`
   - Screenshot tooling: fixture sessions are stored after a first navigation (Playwright init scripts that touched localStorage hung navigation).
   - Per-listing analytics (views, CTR, leads) are not on the dashboard yet: the current API needs one call per property per metric (B2/B4).
   - Next: investor `/user` profile with saved properties, `/sorry` + 404 (A7), then A8 cleanup.
+- **2026-10-04 15:35 (Claude Code, local):** A7 done: `components/account/profile-view.tsx` (`/user`), `components/site/notice-page.tsx` used by
+  `app/not-found.tsx` and `/sorry`. Screens reviewed. Every route under `app/(pages)` now renders new components; nothing imports MUI except
+  `app/providers.tsx` and the legacy folders. Next: A8 (delete legacy code and dependencies, bundle check, README).
