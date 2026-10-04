@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 18:58 Europe/Bucharest (Claude Code local session — B4 part 5 done)
+- **Last heartbeat:** 2026-10-04 21:45 Europe/Bucharest (B4 part 6 (schema + socket) pushed; next mail)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -269,3 +269,6 @@ ode-v20.19.5-win-x64`
   Next: inquiry, mail, remaining account routes, preference, nearby amenities, Google OAuth, schema endpoint + socket.
 - **2026-10-04 18:58 (Claude Code, local):** B4 part 5 done: inquiries, nearby amenities, preferences, account deletion and profile update, agent
   memberships, token purge and the last reference-data routes. 37 Rust tests pass. Left in B4: mail, Google OAuth, schema endpoint + socket.
+- **2026-10-04 21:45 (Claude Code, local):** B4 part 6: `GET /api/schema` and the Socket.IO `schema:updated` broadcast (socketioxide, EIO 3 and 4,
+  websocket and polling). Checked with the visualizer's own socket.io-client on all transports. The visualizer needs no code change (B6 compatibility).
+  New variable `SCHEMA_PATH`. 39 Rust tests pass. Left in B4: mail, Google OAuth.
