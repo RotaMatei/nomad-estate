@@ -1,6 +1,6 @@
 'use client';
 
-import { useQueries, useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useQueries, useQuery, keepPreviousData, type UseQueryResult } from '@tanstack/react-query';
 import * as React from 'react';
 import api from '@/app/lib/api';
 import { toListing } from './normalize';
@@ -20,7 +20,18 @@ export function useCountries() {
 
 /** City names are fetched per id and cached forever (replaced by a joined endpoint in the Rust API, PROGRESS B2). */
 function useCityNames(ids: number[]) {
-  const results = useQueries({
+  const combine = React.useCallback(
+    (results: UseQueryResult<string | null>[]) => {
+      const m = new Map<number, string>();
+      ids.forEach((id, i) => {
+        const name = results[i]?.data;
+        if (name) m.set(id, name);
+      });
+      return m;
+    },
+    [ids],
+  );
+  return useQueries({
     queries: ids.map((id) => ({
       queryKey: ['city', id],
       queryFn: async () => {
@@ -29,16 +40,8 @@ function useCityNames(ids: number[]) {
       },
       staleTime: Infinity,
     })),
+    combine,
   });
-  return React.useMemo(() => {
-    const m = new Map<number, string>();
-    ids.forEach((id, i) => {
-      const name = results[i]?.data;
-      if (name) m.set(id, name);
-    });
-    return m;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ids.join(','), results.map((r) => r.data).join('|')]);
 }
 
 function sortListings(list: Listing[], sort: SortKey) {

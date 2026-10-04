@@ -5,10 +5,16 @@ import * as React from 'react';
 import { AnimatedThemeToggler } from '@/components/magicui/animated-theme-toggler';
 import { cn } from '@/lib/utils';
 
+const subscribe = () => () => {};
+
 export function ThemeToggle({ className }: { className?: string }) {
   const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
-  React.useEffect(() => setMounted(true), []);
+  // false during SSR and hydration, true afterwards, so the icon never mismatches the server markup
+  const mounted = React.useSyncExternalStore(
+    subscribe,
+    () => true,
+    () => false,
+  );
 
   return (
     <AnimatedThemeToggler

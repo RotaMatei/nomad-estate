@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 13:50 Europe/Bucharest (Claude Code local session — A1 in progress)
+- **Last heartbeat:** 2026-10-04 13:47 Europe/Bucharest (Claude Code local session — A1 build verified, finishing A1 verification scripts)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -33,10 +33,12 @@
 - [x] Create `redesign` branch, import uncommitted local WIP (globe/map country highlighting)
 - [x] PROGRESS.md in all four repos + 3-hourly scheduled task
 ### A1 Foundation
-- [ ] Install Tailwind v4, shadcn/ui (components.json), `next-themes`, `lucide-react`, Motion, TanStack Query, nuqs
-- [ ] Design tokens (light + dark) in `app/globals.css`, fonts via @fontsource (no network at build)
+- [x] Install Tailwind v4, shadcn/ui (components.json), `next-themes`, `lucide-react`, Motion, TanStack Query, nuqs
+- [x] Design tokens (light + dark) in `app/globals.css`, fonts via @fontsource (no network at build)
+- [x] Build green: `npm run typecheck`, `npm run lint` (ESLint CLI, flat config), `npm run build`; CI workflow runs on `redesign`
+- [ ] `scripts/mock-api.mjs` (fixtures on :4010) + `scripts/screens.mjs` (Playwright, light/dark, 1440 + 390)
 - [ ] App shell: new header (glass, theme toggle, auth menu), footer, mobile nav (shadcn Sheet)
-- [ ] Typed API client (`lib/api`) kept; add query hooks in `lib/queries/*`
+- [x] Typed API client (`lib/api`) kept; add query hooks in `lib/queries/*`
 ### A2 Properties search (flagship)
 - [ ] `components/globe/PropertyGlobe.tsx` — MapLibre globe, atmosphere, auto-spin (pauses on interaction), light/dark styles
 - [ ] GPU pins: GeoJSON source + circle/symbol layers with glow + pulse; clustering
@@ -87,3 +89,13 @@
   **None of this is verified yet: the local machine has no Node.js installed** (no node/npm/nvm on PATH or disk), so
   `npm install` has not run and `package.json` still has `latest` versions / a stale lock (CI will fail at `npm ci` until then).
   - Next: get Node 20.19.5 available → `npm install` → pin `latest` versions → `npm run typecheck && npm run lint && npm run build` → fix → A2.
+- **2026-10-04 13:47 (Claude Code, local):** A1 build verified. Portable Node 20.19.5 lives in `D:DesktopNomadEstate.tools
+ode-v20.19.5-win-x64`
+  (not on the system PATH — prepend it per command). `npm install` done, every `latest` pinned to a caret range.
+  `maplibre-gl` pinned to `^5.24.0` (npm `latest` is already v6; the decision says v5 — owner to confirm if v6 is wanted).
+  `npm run typecheck` = 0 errors, `npm run lint` = 0 errors / 126 warnings, `npm run build` passes (15 routes).
+  - Lint: React Compiler rules (`set-state-in-effect`, `use-memo`, `immutability`) and `no-explicit-any` are downgraded to warnings
+    for legacy folders only (`app/(pages)`, `app/components`, `app/reactDevBits`, `app/hooks`) — remove that override in A8.
+  - New code fixed: `theme-toggle` (useSyncExternalStore for mounted), `queries.ts` (`useQueries` + `combine`).
+  - Nothing has been looked at in a browser yet. Next: `scripts/mock-api.mjs` + `scripts/screens.mjs`, review screenshots of the
+    header/tokens in both themes, add the footer, then A2 (`components/globe/PropertyGlobe.tsx`).
