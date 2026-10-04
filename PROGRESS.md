@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 18:35 Europe/Bucharest (Claude Code local session — paged search done, continuing B4)
+- **Last heartbeat:** 2026-10-04 18:43 Europe/Bucharest (Claude Code local session — B4 part 3 done, analytics next)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -261,3 +261,6 @@ ode-v20.19.5-win-x64`
     kill them between runs.
   - `scripts/e2e-rust.mjs` passes again on the paged flavor, including "page 2 is requested on scroll". Nest flavor re-checked with `npm run screens`.
   - Next: rest of B4 (view tracking, analytics, mail, pictures, Google OAuth, subscription, schema endpoint + socket), then B5–B7.
+- **2026-10-04 18:43 (Claude Code, local):** B4 part 3 done: the Nest-style property routes (features, tags, pictures, base create/update, score,
+  status, old search) exist in Rust with ownership checks; 31 Rust tests pass. `rust/ENDPOINTS.md` tracks what is ported per route.
+  Next: analytics, then inquiry/mail, preference, nearby amenities, remaining account routes, Google OAuth, schema endpoint + socket.
