@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 15:51 Europe/Bucharest (Claude Code local session — A8 cleanup done, performance pass open)
+- **Last heartbeat:** 2026-10-04 16:42 Europe/Bucharest (Claude Code local session — performance pass)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
