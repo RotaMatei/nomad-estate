@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 13:35 Europe/Bucharest (interactive session, paused — owner moving to Claude Code)
+- **Last heartbeat:** 2026-10-04 13:50 Europe/Bucharest (Claude Code local session — A1 in progress)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -81,3 +81,9 @@
   - `lib/properties/{labels,types,normalize,format,filters,queries}.ts` (nuqs URL filters + TanStack Query search)
   - Next: `npm install`, `npx tsc --noEmit`, `npm run build`, fix errors, then A2 (MapLibre globe).
   - Backend security note for B2/B4: property create/update/delete routes are `@Public()` in Nest — must require agency auth in Rust.
+- **2026-10-04 13:50 (Claude Code, local):** All four local repos switched to `redesign` (local WIP stashed; it matched
+  commit d83ea43 apart from line endings). CI workflow rewritten (runs on `redesign`: install → typecheck → lint → build),
+  `lint` script moved to the ESLint CLI with a native flat config (`eslint-config-next` 16), legacy `.eslintrc.json` removed.
+  **None of this is verified yet: the local machine has no Node.js installed** (no node/npm/nvm on PATH or disk), so
+  `npm install` has not run and `package.json` still has `latest` versions / a stale lock (CI will fail at `npm ci` until then).
+  - Next: get Node 20.19.5 available → `npm install` → pin `latest` versions → `npm run typecheck && npm run lint && npm run build` → fix → A2.

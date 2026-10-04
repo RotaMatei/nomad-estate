@@ -2,29 +2,25 @@ name: Frontend CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, redesign]
   pull_request:
 
+concurrency:
+  group: frontend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  lint-and-build:
+  verify:
     runs-on: ubuntu-latest
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-      - uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          cache: npm
       - run: npm ci
+      - run: npm run typecheck
       - run: npm run lint
-      - run: npm run format:check
       - run: npm run build
-      - name: Trigger Vercel Deploy
-        if: github.ref == 'refs/heads/main'
-        run: |
-          curl -s -X POST "https://api.vercel.com/v1/integrations/deploy/prj_<YOUR_PROJECT_ID>/deployments" \
-            -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{"gitBranch":"main"}'
