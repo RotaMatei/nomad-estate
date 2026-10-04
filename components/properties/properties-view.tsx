@@ -10,13 +10,14 @@ import { ResultsPanel } from './results-panel';
 import { PropertyGlobe, type Bounds, type PropertyGlobeHandle } from '@/components/globe';
 import { SiteHeader } from '@/components/site/site-header';
 import { Button } from '@/components/ui/button';
-import { countActiveFilters, inArea, useSearchFilters, useSelection } from '@/lib/properties/filters';
-import { usePropertySearch } from '@/lib/properties/queries';
+import { countActiveFilters, useSearchFilters, useSelection } from '@/lib/properties/filters';
+import { useListingsByIds, usePropertySearch } from '@/lib/properties/queries';
 import { cn } from '@/lib/utils';
 
 const RAIL_WIDTH = 392;
 const SNAP_PEEK = '132px';
 const SNAPS: (string | number)[] = [SNAP_PEEK, 0.55, 0.92];
+const NO_IDS: string[] = [];
 
 function useIsDesktop() {
   return React.useSyncExternalStore(
@@ -33,7 +34,7 @@ function useIsDesktop() {
 export function PropertiesView() {
   const [filters, setFilters] = useSearchFilters();
   const [{ selected, area }, setSelection] = useSelection();
-  const { listings: all, countries, isLoading, isFetching, isError, refetch } = usePropertySearch(filters);
+  const { listings, pins, total, hasMore, loadMore, isFetchingMore, countries, isLoading, isFetching, isError, refetch } = usePropertySearch(filters, { area });
   const { resolvedTheme } = useTheme();
   const isDesktop = useIsDesktop();
 
@@ -42,8 +43,10 @@ export function PropertiesView() {
   const [pendingArea, setPendingArea] = React.useState<Bounds | null>(null);
   const [snap, setSnap] = React.useState<string | number | null>(SNAP_PEEK);
 
-  const listings = React.useMemo(() => (area ? all.filter((l) => inArea(l.lat, l.lng, area)) : all), [all, area]);
-  const selectedListing = React.useMemo(() => (selected ? all.find((l) => l.id === selected) : undefined), [all, selected]);
+  // The selected listing may sit on a page that is not loaded (opened from a shared link, or picked on the map).
+  const loaded = React.useMemo(() => (selected ? listings.find((l) => l.id === selected) : undefined), [listings, selected]);
+  const { listings: fetched } = useListingsByIds(selected && !loaded ? [selected] : NO_IDS);
+  const selectedListing = loaded ?? fetched[0];
 
   const select = React.useCallback(
     (id: string | null) => {
@@ -62,6 +65,10 @@ export function PropertiesView() {
   const results = (
     <ResultsPanel
       listings={listings}
+      total={total}
+      hasMore={hasMore}
+      onLoadMore={loadMore}
+      isFetchingMore={isFetchingMore}
       isLoading={isLoading}
       isFetching={isFetching}
       isError={isError}
@@ -94,7 +101,7 @@ export function PropertiesView() {
         <h1 className="sr-only">Find investment properties on the globe</h1>
         <PropertyGlobe
           ref={globe}
-          listings={listings}
+          listings={pins}
           theme={resolvedTheme === 'dark' ? 'dark' : 'light'}
           hoveredId={hovered}
           selectedId={selected}

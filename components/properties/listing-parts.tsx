@@ -6,18 +6,19 @@ import { useRouter } from 'next/navigation';
 import * as React from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { canOptimise } from '@/lib/image-hosts.mjs';
 import { flagEmoji } from '@/lib/properties/filters';
 import { formatArea } from '@/lib/properties/format';
 import { useSavedProperties } from '@/lib/properties/saved';
 import type { Listing } from '@/lib/properties/types';
 import { cn } from '@/lib/utils';
 
-/** Listing photos come from the API as data URIs or arbitrary hosts, so the optimiser is bypassed for now (PROGRESS B2). */
+/** Photos on known hosts are resized by the Next.js optimiser; data URIs and unknown hosts are shown as they are. */
 export function ListingImage({ listing, sizes, className, priority }: { listing: Listing; sizes: string; className?: string; priority?: boolean }) {
   return (
     <div className={cn('relative overflow-hidden bg-muted', className)}>
       {listing.image ? (
-        <Image src={listing.image} alt="" fill sizes={sizes} unoptimized priority={priority} className="object-cover" />
+        <Image src={listing.image} alt="" fill sizes={sizes} unoptimized={!canOptimise(listing.image)} priority={priority} className="object-cover" />
       ) : (
         <div className="flex size-full items-center justify-center text-muted-foreground">
           <ImageOff className="size-5" aria-hidden />

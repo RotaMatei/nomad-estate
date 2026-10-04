@@ -23,6 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { useSession } from '@/hooks/use-session';
+import { canOptimise } from '@/lib/image-hosts.mjs';
 import { errorStatus } from '@/lib/auth/session';
 import { CONTACT_METHODS, CONTACT_METHOD_LABEL, humanize, sendInquiry, usePropertyDetails, type PropertyDetails } from '@/lib/properties/details';
 import { DEFAULT_FILTERS } from '@/lib/properties/filters';
@@ -225,7 +226,7 @@ function Gallery({ details }: { details: PropertyDetails }) {
             src={p.imageData}
             alt={p.altText || `${listing.title}, photo ${i + 1} of ${pictures.length}`}
             fill
-            unoptimized
+            unoptimized={!canOptimise(p.imageData)}
             priority={i === 0 && !lightbox}
             sizes={lightbox ? '100vw' : '(max-width: 1200px) 100vw, 1200px'}
             className={lightbox ? 'object-contain' : 'object-cover'}
@@ -450,7 +451,8 @@ function AgencyCard({ details, agencyName }: { details: PropertyDetails; agencyN
 
 function Similar({ details }: { details: PropertyDetails }) {
   const { listing } = details;
-  const { listings } = usePropertySearch(DEFAULT_FILTERS);
+  const filters = React.useMemo(() => ({ ...DEFAULT_FILTERS, countries: listing.countryId != null ? [listing.countryId] : [], sort: 'score' as const }), [listing.countryId]);
+  const { listings } = usePropertySearch(filters, { pins: false, enabled: listing.countryId != null });
   const similar = React.useMemo(
     () =>
       listings

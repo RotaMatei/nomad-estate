@@ -13,9 +13,8 @@ import { Button } from '@/components/ui/button';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSession, type Session } from '@/hooks/use-session';
-import { DEFAULT_FILTERS } from '@/lib/properties/filters';
 import { formatPrice, formatYield } from '@/lib/properties/format';
-import { usePropertySearch } from '@/lib/properties/queries';
+import { useListingsByIds } from '@/lib/properties/queries';
 import { useSavedProperties } from '@/lib/properties/saved';
 
 export function ProfileView() {
@@ -150,8 +149,7 @@ function Profile({ session }: { session: Session }) {
 
 function SavedProperties() {
   const { savedIds } = useSavedProperties();
-  const { listings, isLoading } = usePropertySearch(DEFAULT_FILTERS);
-  const saved = React.useMemo(() => listings.filter((l) => savedIds.includes(l.id)), [listings, savedIds]);
+  const { listings: saved, isLoading } = useListingsByIds(savedIds);
 
   return (
     <section aria-labelledby="saved-title" className="min-w-0">

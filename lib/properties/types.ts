@@ -47,6 +47,17 @@ export interface Listing {
   createdAt: string | null;
 }
 
+/** The little a map pin needs. Every `Listing` is also a valid `Pin`. */
+export interface Pin {
+  id: string;
+  lat: number | null;
+  lng: number | null;
+  countryId: number | null;
+  countryCode: string | null;
+  price: number;
+  yieldPct: number;
+}
+
 export interface Country {
   id: number;
   name: string;

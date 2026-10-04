@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 18:16 Europe/Bucharest (Claude Code local session — frontend verified end to end on the Rust API)
+- **Last heartbeat:** 2026-10-04 18:35 Europe/Bucharest (Claude Code local session — paged search done, continuing B4)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -244,3 +244,20 @@ ode-v20.19.5-win-x64`
     `/property/geo`); Google sign-in and per-listing analytics are not ported; seed photos are remote placeholder images.
   - Next: (1) paged list + `/property/geo` pins in the `rust` flavor, then re-run Lighthouse on `/properties`; (2) rest of B4: view tracking,
     analytics, mail, Google OAuth, pictures, subscription, schema endpoint + socket; (3) B5 AI API, B6 visualizer, B7 parity suite.
+- **2026-10-04 18:35 (Claude Code, local):** Paged search and geo pins (rust flavor), image optimisation, performance re-measured.
+  - `usePropertySearch` now returns `{ listings, pins, total, hasMore, loadMore, … }` for both backends. Rust: the list is an infinite query
+    (40 rows per page, next page requested as the reader nears the end), the pins come from `/property/geo`, "Search this area" is a server
+    `bbox`. Nest: unchanged behaviour (one response, filtered and sorted in the browser). New `useListingsByIds` serves the saved list and a
+    selected listing that is not on a loaded page. Home uses pins only; "More in <country>" asks for that country sorted by score.
+  - Listing photos on known hosts (`lib/image-hosts.mjs`: ImgBB, picsum for the dev seed) go through the Next image optimiser;
+    `/properties` total transfer dropped from 2,450 kB to 1,084 kB with the seed photos. Other hosts and data URIs are shown as they are.
+  - Home hero globe starts at zoom 0.9 on phones (was 1.5): fewer map tiles to build, total blocking time 2.1 s → 1.0 s.
+  - **Lighthouse (mobile, rust flavor, quiet machine): `/` 67, `/properties` 70** (from 45 / 49 at the start; target 90 still not met).
+    Accessibility and best practices 100. Later runs on this machine were unusable: an unrelated `python3.13` process was using ~5 CPU cores
+    and scores swung between 35 and 70. Re-measure on a quiet machine before drawing conclusions from the last two changes.
+    Remaining cost is MapLibre's main-thread work while the first tiles build (6–9 tasks of 150–450 ms under 4x CPU throttling) and first-load JS.
+  - Tooling: `scripts/lighthouse.mjs` reports failures instead of exiting silently; in Git Bash pass routes with `MSYS_NO_PATHCONV=1`
+    (otherwise `/` is rewritten to a Windows path). Each Lighthouse/Playwright run can leave `chrome-headless-shell.exe` processes behind:
+    kill them between runs.
+  - `scripts/e2e-rust.mjs` passes again on the paged flavor, including "page 2 is requested on scroll". Nest flavor re-checked with `npm run screens`.
+  - Next: rest of B4 (view tracking, analytics, mail, pictures, Google OAuth, subscription, schema endpoint + socket), then B5–B7.

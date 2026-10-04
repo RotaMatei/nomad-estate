@@ -7,7 +7,7 @@ import maplibregl, {
 } from 'maplibre-gl';
 import * as React from 'react';
 import { LAYER, MAP_PALETTE, SOURCE, buildStyle, type MapTheme } from '@/lib/map/style';
-import type { Listing } from '@/lib/properties/types';
+import type { Pin } from '@/lib/properties/types';
 import { cn } from '@/lib/utils';
 
 export type Bounds = [west: number, south: number, east: number, north: number];
@@ -19,7 +19,8 @@ export interface PropertyGlobeHandle {
 }
 
 export interface PropertyGlobeProps {
-  listings: Listing[];
+  /** Every match to draw. A full `Listing` works too. */
+  listings: Pin[];
   theme: MapTheme;
   hoveredId?: string | null;
   selectedId?: string | null;
@@ -46,7 +47,7 @@ const SWITCH_ON_MS = 1200;
 const prefersReducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-function toFeatureCollection(listings: Listing[]): GeoJSON.FeatureCollection<GeoJSON.Point> {
+function toFeatureCollection(listings: Pin[]): GeoJSON.FeatureCollection<GeoJSON.Point> {
   return {
     type: 'FeatureCollection',
     features: listings

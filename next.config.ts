@@ -1,6 +1,11 @@
 import type { NextConfig } from 'next';
+import { OPTIMISED_IMAGE_HOSTS } from './lib/image-hosts.mjs';
 
 const shared: NextConfig = {
+  images: {
+    remotePatterns: OPTIMISED_IMAGE_HOSTS.map((hostname) => ({ protocol: 'https' as const, hostname })),
+    formats: ['image/avif', 'image/webp'],
+  },
   experimental: {
     // `radix-ui` is one umbrella package: without this every primitive ships to every route that imports one of them.
     optimizePackageImports: ['radix-ui', 'recharts'],

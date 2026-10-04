@@ -26,7 +26,10 @@ try {
     await writeFile(file, result.report);
     process.stdout.write(execFileSync(process.execPath, ['scripts/lighthouse-summary.cjs', file, route]));
   }
+} catch (error) {
+  console.error('Lighthouse run failed:', error);
+  process.exitCode = 1;
 } finally {
   await Promise.race([browser.close(), new Promise((r) => setTimeout(r, 4000))]);
-  process.exit(0);
+  process.exit(process.exitCode ?? 0);
 }

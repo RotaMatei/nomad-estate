@@ -17,6 +17,11 @@ const ROW = 116;
 
 interface ResultsPanelProps {
   listings: Listing[];
+  /** Matches in total; `listings` may hold only the pages loaded so far */
+  total: number;
+  hasMore: boolean;
+  onLoadMore: () => void;
+  isFetchingMore: boolean;
   isLoading: boolean;
   isFetching: boolean;
   isError: boolean;
@@ -37,6 +42,10 @@ interface ResultsPanelProps {
 
 export function ResultsPanel({
   listings,
+  total,
+  hasMore,
+  onLoadMore,
+  isFetchingMore,
   isLoading,
   isFetching,
   isError,
@@ -74,7 +83,14 @@ export function ResultsPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focusId]);
 
-  const count = listings.length;
+  // Ask for the next page shortly before the reader reaches the end of what is loaded.
+  const rows = virtualizer.getVirtualItems();
+  const lastVisible = rows.length ? rows[rows.length - 1].index : -1;
+  React.useEffect(() => {
+    if (hasMore && lastVisible >= listings.length - 8) onLoadMore();
+  }, [hasMore, lastVisible, listings.length, onLoadMore]);
+
+  const count = total;
   return (
     <section aria-label="Search results" className={cn('flex min-h-0 flex-col', className)}>
       <header className="flex items-center justify-between gap-3 px-4 pt-3 pb-2">
@@ -136,7 +152,7 @@ export function ResultsPanel({
               <Button onClick={onRetry}>Load results again</Button>
             </EmptyContent>
           </Empty>
-        ) : count === 0 ? (
+        ) : listings.length === 0 ? (
           <Empty className="h-full">
             <EmptyHeader>
               <EmptyMedia variant="icon">
@@ -156,7 +172,7 @@ export function ResultsPanel({
           </Empty>
         ) : (
           <ul className="relative" style={{ height: virtualizer.getTotalSize() }}>
-            {virtualizer.getVirtualItems().map((row) => {
+            {rows.map((row) => {
               const l = listings[row.index];
               const active = l.id === selectedId || l.id === hoveredId;
               return (

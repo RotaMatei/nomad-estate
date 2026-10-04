@@ -18,12 +18,12 @@ import { formatPrice, formatYield } from '@/lib/properties/format';
 import { usePropertySearch } from '@/lib/properties/queries';
 
 /** The catalogue is fetched once and shared (TanStack Query cache) by the hero globe, featured markets and /properties. */
-const useCatalogue = () => usePropertySearch(DEFAULT_FILTERS, { enabled: useAfterFirstPaint() });
+const useCatalogue = () => usePropertySearch(DEFAULT_FILTERS, { enabled: useAfterFirstPaint(), list: false });
 
 export function HomeHero() {
   const router = useRouter();
   const { resolvedTheme } = useTheme();
-  const { listings } = useCatalogue();
+  const { pins } = useCatalogue();
   const [q, setQ] = React.useState('');
 
   return (
@@ -34,11 +34,11 @@ export function HomeHero() {
         className="pointer-events-none absolute inset-x-0 bottom-[-16%] -z-10 h-[44%] lg:inset-x-auto lg:top-[-6%] lg:right-[-14%] lg:bottom-[-6%] lg:h-auto lg:w-[72%]"
       >
         <PropertyGlobe
-          listings={listings}
+          listings={pins}
           theme={resolvedTheme === 'dark' ? 'dark' : 'light'}
           interactive={false}
           transparent
-          initialView={{ center: [14, 24], zoom: 2.35, zoomMobile: 1.5 }}
+          initialView={{ center: [14, 24], zoom: 2.35, zoomMobile: 0.9 }}
         />
       </div>
 
@@ -128,20 +128,22 @@ export function HomeStatsBand() {
 }
 
 export function FeaturedMarkets() {
-  const { listings, isLoading, isPending, isError } = useCatalogue();
+  const { pins, countries, isLoading, isPending, isError } = useCatalogue();
 
   const markets = React.useMemo(() => {
+    const names = new Map(countries.map((c) => [c.id, c] as const));
     const by = new Map<number, { id: number; name: string; code: string | null; count: number; yieldSum: number; from: number }>();
-    for (const l of listings) {
-      if (l.countryId == null || !l.countryName) continue;
-      const m = by.get(l.countryId) ?? { id: l.countryId, name: l.countryName, code: l.countryCode, count: 0, yieldSum: 0, from: Infinity };
+    for (const p of pins) {
+      const country = p.countryId != null ? names.get(p.countryId) : undefined;
+      if (p.countryId == null || !country) continue;
+      const m = by.get(p.countryId) ?? { id: p.countryId, name: country.name, code: country.code, count: 0, yieldSum: 0, from: Infinity };
       m.count += 1;
-      m.yieldSum += l.yieldPct;
-      m.from = Math.min(m.from, l.price);
-      by.set(l.countryId, m);
+      m.yieldSum += p.yieldPct;
+      m.from = Math.min(m.from, p.price);
+      by.set(p.countryId, m);
     }
     return [...by.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name)).slice(0, 6);
-  }, [listings]);
+  }, [pins, countries]);
 
   if (isError || (!isLoading && !isPending && markets.length === 0)) return null;
 

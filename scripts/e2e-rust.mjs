@@ -40,6 +40,16 @@ await open('/properties');
 await p.waitForSelector(`${results} li button`, { timeout: 30000 });
 log('search results', await p.locator(`${results} h1`).textContent());
 log('first card place', await p.locator(`${results} li button p`).first().textContent());
+// paging: the list loads 40 rows, then asks for page 2 when scrolled towards the end; pins come from /property/geo
+let page2 = false;
+p.on('request', (r) => {
+  if (r.url().endsWith('/property/search') && (r.postData() ?? '').includes('"page":2')) page2 = true;
+});
+for (let i = 0; i < 6 && !page2; i++) {
+  await p.locator(`${results} > div`).last().evaluate((el) => (el.scrollTop = el.scrollHeight));
+  await p.waitForTimeout(500);
+}
+log('page 2 requested on scroll', page2);
 await open('/properties?countries=2&sort=yield');
 await p.waitForSelector(`${results} li button`);
 await p.waitForTimeout(800);
