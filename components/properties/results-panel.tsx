@@ -197,7 +197,8 @@ export function ResultsPanel({
                       l.id === selectedId && 'ring-1 ring-beacon',
                     )}
                   >
-                    <ListingImage listing={l} sizes="92px" className="size-[92px] shrink-0 rounded-md" />
+                    {/* the first rows are on screen at once: their photos should not wait to be scrolled into view */}
+                    <ListingImage listing={l} sizes="92px" className="size-[92px] shrink-0 rounded-md" priority={row.index < 3} />
                     <span className="flex min-w-0 flex-1 flex-col">
                       <span className="truncate text-sm font-medium">{l.title}</span>
                       <ListingPlace listing={l} className="text-xs" />

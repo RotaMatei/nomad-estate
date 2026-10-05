@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 07:27 Europe/Bucharest (C:/Program Files/Git/properties results server-rendered and pushed)
+- **Last heartbeat:** 2026-10-04 08:47 Europe/Bucharest (Lighthouse re-measured on a clean machine; /properties 72 with real throttling)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -332,3 +332,17 @@ ode-v20.19.5-win-x64`
   real throttling, less than hoped. I could not find out which element is the LCP now: headless browser runs became unreliable again.
   TBT (about 800ms, the map's shader compilation plus hydration) is what keeps the score down.
   - `scripts/lighthouse.mjs` and `scripts/globe-posters.mjs` now kill their whole browser process tree and use a fresh debugging port per run.
+- **2026-10-05 08:47 (Claude Code, local):** Re-measured on a clean, idle machine (the stuck browser processes were gone and the unrelated CPU
+  load had stopped), two or three runs each, identical results between runs:
+  | page | simulated (Lighthouse default) | real throttling | before this work |
+  |---|---|---|---|
+  | `/` | 85 | 97 | 61 to 67 |
+  | `/properties` | 52 to 60 | 72 | about 50 |
+  Found why the server-rendered results had not moved LCP: the page still wrapped the view in `<Suspense>`, so React sent the fallback shell
+  first and revealed the real content about half a second later. The boundary is gone (the page is rendered per request, so nuqs no longer
+  needs it), the results are in the first flush, and LCP on `/properties` with real throttling went 5.1s -> 2.0s (= FCP). The first three
+  photos in the list load eagerly. What is left on that page is blocking time (about 800ms: hydration and the map's shader compilation) and
+  the map itself appearing late (speed index 7s).
+  - Redone now that browsers run again: hydration check (no errors, no duplicate search request, phone and desktop), `scripts/e2e-rust.mjs`
+    (all flows pass), the still-versus-live globe comparison (0.02 to 0.13% of pixels differ on phones, up to 1.2% on desktop). The stills
+    were regenerated at higher quality (19 to 57 KiB).
