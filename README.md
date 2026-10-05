@@ -58,6 +58,29 @@ The demo sign-ins are listed under `DEMO_ACCOUNTS` in the script.
 | `node scripts/bundle-report.mjs` | First-load JavaScript per route, and whether the map chunk is in it |
 | `node scripts/build-countries.mjs` | Regenerates `public/map/countries.json` from the Natural Earth source in `scripts/data/` |
 
+## Performance
+
+Measured with `node scripts/lighthouse.mjs http://127.0.0.1:3210 / /properties` against `next start` (mobile profile).
+`LH_THROTTLING=devtools` slows the browser for real; without it Lighthouse estimates a slow phone from a fast load,
+and on localhost that estimate charges every script to LCP because they all arrive before the first paint.
+
+| Page | Real throttling | Simulated (default) |
+|---|---|---|
+| `/` | 97 | 85 |
+| `/properties` | 73 | 52 to 60 |
+
+What the numbers rest on, so it is not undone by accident:
+
+- **The map is the cost.** MapLibre compiles its WebGL programs on the main thread when it starts. `lib/map/style.ts`
+  keeps their number down (see the comment on `buildStyle`).
+- **The home globe starts as a still.** `components/globe/index.tsx` shows `public/globe/*.webp` and starts the live
+  globe when the visitor interacts or the page has been idle for 5s (`hooks/use-when-quiet.ts`). The hero box has a
+  fixed height because the globe's perspective follows the height of its box. After changing the hero view, the map
+  style or the palette, run `node scripts/globe-posters.mjs` against a running build to remake the stills.
+- **`/properties` is rendered per request** with the first page of results fetched on the server
+  (`lib/properties/prefetch.ts`). Do not wrap the view in `<Suspense>`: React then paints the fallback first.
+- On `/properties` the map is the page, so it starts on its own; about 800ms of blocking time remains there.
+
 ## Layout
 
 ```

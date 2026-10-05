@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 08:47 Europe/Bucharest (Lighthouse re-measured on a clean machine; /properties 72 with real throttling)
+- **Last heartbeat:** 2026-10-04 08:52 Europe/Bucharest (Part A leftovers verified; CI for Rust added)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -346,3 +346,8 @@ ode-v20.19.5-win-x64`
   - Redone now that browsers run again: hydration check (no errors, no duplicate search request, phone and desktop), `scripts/e2e-rust.mjs`
     (all flows pass), the still-versus-live globe comparison (0.02 to 0.13% of pixels differ on phones, up to 1.2% on desktop). The stills
     were regenerated at higher quality (19 to 57 KiB).
+- **2026-10-05 08:52 (Claude Code, local):** Part A leftovers checked in a browser against the Rust API: the details page no longer overflows
+  at 390px (scroll width equals the viewport; only carousel slides sit outside, clipped as intended); hovering a pin highlights its card in the
+  rail; saving then unsaving a listing works (DELETE 200, POST 201). CI added for both Rust services (`rust-ci.yml`: format, clippy, tests on a
+  Postgres service, Docker image build). The frontend CI is green on GitHub; the API repos are private, so their runs are not visible from
+  here. README has a Performance section. Open: MapTiler satellite layer (needs a key), deployment and Nest removal (owner).
