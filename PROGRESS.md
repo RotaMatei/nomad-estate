@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 00:43 Europe/Bucharest (Lighthouse work on home pushed; /properties needs an owner decision)
+- **Last heartbeat:** 2026-10-04 07:27 Europe/Bucharest (C:/Program Files/Git/properties results server-rendered and pushed)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -322,3 +322,13 @@ ode-v20.19.5-win-x64`
     phones, under 1% on desktop when measured). A `<picture>` version of the still was tried and dropped.
   - Tooling lesson: killing GPU headless browsers with `process.exit()` left about 20 processes Windows could not end, and until they cleared
     every browser run hung at load. The scripts now use `launchServer()` + `kill()`.
+- **2026-10-05 07:27 (Claude Code, local):** Owner decision on `/properties`: server-render the results, keep the map starting on its own
+  (accepting that the page stays below the 90 target). Done: the page is rendered per request and fetches the first page of the search for the
+  URL's filters on the server (`lib/properties/prefetch.ts`, Rust flavor only, 1.5s limit, then the browser fetches as before), handing it to
+  TanStack Query through `HydrationBoundary`. The filter definitions moved to `lib/properties/search-params.ts` so the server and the hooks share
+  them. The HTML carries both layouts until hydration (rail on wide screens, a strip where the sheet will sit on phones). Checked in a browser on
+  phone and desktop sizes: no hydration errors, the browser makes no search request of its own on load, filters in the URL are honoured.
+  Lighthouse `/properties`, one clean run per mode: 56 simulated (was 48 to 51), 59 with real throttling (was 51 to 54); LCP 5.1s -> 4.0s with
+  real throttling, less than hoped. I could not find out which element is the LCP now: headless browser runs became unreliable again.
+  TBT (about 800ms, the map's shader compilation plus hydration) is what keeps the score down.
+  - `scripts/lighthouse.mjs` and `scripts/globe-posters.mjs` now kill their whole browser process tree and use a fresh debugging port per run.

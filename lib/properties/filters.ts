@@ -1,15 +1,9 @@
-import {
-  parseAsArrayOf,
-  parseAsFloat,
-  parseAsInteger,
-  parseAsString,
-  parseAsStringLiteral,
-  useQueryStates,
-} from 'nuqs';
-import { INVESTMENT_GOAL_TAGS, LOCATION_BENEFIT_TAGS, PROPERTY_TYPES } from './labels';
+import { useQueryStates } from 'nuqs';
+import { SORTS, filterParsers, selectionParsers, type SearchFilters, type SortKey } from './search-params';
 
-export const SORTS = ['relevance', 'yield', 'score', 'price-asc', 'price-desc', 'newest'] as const;
-export type SortKey = (typeof SORTS)[number];
+// The definitions live in `search-params.ts`, which the server can read too; this module adds the hooks.
+export { SORTS, filterParsers, selectionParsers };
+export type { SearchFilters, SortKey };
 
 export const SORT_LABEL: Record<SortKey, string> = {
   relevance: 'Best match',
@@ -20,32 +14,10 @@ export const SORT_LABEL: Record<SortKey, string> = {
   newest: 'Newest',
 };
 
-/** Every search filter lives in the URL → shareable, back-button friendly, survives refresh. */
-export const filterParsers = {
-  q: parseAsString.withDefault(''),
-  countries: parseAsArrayOf(parseAsInteger).withDefault([]),
-  cities: parseAsArrayOf(parseAsString).withDefault([]),
-  type: parseAsStringLiteral(PROPERTY_TYPES),
-  minPrice: parseAsInteger,
-  maxPrice: parseAsInteger,
-  minYield: parseAsFloat,
-  minScore: parseAsInteger,
-  beds: parseAsInteger,
-  goals: parseAsArrayOf(parseAsStringLiteral(INVESTMENT_GOAL_TAGS)).withDefault([]),
-  benefits: parseAsArrayOf(parseAsStringLiteral(LOCATION_BENEFIT_TAGS)).withDefault([]),
-  sort: parseAsStringLiteral(SORTS).withDefault('relevance'),
-};
-
-/** UI-only state that is also nice to share: the selected listing. */
-export const selectionParsers = {
-  selected: parseAsString,
-};
-
 export function useSearchFilters() {
   return useQueryStates(filterParsers, { history: 'replace', clearOnDefault: true });
 }
 
-export type SearchFilters = ReturnType<typeof useSearchFilters>[0];
 
 export function countActiveFilters(f: SearchFilters) {
   let n = 0;
@@ -83,7 +55,7 @@ export function toSearchBody(f: SearchFilters, countryNames: (id: number) => str
 
 /** Selected listing and the "Search this area" box (west, south, east, north). */
 export function useSelection() {
-  return useQueryStates({ ...selectionParsers, area: parseAsArrayOf(parseAsFloat) }, { history: 'replace' });
+  return useQueryStates(selectionParsers, { history: 'replace' });
 }
 
 export type Area = [west: number, south: number, east: number, north: number];

@@ -6,6 +6,7 @@
 // The live globe is captured without pins, on the page background, in both themes and at both hero sizes.
 // The hero box has a fixed height per breakpoint (the globe's perspective follows the height of its box), so the
 // still, drawn centred at its natural size, sits exactly where the live globe will appear.
+import { execFileSync } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { chromium } from '@playwright/test';
 import sharp from 'sharp';
@@ -73,7 +74,9 @@ try {
     }
   }
 } finally {
-  await server.kill();
+  // the whole process tree: on Windows the GPU and renderer children otherwise outlive the browser
+  if (process.platform === 'win32') try { execFileSync('taskkill', ['/F', '/T', '/PID', String(server.process().pid)], { stdio: 'ignore' }); } catch {}
+  await server.kill().catch(() => {});
 }
 
 // the mask fades the last part of the glow, so the still never shows as a hard-edged box on the page

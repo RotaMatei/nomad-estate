@@ -7,6 +7,7 @@ import api from '@/app/lib/api';
 import { toListing } from './normalize';
 import { inArea, toSearchBody, DEFAULT_FILTERS, type SearchFilters, type SortKey } from './filters';
 import type { InvestmentGoalTagEnum, LocationBenefitTagEnum, PropertyType } from './labels';
+import { PAGE_SIZE, rustFilters, searchKey } from './search-params';
 import type { ApiPropertySummary, Country, Listing, Pin } from './types';
 
 export function useCountries() {
@@ -205,26 +206,6 @@ const fromRust = (p: RustSearchItem): Listing => ({
   createdAt: p.createdAt,
 });
 
-/** Rows per request. The list asks for the next page as the reader nears the end of what is loaded. */
-const PAGE_SIZE = 40;
-
-function rustFilters(filters: SearchFilters, area: number[] | null | undefined) {
-  return {
-    q: filters.q.trim() || undefined,
-    countryIds: filters.countries,
-    cityNames: filters.cities,
-    type: filters.type ?? undefined,
-    minPrice: filters.minPrice ?? undefined,
-    maxPrice: filters.maxPrice ?? undefined,
-    minYield: filters.minYield ?? undefined,
-    minScore: filters.minScore ?? undefined,
-    minBedrooms: filters.beds ?? undefined,
-    goals: filters.goals,
-    benefits: filters.benefits,
-    bbox: area && area.length === 4 ? area : undefined,
-  };
-}
-
 /** Search against the Rust API: the list is paged and sorted in SQL; the pins come from the light GeoJSON endpoint. */
 function useRustSearch(filters: SearchFilters, options?: SearchOptions): SearchResult {
   const countries = useCountries();
@@ -232,7 +213,8 @@ function useRustSearch(filters: SearchFilters, options?: SearchOptions): SearchR
   const where = rustFilters(filters, options?.area);
 
   const pages = useInfiniteQuery({
-    queryKey: ['property-search', 'rust', where, filters.sort],
+    // on /properties the first page is usually in the cache already: the server fetched it (`prefetch.ts`)
+    queryKey: searchKey(where, filters.sort),
     enabled: enabled && options?.list !== false,
     initialPageParam: 1,
     queryFn: async ({ pageParam, signal }) => {

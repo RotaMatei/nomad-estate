@@ -69,6 +69,8 @@ export function ResultsPanel({
     getScrollElement: () => scrollRef.current,
     estimateSize: () => ROW,
     overscan: 6,
+    // a size to plan with before the list is measured, so the first rows are in the server-rendered HTML
+    initialRect: { width: 392, height: 720 },
     getItemKey: (i) => listings[i].id,
   });
 

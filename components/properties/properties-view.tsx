@@ -31,7 +31,13 @@ function useIsDesktop() {
   );
 }
 
+const noSubscription = () => () => {};
+
+/** False in the server-rendered HTML and until the page has hydrated. */
+const useHydrated = () => React.useSyncExternalStore(noSubscription, () => true, () => false);
+
 export function PropertiesView() {
+  const hydrated = useHydrated();
   const [filters, setFilters] = useSearchFilters();
   const [{ selected, area }, setSelection] = useSelection();
   const { listings, pins, total, hasMore, loadMore, isFetchingMore, countries, isLoading, isFetching, isError, refetch } = usePropertySearch(filters, { area });
@@ -135,10 +141,19 @@ export function PropertiesView() {
           </div>
         )}
 
+        {/* The server cannot know the screen size, so its HTML carries both layouts and CSS shows the right one:
+            the rail on wide screens, and on phones a fixed strip where the sheet will sit once the page hydrates. */}
+        {!hydrated && (
+          <div className="glass shadow-float fixed inset-x-0 bottom-0 z-40 overflow-hidden rounded-t-xl lg:hidden" style={{ height: SNAP_PEEK }}>
+            <div aria-hidden className="mx-auto mt-2 h-[5px] w-12 rounded-full bg-foreground/25" />
+            {results}
+          </div>
+        )}
         {isDesktop ? (
           <aside
             className={cn(
               'glass shadow-float absolute bottom-5 left-5 z-20 overflow-hidden rounded-xl transition-[top] duration-200',
+              !hydrated && 'max-lg:hidden',
               hasChips ? 'top-[184px]' : 'top-[148px]',
             )}
             style={{ width: RAIL_WIDTH }}

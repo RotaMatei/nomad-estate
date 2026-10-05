@@ -15,7 +15,8 @@ import { chromium } from '@playwright/test';
 
 const [base = 'http://127.0.0.1:3210', ...paths] = process.argv.slice(2);
 const routes = paths.length ? paths : ['/', '/properties'];
-const PORT = 9333;
+// a port of its own per run: the port of a previous run can stay taken for a while after its browser is gone
+const PORT = 9300 + Math.floor(Math.random() * 600);
 
 // launchServer, not launch: it can kill the browser. A headless browser left behind with a GPU context becomes a
 // process Windows cannot end, and enough of those make every later run hang.
@@ -45,6 +46,8 @@ try {
   console.error('Lighthouse run failed:', error);
   process.exitCode = 1;
 } finally {
-  await browser.kill();
+  // the whole process tree: on Windows the GPU and renderer children otherwise outlive the browser
+  if (process.platform === 'win32') try { execFileSync('taskkill', ['/F', '/T', '/PID', String(browser.process().pid)], { stdio: 'ignore' }); } catch {}
+  await browser.kill().catch(() => {});
   process.exit(process.exitCode ?? 0);
 }
