@@ -146,7 +146,8 @@ export function PropertiesView() {
         {!hydrated && (
           <div className="glass shadow-float fixed inset-x-0 bottom-0 z-40 overflow-hidden rounded-t-xl lg:hidden" style={{ height: SNAP_PEEK }}>
             <div aria-hidden className="mx-auto mt-2 h-[5px] w-12 rounded-full bg-foreground/25" />
-            {results}
+            {/* only the top of the list shows in the strip: two rows are enough until the sheet replaces it */}
+            {React.cloneElement(results, { listings: listings.slice(0, 2), hasMore: false })}
           </div>
         )}
         {isDesktop ? (
