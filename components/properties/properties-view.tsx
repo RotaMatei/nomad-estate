@@ -2,6 +2,7 @@
 
 import { AnimatePresence } from 'motion/react';
 import { useTheme } from 'next-themes';
+import { Dialog } from 'radix-ui';
 import * as React from 'react';
 import { Drawer as Vaul } from 'vaul';
 import { FilterBar } from './filter-bar';
@@ -228,16 +229,25 @@ export function PropertiesView() {
           </aside>
         ) : (
           <Vaul.Root open modal={false} dismissible={false} snapPoints={SNAPS} activeSnapPoint={snap} setActiveSnapPoint={setSnap}>
-            <Vaul.Portal>
-              <Vaul.Content
-                aria-describedby={undefined}
-                className="glass shadow-float fixed inset-x-0 bottom-0 z-40 flex h-full max-h-[92%] flex-col rounded-t-xl outline-none"
-              >
-                <Vaul.Title className="sr-only">Search results</Vaul.Title>
-                <Vaul.Handle className="mt-2 !bg-foreground/25" />
-                <div className="min-h-0 flex-1">{results}</div>
-              </Vaul.Content>
-            </Vaul.Portal>
+            {/* Vaul 1.1.2 keeps `modal` to itself and never hands it to the Radix dialog it wraps, so that dialog stays modal:
+                it marks the rest of the page aria-hidden and traps focus in the sheet. Vaul's content reads the nearest
+                Radix dialog, so a non-modal one in between keeps the header, the filters and the map reachable. */}
+            <Dialog.Root open modal={false}>
+              <Vaul.Portal>
+                <Vaul.Content
+                  aria-describedby={undefined}
+                  className="glass shadow-float fixed inset-x-0 bottom-0 z-40 flex h-full max-h-[92%] flex-col rounded-t-xl outline-none"
+                >
+                  <Vaul.Title className="sr-only">Search results</Vaul.Title>
+                  <Vaul.Handle className="mt-2 !bg-foreground/25" />
+                  {/* even a non-modal Radix dialog wraps Tab from its last control back to its first: keep Tab from
+                      reaching that handler, so the keyboard walks out of the sheet like out of any other region */}
+                  <div className="min-h-0 flex-1" onKeyDown={(e) => e.key === 'Tab' && e.stopPropagation()}>
+                    {results}
+                  </div>
+                </Vaul.Content>
+              </Vaul.Portal>
+            </Dialog.Root>
           </Vaul.Root>
         )}
 
