@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 15:27 Europe/Bucharest (C1 price history pushed; next C2)
+- **Last heartbeat:** 2026-10-04 15:40 Europe/Bucharest (Qwen3 chosen, C7 out of scope; next C2 with recorded tests)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -85,7 +85,7 @@ Brief: `CLAUDE_CODE_PART_C_AI_PROMPT.md` (owner's hand-off, kept out of git). Ar
 `nomad-estate-ai-api/docs/AI_ARCHITECTURE.md`. Backend-side detail: `nomad-estate-ai-api/PROGRESS.md`.
 
 Rules that bind every step: the Rust AI API is the only AI gateway (`/api/ai/*`); Python only in `nomad-estate-ai-api/ml/`
-and only called by Rust; models come from env vars; pgvector in the existing Postgres; schema changes are additive, in
+and only called by Rust; the language model is Qwen3 behind an OpenAI-compatible server (owner, 2026-10-06), named by env vars; pgvector in the existing Postgres; schema changes are additive, in
 `prisma/schema.prisma` plus migration SQL, never applied to production without the owner; money maths only in tested Rust
 code; AI output is labelled; no personal data goes to a model; every feature has a flag (off in production until reviewed),
 a rate limit, usage logging and a daily budget.
@@ -135,7 +135,7 @@ flag, rate limit, usage logging; UI in both themes, phone and desktop, keyboard 
 - [ ] Heuristic score 0-100 with reasons; inquiries sorted by it
 - [ ] Future: trained model at 500+ labelled inquiries, only if clearly better than the heuristic
 
-### C7 Investment copilot (needs C3 and C5)
+### C7 Investment copilot: OUT OF SCOPE (owner, 2026-10-06: it needs an agent; the items below are not to be built for now)
 - [ ] `finance.rs` with unit tests; tools; tool-use loop in Rust, at most 8 calls and 60s per turn; `POST /api/ai/copilot` streaming
 - [ ] Side sheet with typed blocks (cards, comparison, cash-flow table with editable assumptions, citations)
 - [ ] `CopilotThread` / `CopilotMessage`; eval with 40 scripted tasks and a numbers-come-from-tools check
@@ -152,8 +152,8 @@ flag, rate limit, usage logging; UI in both themes, phone and desktop, keyboard 
 - [ ] Future: add our own price history as a series once C1 has 12 months
 
 ### Waiting on the owner (nothing blocks on these; fakes and fixtures stand in)
-- [ ] Anthropic API key and monthly budget caps per feature
-- [ ] Self-host an open model for search, or stay on the API
+- [x] ~~Anthropic API key~~ Not needed: the owner chose Qwen3 (open weights) instead of Claude on 2026-10-06
+- [x] Model host for development: Ollama on the owner's laptop. Still open: a GPU host for Qwen3 in production
 - [ ] Where the TEI containers run
 - [ ] Reviewed official sources per country (C3) and legal review of the disclaimers
 - [ ] Approval before any Part C migration is applied to production
@@ -457,3 +457,9 @@ ode-v20.19.5-win-x64`
     foreign key, so they survive a deleted listing; a delete adds a closing `DELETED` row.
   - Applied to the local database only (49 listings backfilled). **Production needs the owner's approval for both SQL files.**
   Next: C2 (natural-language search). It can be built and tested against recorded answers, but its accuracy targets need a real API key.
+- **2026-10-06 15:40 (Claude Code, local):** Owner decisions for Part C: **Qwen3 (Hugging Face, open weights) instead of Claude**, run with
+  Ollama on the owner's laptop for now; **C7 (copilot) out of scope** because it needs an agent; C3 stays in (one model call, not an agent);
+  C4 photo analysis uses a Qwen vision model (`qwen2.5vl:7b`); Docker may be started for pgvector and the embedding containers.
+  The AI API now defaults to the OpenAI-compatible provider with `qwen3:8b`; the Anthropic client remains as an unused second provider.
+  **Do not run Qwen3 or any GPU work on this machine without asking: the owner is training a model on the same GPU.** Evals that need the
+  real model (C2 accuracy, C3 answers) are therefore still unmeasured.
