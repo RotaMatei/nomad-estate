@@ -14,6 +14,8 @@ const eslintConfig = [
     ignores: [
       'node_modules/**',
       '.next/**',
+      // other sessions' checkouts of this repository live here
+      '.claude/**',
       '.next_build/**',
       'out/**',
       'build/**',

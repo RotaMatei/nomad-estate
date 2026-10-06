@@ -13,6 +13,9 @@ const customJestConfig = {
     '^@/(.*)$': '<rootDir>/$1',
     '^@/app/(.*)$': '<rootDir>/app/$1',
   },
+  // other sessions' checkouts of this repository live in .claude/
+  testPathIgnorePatterns: ['/node_modules/', '/.next/', '/.claude/'],
+  modulePathIgnorePatterns: ['<rootDir>/.claude/'],
   testMatch: [
     '**/__tests__/**/*.[jt]s?(x)',
     '**/?(*.)+(spec|test).[jt]s?(x)',
