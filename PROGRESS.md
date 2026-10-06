@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 08:52 Europe/Bucharest (Part A leftovers verified; CI for Rust added)
+- **Last heartbeat:** 2026-10-04 14:57 Europe/Bucharest (Part C started: plan and architecture written; next C0 foundation)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -66,7 +66,7 @@
 ### A8 Cleanup & performance
 - [x] Remove MUI, Emotion, styled-components, globe.gl, @openglobus/og, three/R3F, leaflet, d3, gsap, wave-gradient, legacy `app/components`, `app/reactDevBits`, `app/hooks`, unused `public/` assets
 - [x] Map chunk is lazy and absent from non-map routes (verified with `scripts/bundle-report.mjs`)
-- [ ] Performance: Lighthouse mobile is 59 on `/` and 56 on `/properties` (target 90, **not met**); accessibility and best practices are 100 on both. See the session log for what is left
+- [ ] Performance: Lighthouse mobile, measured 2026-10-05: `/` 97 with real throttling (85 simulated), `/properties` 73 (52 to 60 simulated); target 90 **not met on `/properties`** (owner chose to keep the map starting on its own). Accessibility and best practices are 100 on both
 - [x] Update README
 
 ## Plan — Part B: Backend → Rust (see `nomad-estate-database-api/PROGRESS.md`)
@@ -78,6 +78,86 @@
 - [x] B5 AI API (`nomad-estate-ai-api`) port to Rust (`rust/` in that repo)
 - [x] B6 Schema visualizer: keeps `prisma/schema.prisma` as the schema documentation, served by the Rust API; restyled to the app tokens
 - [ ] B7 Parity tests (done, `rust/PARITY.md`), frontend default switched to the Rust flavor (done), deployment prepared (`rust/DEPLOY.md`). Open, owner only: deploy, then approve removing Nest
+
+## Plan — Part C: AI features
+
+Brief: `CLAUDE_CODE_PART_C_AI_PROMPT.md` (owner's hand-off, kept out of git). Architecture and every measured number:
+`nomad-estate-ai-api/docs/AI_ARCHITECTURE.md`. Backend-side detail: `nomad-estate-ai-api/PROGRESS.md`.
+
+Rules that bind every step: the Rust AI API is the only AI gateway (`/api/ai/*`); Python only in `nomad-estate-ai-api/ml/`
+and only called by Rust; models come from env vars; pgvector in the existing Postgres; schema changes are additive, in
+`prisma/schema.prisma` plus migration SQL, never applied to production without the owner; money maths only in tested Rust
+code; AI output is labelled; no personal data goes to a model; every feature has a flag (off in production until reviewed),
+a rate limit, usage logging and a daily budget.
+
+Done means, for each step: endpoint(s) with OpenAPI docs; unit tests and an eval passing its threshold where one applies;
+flag, rate limit, usage logging; UI in both themes, phone and desktop, keyboard and reduced motion; screenshots looked at;
+`AI_ARCHITECTURE.md` updated; box ticked with a session-log line saying what was measured.
+
+### C0 Foundation (`nomad-estate-ai-api/rust/src/ai/`)
+- [ ] Plan in the PROGRESS files, `docs/AI_ARCHITECTURE.md`
+- [ ] Provider trait: Anthropic Messages API and OpenAI-compatible clients, timeouts (fast 8s, smart 60s), 2 retries with jitter, SSE streaming
+- [ ] Versioned prompt files loaded at startup; prompt version logged with every call
+- [ ] `AiUsage` table, cost per call, daily budget guard per feature (503 when spent)
+- [ ] Cache (moka), rate limits per IP and per user, feature flags and `GET /api/ai/features`
+- [ ] `pii.rs` scrubber with unit tests
+- [ ] Eval runner (`cargo run --bin evals -- <feature>`), recorded fixtures in CI, `--live` by hand
+- [ ] `docker-compose.ai.yml`: Postgres with pgvector, TEI embeddings (bge-m3) and reranker (bge-reranker-v2-m3)
+
+### C1 Price history
+- [ ] `PropertyPriceHistory` table; rows written in the same transaction as create-full, update-full, status changes and delete
+- [ ] Postgres trigger on `Property` as a safety net, without double inserts; backfill one row per existing property
+- [ ] Details page: price-history sparkline when there are 2 or more points
+
+### C2 Natural-language search
+- [ ] `POST /api/ai/search/parse`: gazetteer, then model with one `set_filters` tool, then server-side validation, then tag similarity
+- [ ] "Describe what you're looking for" on `/` and `/properties`, removable chips, "Did you mean" at low confidence
+- [ ] Eval: 150+ queries in EN, RO, ES, PT, DE, FR, IT; per-field accuracy >= 90%, exact match >= 75%, p95 < 1.5s uncached
+
+### C3 Country answers with citations (RAG)
+- [ ] pgvector, `KnowledgeSource` / `KnowledgeChunk`, HNSW and GIN indexes
+- [ ] Python ingestion (`ml/ingest/`), `sources.yaml` for the 10 countries with most listings (owner reviews the URLs before production)
+- [ ] Hybrid retrieval, rank fusion, rerank; `POST /api/ai/ask` streaming with citations and refusals
+- [ ] "Ask about buying in {country}" panel; eval with 60 questions over 5 countries
+
+### C4 Listing autopilot
+- [ ] `POST /api/ai/listing/analyse` (photos to existing enums, quality warnings, suggested cover), suggestions never auto-saved
+- [ ] `POST /api/ai/listing/describe` with a numbers-match-fields check
+- [ ] `PropertyTranslation` table, language switcher, machine translations labelled
+
+### C5 Fair value
+- [ ] `valuation.rs` (comparables, median price per m² with interquartile band), `GET /api/ai/valuation/:propertyId`
+- [ ] Details page delta and "How we estimate"; badge on cards when |delta| >= 5% and comps >= 5
+- [ ] Future: LightGBM in `ml/` at 5,000+ listings with history, ONNX in Rust
+
+### C6 Lead scoring
+- [ ] `Inquiry.status` and `statusChangedAt`; agencies set the status in the dashboard
+- [ ] Heuristic score 0-100 with reasons; inquiries sorted by it
+- [ ] Future: trained model at 500+ labelled inquiries, only if clearly better than the heuristic
+
+### C7 Investment copilot (needs C3 and C5)
+- [ ] `finance.rs` with unit tests; tools; tool-use loop in Rust, at most 8 calls and 60s per turn; `POST /api/ai/copilot` streaming
+- [ ] Side sheet with typed blocks (cards, comparison, cash-flow table with editable assumptions, citations)
+- [ ] `CopilotThread` / `CopilotMessage`; eval with 40 scripted tasks and a numbers-come-from-tools check
+
+### C8 Similar properties, duplicates, explainable score
+- [ ] `PropertyEmbedding`, "Similar properties" carousel
+- [ ] pHash per picture, admin list of listings sharing 3+ near-identical photos across agencies
+- [ ] `score.rs` returns per-factor contributions; "Why this score" popover
+
+### C9 Market forecasts (pipeline now, UI behind a flag)
+- [ ] `MarketSeries` / `MarketObservation` / `MarketEvent`; scheduled ingestion in `ml/data/`
+- [ ] Baselines, Chronos and TimesFM, rolling-origin backtest, ship per country only when it beats the baseline on MASE
+- [ ] `GET /api/ai/forecast/:countryCode`; market page with fan chart and scenarios, flagged off
+- [ ] Future: add our own price history as a series once C1 has 12 months
+
+### Waiting on the owner (nothing blocks on these; fakes and fixtures stand in)
+- [ ] Anthropic API key and monthly budget caps per feature
+- [ ] Self-host an open model for search, or stay on the API
+- [ ] Where the TEI containers run
+- [ ] Reviewed official sources per country (C3) and legal review of the disclaimers
+- [ ] Approval before any Part C migration is applied to production
+- [ ] Translation languages, if not EN, RO, ES, PT, DE, FR, IT
 
 ## Session log
 
@@ -351,3 +431,10 @@ ode-v20.19.5-win-x64`
   rail; saving then unsaving a listing works (DELETE 200, POST 201). CI added for both Rust services (`rust-ci.yml`: format, clippy, tests on a
   Postgres service, Docker image build). The frontend CI is green on GitHub; the API repos are private, so their runs are not visible from
   here. README has a Performance section. Open: MapTiler satellite layer (needs a key), deployment and Nest removal (owner).
+- **2026-10-06 14:57 (Claude Code, local):** Part C (AI features) started from the owner's brief. The plan is above ("Plan — Part C"),
+  mirrored in `nomad-estate-ai-api/PROGRESS.md`; the design is in `nomad-estate-ai-api/docs/AI_ARCHITECTURE.md`. Part A's open items stay as
+  they are: MapTiler layer (needs a key), and Lighthouse on `/properties` at 73 (the brief quotes 59 and 56, which are the numbers from before
+  the 2026-10-05 performance work; `/` is 97 now). One thing the brief could not know: the default smart model (`claude-sonnet-5-5`) rejects a
+  forced tool choice and a non-default temperature, so the provider client adapts the request per model (table in the architecture doc).
+  Local tools: `uv` and Python 3.13 are installed; Docker Desktop is installed but not running, and the portable Postgres has no pgvector,
+  so C3 and C8 will need the compose Postgres.
