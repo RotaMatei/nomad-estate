@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 14:57 Europe/Bucharest (Part C started: plan and architecture written; next C0 foundation)
+- **Last heartbeat:** 2026-10-04 15:16 Europe/Bucharest (C0 AI foundation pushed; next C1 price history)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -95,14 +95,14 @@ flag, rate limit, usage logging; UI in both themes, phone and desktop, keyboard 
 `AI_ARCHITECTURE.md` updated; box ticked with a session-log line saying what was measured.
 
 ### C0 Foundation (`nomad-estate-ai-api/rust/src/ai/`)
-- [ ] Plan in the PROGRESS files, `docs/AI_ARCHITECTURE.md`
-- [ ] Provider trait: Anthropic Messages API and OpenAI-compatible clients, timeouts (fast 8s, smart 60s), 2 retries with jitter, SSE streaming
-- [ ] Versioned prompt files loaded at startup; prompt version logged with every call
-- [ ] `AiUsage` table, cost per call, daily budget guard per feature (503 when spent)
-- [ ] Cache (moka), rate limits per IP and per user, feature flags and `GET /api/ai/features`
-- [ ] `pii.rs` scrubber with unit tests
-- [ ] Eval runner (`cargo run --bin evals -- <feature>`), recorded fixtures in CI, `--live` by hand
-- [ ] `docker-compose.ai.yml`: Postgres with pgvector, TEI embeddings (bge-m3) and reranker (bge-reranker-v2-m3)
+- [x] Plan in the PROGRESS files, `docs/AI_ARCHITECTURE.md`
+- [x] Provider trait: Anthropic Messages API and OpenAI-compatible clients, timeouts (fast 8s, smart 60s), 2 retries with jitter, SSE streaming
+- [x] Versioned prompt files loaded at startup; prompt version logged with every call
+- [x] `AiUsage` table, cost per call, daily budget guard per feature (503 when spent)
+- [x] Cache (moka), rate limits per IP and per user, feature flags and `GET /api/ai/features`
+- [x] `pii.rs` scrubber with unit tests
+- [x] Eval runner (`cargo run --bin evals -- <feature>`), recorded fixtures in CI, `--live` by hand
+- [x] `docker-compose.ai.yml`: Postgres with pgvector, TEI embeddings (bge-m3) and reranker (bge-reranker-v2-m3) (written; not started here: Docker Desktop is not running)
 
 ### C1 Price history
 - [ ] `PropertyPriceHistory` table; rows written in the same transaction as create-full, update-full, status changes and delete
@@ -438,3 +438,9 @@ ode-v20.19.5-win-x64`
   forced tool choice and a non-default temperature, so the provider client adapts the request per model (table in the architecture doc).
   Local tools: `uv` and Python 3.13 are installed; Docker Desktop is installed but not running, and the portable Postgres has no pgvector,
   so C3 and C8 will need the compose Postgres.
+- **2026-10-06 15:16 (Claude Code, local):** C0 (AI foundation) done in `nomad-estate-ai-api/rust/src/ai/`: provider trait with Anthropic
+  and OpenAI-compatible clients (request shaped per model, 2 retries with jitter, SSE streaming, refusals as errors), versioned prompts,
+  `AiUsage` rows with cost and a daily budget per feature, flags and `GET /api/ai/features`, rate limits per address and per user, cache,
+  PII scrubber, eval runner with recorded answers for CI. `AiUsage` is in `prisma/schema.prisma` with its SQL in `prisma/sql/` (applied to the
+  local database only). Measured: 32 tests pass in the AI API; the scrubber eval is 10/10. Cost model check: 1,000 search parses at about 900
+  input and 120 output tokens on the fast model come to $1.50. No call has reached a real model: there is no API key yet. Next: C1.
