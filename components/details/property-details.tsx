@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import { PropertyGlobe } from '@/components/globe';
 import { PriceHistory } from './price-history';
+import { AskCountry } from './ask-country';
 import { ListingFacts, ListingImage, ListingPlace, SaveButton, ScoreRing } from '@/components/properties/listing-parts';
 import { SiteFooter } from '@/components/site/site-footer';
 import { SiteHeader } from '@/components/site/site-header';
@@ -192,6 +193,8 @@ function Loaded({ details }: { details: PropertyDetails }) {
               </div>
             </section>
           )}
+
+          {listing.countryCode && <AskCountry countryCode={listing.countryCode} countryName={listing.countryName ?? 'this country'} />}
         </div>
 
         <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
