@@ -46,6 +46,8 @@ export interface SearchResult {
   isLoading: boolean;
   isPending: boolean;
   isFetching: boolean;
+  /** The pins are being fetched: they come from their own request and may arrive after the list */
+  isFetchingPins: boolean;
   isError: boolean;
   refetch: () => void;
 }
@@ -145,6 +147,7 @@ function useNestSearch(filters: SearchFilters, options?: SearchOptions): SearchR
     isLoading: search.isLoading,
     isPending: search.isPending,
     isFetching: search.isFetching,
+    isFetchingPins: search.isFetching,
     isError: search.isError,
     refetch: search.refetch,
   };
@@ -277,6 +280,7 @@ function useRustSearch(filters: SearchFilters, options?: SearchOptions): SearchR
     isLoading: main.isLoading,
     isPending: main.isPending,
     isFetching: main.isFetching && !isFetchingNextPage,
+    isFetchingPins: geo.isFetching,
     isError: main.isError,
     refetch: () => {
       void pages.refetch();

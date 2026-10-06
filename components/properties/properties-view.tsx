@@ -10,6 +10,8 @@ import { ResultsPanel } from './results-panel';
 import { PropertyGlobe, type Bounds, type PropertyGlobeHandle } from '@/components/globe';
 import { SiteHeader } from '@/components/site/site-header';
 import { Button } from '@/components/ui/button';
+import { LOW_CONFIDENCE, peekHandoff } from '@/lib/ai/search';
+import { useAskSearch } from '@/lib/ai/use-ask-search';
 import { countActiveFilters, useSearchFilters, useSelection } from '@/lib/properties/filters';
 import { useListingsByIds, usePropertySearch } from '@/lib/properties/queries';
 import { cn } from '@/lib/utils';
@@ -33,6 +35,31 @@ function useIsDesktop() {
 
 const noSubscription = () => () => {};
 
+/** Where to look to see all of these pins: their middle, and a zoom that fits their spread. */
+function viewOf(pins: { lat: number | null; lng: number | null }[]) {
+  const placed = pins.filter((p): p is { lat: number; lng: number } => p.lat != null && p.lng != null);
+  if (placed.length === 0) return null;
+  const lats = placed.map((p) => p.lat);
+  const lngs = placed.map((p) => p.lng);
+  const [south, north, west, east] = [Math.min(...lats), Math.max(...lats), Math.min(...lngs), Math.max(...lngs)];
+  const spread = Math.max(east - west, (north - south) * 2, 0.02);
+  // never closer than a city and its surroundings: a single match should still show where in the country it is
+  return { lng: (west + east) / 2, lat: (south + north) / 2, zoom: Math.min(8, Math.max(1.6, Math.log2(360 / spread) - 0.4)) };
+}
+
+/** Height of an element, kept current. `fallback` is used on the server and until the element is measured. */
+function useHeight(ref: React.RefObject<HTMLElement | null>, fallback: number) {
+  const [height, setHeight] = React.useState<number | null>(null);
+  React.useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const observer = new ResizeObserver(() => setHeight(element.offsetHeight));
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [ref]);
+  return height ?? fallback;
+}
+
 /** False in the server-rendered HTML and until the page has hydrated. */
 const useHydrated = () => React.useSyncExternalStore(noSubscription, () => true, () => false);
 
@@ -40,7 +67,7 @@ export function PropertiesView() {
   const hydrated = useHydrated();
   const [filters, setFilters] = useSearchFilters();
   const [{ selected, area }, setSelection] = useSelection();
-  const { listings, pins, total, hasMore, loadMore, isFetchingMore, countries, isLoading, isFetching, isError, refetch } = usePropertySearch(filters, { area });
+  const { listings, pins, total, hasMore, loadMore, isFetchingMore, countries, isLoading, isFetching, isFetchingPins, isError, refetch } = usePropertySearch(filters, { area });
   const { resolvedTheme } = useTheme();
   const isDesktop = useIsDesktop();
 
@@ -66,7 +93,44 @@ export function PropertiesView() {
     setPendingArea(null);
   }, [setSelection]);
 
+  // Search by description. Once its filters have brought new results, the globe turns to them.
+  // (also on arrival from the home page, when its search box has already put a description's filters in the URL)
+  const turnToResults = React.useRef((peekHandoff()?.parsed.confidence ?? 0) >= LOW_CONFIDENCE);
+  const applyFilters = React.useCallback((patch: Parameters<typeof setFilters>[0]) => void setFilters(patch), [setFilters]);
+  const ask = useAskSearch(
+    filters,
+    applyFilters,
+    React.useCallback(() => {
+      turnToResults.current = true;
+      clearArea();
+    }, [clearArea]),
+  );
+  React.useEffect(() => {
+    if (!turnToResults.current || isFetchingPins) return;
+    const view = viewOf(pins);
+    if (!view) {
+      turnToResults.current = false;
+      return;
+    }
+    // on arrival from the home page the map may still be loading: wait for it, for a while
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let tries = 0;
+    const turn = () => {
+      if (globe.current?.getBounds()) {
+        turnToResults.current = false;
+        globe.current.flyTo(view.lng, view.lat, view.zoom);
+      } else if (++tries < 60) {
+        timer = setTimeout(turn, 250);
+      }
+    };
+    turn();
+    return () => clearTimeout(timer);
+  }, [pins, isFetchingPins]);
+
   const hasChips = countActiveFilters(filters) > 0 || !!area;
+  // the rail starts under the filter bar, however many rows the bar has (chips, the note about a description)
+  const bar = React.useRef<HTMLDivElement>(null);
+  const barHeight = useHeight(bar, hasChips ? 84 : 48);
   const hasFilters = hasChips || !!filters.q;
   const results = (
     <ResultsPanel
@@ -118,11 +182,13 @@ export function PropertiesView() {
         />
 
         <FilterBar
+          ref={bar}
           filters={filters}
-          setFilters={(patch) => void setFilters(patch)}
+          setFilters={applyFilters}
           countries={countries}
           hasArea={!!area}
           onClearArea={clearArea}
+          ask={ask}
           className="absolute inset-x-3 top-[76px] z-30 sm:inset-x-5 sm:top-[84px] lg:max-w-[1040px]"
         />
 
@@ -155,9 +221,8 @@ export function PropertiesView() {
             className={cn(
               'glass shadow-float absolute bottom-5 left-5 z-20 overflow-hidden rounded-xl transition-[top] duration-200',
               !hydrated && 'max-lg:hidden',
-              hasChips ? 'top-[184px]' : 'top-[148px]',
             )}
-            style={{ width: RAIL_WIDTH }}
+            style={{ width: RAIL_WIDTH, top: 100 + barHeight }}
           >
             {results}
           </aside>

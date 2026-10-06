@@ -58,6 +58,9 @@ api.interceptors.response.use(
     return response;
   },
   async (error: AxiosError) => {
+    // A request dropped because a newer one replaced it (typing in a search box, changing a filter) is not a failure
+    if (axios.isCancel(error)) return Promise.reject(error);
+
     // Log errors in development
     if (process.env.NODE_ENV === 'development') {
       console.error(`[API] ${error.config?.method?.toUpperCase()} ${error.config?.url}`, {

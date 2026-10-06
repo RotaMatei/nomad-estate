@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 15:40 Europe/Bucharest (Qwen3 chosen, C7 out of scope; next C2 with recorded tests)
+- **Last heartbeat:** 2026-10-06 19:23 Europe/Bucharest (C2 done except a live Qwen3 run; next C3)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -110,9 +110,9 @@ flag, rate limit, usage logging; UI in both themes, phone and desktop, keyboard 
 - [x] Details page: price-history sparkline when there are 2 or more points
 
 ### C2 Natural-language search
-- [ ] `POST /api/ai/search/parse`: gazetteer, then model with one `set_filters` tool, then server-side validation, then tag similarity
-- [ ] "Describe what you're looking for" on `/` and `/properties`, removable chips, "Did you mean" at low confidence
-- [ ] Eval: 150+ queries in EN, RO, ES, PT, DE, FR, IT; per-field accuracy >= 90%, exact match >= 75%, p95 < 1.5s uncached
+- [x] `POST /api/ai/search/parse`: gazetteer, then model with one `set_filters` tool, then server-side validation, then tag similarity (rules in 7 languages first; the model only for what they leave over)
+- [x] "Describe what you're looking for" on `/` and `/properties`, removable chips, "Did you mean" at low confidence (only the filters go in the URL, never the sentence; the globe turns to the results)
+- [x] Eval: 150+ queries in EN, RO, ES, PT, DE, FR, IT; per-field accuracy >= 90%, exact match >= 75%, p95 < 1.5s uncached. **Met on rules alone: 163 queries, 97.9% per-field, 93.3% exact, under 1 ms; with embeddings 98.9%, 96.3%, 213 ms. Still open: the same run with Qwen3 (`--live --record`), which the owner asked to hold.**
 
 ### C3 Country answers with citations (RAG)
 - [ ] pgvector, `KnowledgeSource` / `KnowledgeChunk`, HNSW and GIN indexes
@@ -463,3 +463,5 @@ ode-v20.19.5-win-x64`
   The AI API now defaults to the OpenAI-compatible provider with `qwen3:8b`; the Anthropic client remains as an unused second provider.
   **Do not run Qwen3 or any GPU work on this machine without asking: the owner is training a model on the same GPU.** Evals that need the
   real model (C2 accuracy, C3 answers) are therefore still unmeasured.
+- 2026-10-06 19:03 (Claude Code, local): C2 backend. `POST /api/ai/search/parse` in the AI API (`rust/src/ai/search/`): contact details are cut first; rules in EN, RO, ES, PT, DE, FR, IT read places (gazetteer: countries by CLDR names, cities with a listing, new `PlaceAlias` table), prices, bedrooms as each language counts them, yields, scores, types, sort orders and plainly worded tags; Qwen3 is asked only for what the rules leave over, through one forced tool, and its answer is validated; leftover phrases can become tags by bge-m3 similarity. Eval `evals/search/queries.jsonl`, 163 sentences: rules alone 97.9% per-field and 93.3% exact match (targets 90 and 75), with embeddings 98.9% and 96.3%, p95 213 ms. Cautions recorded in `AI_ARCHITECTURE.md` section 6: I wrote both the rules and the sentences, and Qwen3 itself has still not been run (owner's request), so the model stage is tested with scripted answers only. The planned 0.6 similarity threshold was measured to be far too loose for bge-m3 and is 0.76. Docker is running the pgvector Postgres and the embedding container (it needed a smaller batch size to fit in memory). `PlaceAlias` is applied to the local database only. 60 tests pass in the AI API.
+- 2026-10-06 19:23 (Claude Code, local): C2 frontend. With `search` on in `/api/ai/features`, the search box on `/` and in the filter bar of `/properties` takes a sentence ("Describe what you're looking for"). On `/properties` a confident reading replaces the filters (the existing removable chips show them), a note says the filters were set automatically, names what found no filter and says when a non-dollar amount was used as written; a reading under 0.6 confidence is offered as "Did you mean" with "Use these filters" and "Search names instead"; a sentence with no filter in it, or a reader that is down, falls back to the plain name search. The home page reads the sentence before navigating, so the search page opens already filtered; the sentence travels in memory, never in the URL. After a description is applied the globe turns to the results. Files: `lib/ai/search.ts`, `lib/ai/use-ask-search.ts`, `filter-bar.tsx`, `properties-view.tsx` (the rail now sits under the bar by measured height), `home-client.tsx`. Checked in a real browser, light and dark, desktop and phone: four flows, no console errors, no horizontal overflow. Also: cancelled requests are no longer logged as API errors; Jest can load `nuqs` (4 new tests, 35 pass). `typecheck`, `lint`, `build` green. Found on the way and left as a separate task: on phones the results sheet marks the rest of `/properties` `aria-hidden`, so the filter bar is hidden from screen readers (older defect). Not done in C2: running the eval and the UI against Qwen3 itself.

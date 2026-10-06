@@ -36,5 +36,15 @@ const customJestConfig = {
   },
 };
 
-// createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
-module.exports = createJestConfig(customJestConfig);
+// Packages published as ES modules only: Jest must transform them like our own code.
+const esmPackages = ['nuqs'];
+
+// createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async.
+// next/jest sets its own transformIgnorePatterns after reading ours, so the list is corrected on the way out.
+module.exports = async () => {
+  const config = await createJestConfig(customJestConfig)();
+  return {
+    ...config,
+    transformIgnorePatterns: [`/node_modules/(?!(${esmPackages.join('|')})/)`, '^.+\\.module\\.(css|sass|scss)$'],
+  };
+};

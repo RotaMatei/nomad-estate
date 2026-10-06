@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { ArrowUpRight, Search } from 'lucide-react';
+import { ArrowUpRight, Search, Sparkles } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { QuietLink as Link } from '@/components/site/quiet-link';
 import { useRouter } from 'next/navigation';
@@ -13,9 +13,13 @@ import { NumberTicker } from '@/components/magicui/number-ticker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Spinner } from '@/components/ui/spinner';
+import { LOW_CONFIDENCE, MAX_CHARS, hasFilters, leaveHandoff, parseSearch, searchHref, toFilters } from '@/lib/ai/search';
+import { useAiFeature } from '@/lib/ai/use-ask-search';
 import { DEFAULT_FILTERS, flagEmoji } from '@/lib/properties/filters';
 import { formatPrice, formatYield } from '@/lib/properties/format';
 import { usePropertySearch } from '@/lib/properties/queries';
+import { cn } from '@/lib/utils';
 
 /** The catalogue is fetched once and shared (TanStack Query cache) by the hero globe, featured markets and /properties. */
 const useCatalogue = () => usePropertySearch(DEFAULT_FILTERS, { enabled: useAfterFirstPaint(), list: false });
@@ -25,6 +29,27 @@ export function HomeHero() {
   const { resolvedTheme } = useTheme();
   const { pins } = useCatalogue();
   const [q, setQ] = React.useState('');
+  const describing = useAiFeature('search');
+  const [reading, setReading] = React.useState(false);
+
+  /** With search by description on, the sentence is read here, so the search page opens already filtered. */
+  const search = async () => {
+    const term = q.trim();
+    const byName = term ? `/properties?q=${encodeURIComponent(term)}` : '/properties';
+    if (!term || !describing) return router.push(byName);
+    setReading(true);
+    try {
+      const parsed = await parseSearch(term, navigator.language);
+      if (!hasFilters(parsed)) return router.push(byName);
+      leaveHandoff(term, parsed);
+      // not sure enough: the search page offers the reading instead of applying it
+      router.push(parsed.confidence >= LOW_CONFIDENCE ? searchHref(toFilters(parsed)) : '/properties');
+    } catch {
+      router.push(byName);
+    } finally {
+      setReading(false);
+    }
+  };
 
   return (
     <section className="relative isolate flex min-h-[100svh] flex-col overflow-hidden">
@@ -56,28 +81,34 @@ export function HomeHero() {
 
           <form
             role="search"
-            className="glass shadow-float mt-8 flex h-14 max-w-md items-center gap-2 rounded-full pr-2 pl-5"
+            className={cn('glass shadow-float mt-8 flex h-14 items-center gap-2 rounded-full pr-2 pl-5', describing ? 'max-w-lg' : 'max-w-md')}
             onSubmit={(e) => {
               e.preventDefault();
-              const term = q.trim();
-              router.push(term ? `/properties?q=${encodeURIComponent(term)}` : '/properties');
+              void search();
             }}
           >
-            <Search className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+            {describing ? (
+              <Sparkles className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+            ) : (
+              <Search className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+            )}
             <Input
               type="search"
               value={q}
+              maxLength={MAX_CHARS}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Country or property name"
-              aria-label="Search properties by country or name"
+              placeholder={describing ? 'Describe what you’re looking for' : 'Country or property name'}
+              aria-label={describing ? 'Describe the property you are looking for, in your own words' : 'Search properties by country or name'}
               className="h-10 flex-1 border-transparent bg-transparent px-1 text-base shadow-none focus-visible:ring-0 dark:bg-transparent"
             />
-            <Button type="submit" className="h-10 rounded-full px-5">
+            <Button type="submit" className="h-10 rounded-full px-5" disabled={reading}>
+              {reading && <Spinner aria-label="Reading your description" />}
               Search properties
             </Button>
           </form>
 
           <p className="mt-4 text-sm text-muted-foreground">
+            {describing && <>Try “two-bedroom flat in Lisbon under 400k near the beach”. </>}
             Or{' '}
             <Link href="/properties" className="font-medium text-foreground underline underline-offset-4 hover:text-beacon">
               explore the whole globe

@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, ChevronDown, MapPin, Search, SlidersHorizontal, X } from 'lucide-react';
+import { Check, ChevronDown, MapPin, Search, SlidersHorizontal, Sparkles, X } from 'lucide-react';
 import * as React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,10 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Slider } from '@/components/ui/slider';
+import { Spinner } from '@/components/ui/spinner';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import type { AskSearch } from '@/lib/ai/use-ask-search';
+import { MAX_CHARS } from '@/lib/ai/search';
 import { countActiveFilters, flagEmoji, type SearchFilters } from '@/lib/properties/filters';
 import { formatPrice } from '@/lib/properties/format';
 import {
@@ -36,7 +39,10 @@ interface FilterBarProps {
   countries: Country[];
   hasArea: boolean;
   onClearArea: () => void;
+  /** Search by description. When it is on, the box takes a sentence and the filters are set from it. */
+  ask?: AskSearch;
   className?: string;
+  ref?: React.Ref<HTMLDivElement>;
 }
 
 function FilterTrigger({ label, summary, ...props }: { label: string; summary?: string | null } & React.ComponentProps<typeof Button>) {
@@ -62,8 +68,10 @@ function priceLabel(min: number | null, max: number | null) {
   return min != null ? `From ${c(min)}` : `Up to ${c(max!)}`;
 }
 
-export function FilterBar({ filters, setFilters, countries, hasArea, onClearArea, className }: FilterBarProps) {
-  const [query, setQuery] = React.useState(filters.q);
+export function FilterBar({ filters, setFilters, countries, hasArea, onClearArea, ask, className, ref }: FilterBarProps) {
+  // the box starts with the sentence that produced these filters (read on the home page), or the name searched for
+  const [query, setQuery] = React.useState(ask?.text || filters.q);
+  const describing = !!ask?.enabled;
   const [cityDraft, setCityDraft] = React.useState('');
   const active = countActiveFilters(filters);
   const countryById = React.useMemo(() => new Map(countries.map((c) => [c.id, c])), [countries]);
@@ -116,26 +124,37 @@ export function FilterBar({ filters, setFilters, countries, hasArea, onClearArea
   ];
 
   return (
-    <div className={cn('pointer-events-none flex flex-col gap-2', className)}>
+    <div ref={ref} className={cn('pointer-events-none flex flex-col gap-2', className)}>
       <div className="glass shadow-float pointer-events-auto flex h-12 items-center gap-1 rounded-full pr-1.5 pl-1.5">
         <form
           role="search"
-          className="relative min-w-36 flex-1 sm:max-w-64"
+          className={cn('relative min-w-36 flex-1', describing ? 'sm:max-w-80' : 'sm:max-w-64')}
           onSubmit={(e) => {
             e.preventDefault();
-            setFilters({ q: query.trim() });
+            if (ask) void ask.submit(query);
+            else setFilters({ q: query.trim() });
           }}
         >
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+          {ask?.busy ? (
+            <Spinner aria-label="Reading your description" className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground" />
+          ) : describing ? (
+            <Sparkles className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+          ) : (
+            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+          )}
           <Input
             type="search"
             value={query}
+            maxLength={MAX_CHARS}
             onChange={(e) => {
               setQuery(e.target.value);
-              if (e.target.value === '' && filters.q) setFilters({ q: '' });
+              if (e.target.value === '') {
+                if (filters.q) setFilters({ q: '' });
+                ask?.dismiss();
+              }
             }}
-            placeholder="Search by name or country"
-            aria-label="Search properties by name or country"
+            placeholder={describing ? 'Describe what you’re looking for' : 'Search by name or country'}
+            aria-label={describing ? 'Describe the property you are looking for, in your own words' : 'Search properties by name or country'}
             className="h-9 rounded-full border-transparent bg-transparent pl-9 shadow-none dark:bg-transparent"
           />
         </form>
@@ -352,6 +371,63 @@ export function FilterBar({ filters, setFilters, countries, hasArea, onClearArea
           )}
         </ul>
       )}
+
+      {ask?.note && <AskNoteLine ask={ask} />}
+    </div>
+  );
+}
+
+/** What was made of the last description: said in words, because the filters were set by software, not by the person. */
+function AskNoteLine({ ask }: { ask: AskSearch }) {
+  const note = ask.note;
+  if (!note) return null;
+  const quoted = (phrases: string[]) => phrases.map((p) => `“${p}”`).join(', ');
+  return (
+    <div
+      role="status"
+      className="glass shadow-float pointer-events-auto flex max-w-full items-start gap-2 self-start rounded-2xl py-1.5 pr-1.5 pl-3 text-xs"
+    >
+      <Sparkles className="mt-[5px] size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+      <div className="flex min-h-6 min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1.5">
+      {note.kind === 'applied' && (
+        <p>
+          Filters set automatically from your description.
+          {note.unparsed.length > 0 ? <span className="text-muted-foreground"> No filter for {quoted(note.unparsed)}.</span> : ' Remove any that are wrong.'}
+          {note.currency && note.currency !== 'USD' && (
+            <span className="text-muted-foreground"> Prices here are in US dollars: your amount in {note.currency} was used as written, not converted.</span>
+          )}
+        </p>
+      )}
+      {note.kind === 'names' && <p>No filters found in that, so listings were searched by name.</p>}
+      {note.kind === 'suggest' && (
+        <>
+          <p>Did you mean</p>
+          <ul aria-label="Suggested filters" className="flex flex-wrap items-center gap-1">
+            {note.parsed.chips.map((chip) => (
+              <li key={`${chip.field}-${chip.value}`}>
+                <Badge variant="outline" className="h-6 rounded-full px-2 text-xs font-normal">
+                  {chip.label}
+                </Badge>
+              </li>
+            ))}
+          </ul>
+          <Button size="sm" className="h-7 rounded-full px-3 text-xs" onClick={() => ask.accept(note.parsed)}>
+            Use these filters
+          </Button>
+          <Button size="sm" variant="ghost" className="h-7 rounded-full px-3 text-xs" onClick={ask.searchNames}>
+            Search names instead
+          </Button>
+        </>
+      )}
+      </div>
+      <button
+        type="button"
+        onClick={ask.dismiss}
+        aria-label="Dismiss"
+        className="flex size-6 shrink-0 items-center justify-center rounded-full hover:bg-foreground/10"
+      >
+        <X className="size-3" aria-hidden />
+      </button>
     </div>
   );
 }
