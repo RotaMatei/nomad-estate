@@ -10,6 +10,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { PropertyGlobe } from '@/components/globe';
+import { PriceHistory } from './price-history';
 import { ListingFacts, ListingImage, ListingPlace, SaveButton, ScoreRing } from '@/components/properties/listing-parts';
 import { SiteFooter } from '@/components/site/site-footer';
 import { SiteHeader } from '@/components/site/site-header';
@@ -287,6 +288,7 @@ function InvestmentPanel({ details }: { details: PropertyDetails }) {
     <section aria-label="Investment summary" className="rounded-xl border bg-card p-6">
       <p className="text-sm text-muted-foreground">Asking price</p>
       <p className="font-display tabular mt-1 text-4xl font-semibold">{formatPrice(listing.price)}</p>
+      <PriceHistory propertyId={listing.id} />
 
       <div className="mt-5 flex items-center gap-5 border-y py-4">
         <div className="flex-1">

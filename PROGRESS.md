@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-10-04 15:16 Europe/Bucharest (C0 AI foundation pushed; next C1 price history)
+- **Last heartbeat:** 2026-10-04 15:27 Europe/Bucharest (C1 price history pushed; next C2)
 
 ## Decisions (agreed with owner, 2026-10-04)
 
@@ -105,9 +105,9 @@ flag, rate limit, usage logging; UI in both themes, phone and desktop, keyboard 
 - [x] `docker-compose.ai.yml`: Postgres with pgvector, TEI embeddings (bge-m3) and reranker (bge-reranker-v2-m3) (written; not started here: Docker Desktop is not running)
 
 ### C1 Price history
-- [ ] `PropertyPriceHistory` table; rows written in the same transaction as create-full, update-full, status changes and delete
-- [ ] Postgres trigger on `Property` as a safety net, without double inserts; backfill one row per existing property
-- [ ] Details page: price-history sparkline when there are 2 or more points
+- [x] `PropertyPriceHistory` table; rows written in the same transaction as create-full, update-full, status changes and delete
+- [x] Postgres trigger on `Property` as a safety net, without double inserts; backfill one row per existing property
+- [x] Details page: price-history sparkline when there are 2 or more points
 
 ### C2 Natural-language search
 - [ ] `POST /api/ai/search/parse`: gazetteer, then model with one `set_filters` tool, then server-side validation, then tag similarity
@@ -444,3 +444,16 @@ ode-v20.19.5-win-x64`
   PII scrubber, eval runner with recorded answers for CI. `AiUsage` is in `prisma/schema.prisma` with its SQL in `prisma/sql/` (applied to the
   local database only). Measured: 32 tests pass in the AI API; the scrubber eval is 10/10. Cost model check: 1,000 search parses at about 900
   input and 120 output tokens on the fast model come to $1.50. No call has reached a real model: there is no API key yet. Next: C1.
+- **2026-10-06 15:27 (Claude Code, local):** C1 (price history) done.
+  - Database API (Rust): `PropertyPriceHistory` in `prisma/schema.prisma`, SQL with the trigger and backfill in
+    `prisma/sql/2026-10-06_c1_price_history.sql`. Every route that creates, changes or deletes a listing writes the row in its own
+    transaction; the trigger covers writes from anywhere else. Both insert only when price, yield or status differ from the listing's latest
+    row, so a change is recorded once, and the API names the source for the trigger. Tested with and without the trigger (46 Rust tests).
+    `GET /api/property/price-history/{id}` for public listings. On a database without the table the API skips the history.
+  - Frontend: a step-line sparkline under the asking price on the details page once the price has changed at least once, with a sentence
+    and a screen-reader list saying the same thing, and a hover label. Checked in light and dark, 1440 and 390 px: no overflow, no console
+    errors, nothing shown for a listing whose price never changed.
+  - Choices worth knowing: `currency` is always `USD` (listings have no currency column and the site shows dollars); history rows have no
+    foreign key, so they survive a deleted listing; a delete adds a closing `DELETED` row.
+  - Applied to the local database only (49 listings backfilled). **Production needs the owner's approval for both SQL files.**
+  Next: C2 (natural-language search). It can be built and tested against recorded answers, but its accuracy targets need a real API key.

@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { env } from '@/app/config/env';
 import api from '@/app/lib/api';
 import { toListing } from './normalize';
 import { errorStatus } from '@/lib/auth/session';
@@ -142,4 +143,22 @@ export const CONTACT_METHOD_LABEL: Record<ContactMethod, string> = {
 
 export async function sendInquiry(input: { userId: string; propertyId: string; agentId: string; message: string; contactMethod: ContactMethod }) {
   await api.post('/inquiry/create', input);
+}
+
+export interface PricePoint {
+  changedAt: string;
+  price: number;
+  yield: number;
+  status: string;
+  source: string;
+}
+
+/** Every recorded change of a listing's price, yield or status, oldest first. Rust API only: Nest keeps no history. */
+export function usePriceHistory(id: string) {
+  return useQuery({
+    queryKey: ['price-history', id],
+    enabled: env.apiFlavor === 'rust' && !!id,
+    staleTime: 5 * 60_000,
+    queryFn: async ({ signal }) => (await api.get<{ currency: string; points: PricePoint[] }>(`/property/price-history/${id}`, { signal })).data,
+  });
 }
