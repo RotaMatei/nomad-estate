@@ -83,6 +83,8 @@ export function HomeHero() {
         <i />
       </div>
 
+      <HeroChips />
+
       <div className="mx-auto flex w-full max-w-[1200px] flex-1 flex-col justify-start px-5 pt-28 pb-10 sm:px-8 lg:justify-center lg:pt-24">
         <div className="max-w-[34rem]">
           {/* the headline is in place from the first paint; what follows it rises in */}
@@ -132,6 +134,30 @@ export function HomeHero() {
         </div>
       </div>
     </section>
+  );
+}
+
+/** Two live figures floating in front of the globe on wide screens: decoration, the same numbers are in the band below. */
+function HeroChips() {
+  const { pins } = useCatalogue();
+  if (pins.length === 0) return null;
+  const average = pins.reduce((sum, p) => sum + p.yieldPct, 0) / pins.length;
+  const from = Math.min(...pins.map((p) => p.price));
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 hidden lg:block">
+      <div className="glass shadow-float animate-rise absolute top-[30%] right-[34%] rounded-2xl px-4 py-3 [animation-delay:500ms]">
+        <div className="animate-float">
+          <p className="text-xs text-muted-foreground">Average gross yield</p>
+          <p className="font-display tabular text-2xl font-semibold text-positive">{formatYield(average)}</p>
+        </div>
+      </div>
+      <div className="glass shadow-float animate-rise absolute right-[6%] bottom-[22%] rounded-2xl px-4 py-3 [animation-delay:700ms]">
+        <div className="animate-float [animation-delay:-3s]">
+          <p className="text-xs text-muted-foreground">Listings from</p>
+          <p className="font-display tabular text-2xl font-semibold">{formatPrice(from, { compact: true })}</p>
+        </div>
+      </div>
+    </div>
   );
 }
 

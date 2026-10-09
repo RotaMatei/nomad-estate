@@ -26,3 +26,28 @@ export const TEAM = [
   { name: 'Sofia Marques', role: 'Agency partnerships', initials: 'SM', audience: 'agency' },
   { name: 'Daniel Okafor', role: 'Market data', initials: 'DO', audience: 'investor' },
 ] as const;
+
+/** PLACEHOLDERS: invented agency names for the partner strip, until real partners have agreed to be shown. */
+export const PARTNERS = ['Atlântico Homes', 'Carpathia Realty', 'Costa Blanca Living', 'Aegean Keys', 'Marina Gate Properties', 'Table Bay Estates', 'Siam Urban', 'Riviera Maya Casas'] as const;
+
+/** PLACEHOLDERS: invented quotes for the design. Replace with real, attributed ones or remove the section. */
+export const TESTIMONIALS = [
+  {
+    quote: 'I compared a flat in Valencia with one in Cluj in ten minutes. Same numbers, same layout, no spreadsheets.',
+    name: 'Elena P.',
+    role: 'Private investor',
+    audience: 'investor',
+  },
+  {
+    quote: 'The inquiries we get are from people who already know the yield and the price. The first call is about viewing dates.',
+    name: 'Rui M.',
+    role: 'Agency owner, Porto',
+    audience: 'agency',
+  },
+  {
+    quote: 'Asking about the tax rules and getting the official page back, with the paragraph marked, saved me a week.',
+    name: 'Jonas K.',
+    role: 'Private investor',
+    audience: 'investor',
+  },
+] as const;

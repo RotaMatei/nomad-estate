@@ -45,6 +45,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             </span>
           </div>
         </div>
+        <div className="scroll-progress" aria-hidden="true" />
         <ErrorBoundary>
           <Providers>{children}</Providers>
         </ErrorBoundary>

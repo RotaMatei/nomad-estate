@@ -1,8 +1,9 @@
 import { ArrowUpRight, Building2, TrendingUp } from 'lucide-react';
 import { HomeHero, HomeStatsBand } from '@/components/home/home-client';
 import { MarketSkyline, MarketSnapshot, PlacesMarquee } from '@/components/home/home-extras';
+import { CountryGuides, FeaturedListings, Newsletter, PartnerStrip, PriceDrops, Testimonials, YieldCalculator } from '@/components/home/home-more';
 import { QuietLink as Link } from '@/components/site/quiet-link';
-import { Reveal, Tilt } from '@/components/site/reveal';
+import { Reveal, Tilt, Words } from '@/components/site/reveal';
 import { SiteFooter } from '@/components/site/site-footer';
 import { SiteHeader } from '@/components/site/site-header';
 import { Button } from '@/components/ui/button';
@@ -30,8 +31,12 @@ export default function Home() {
         <HomeHero />
         <PlacesMarquee />
         <HomeStatsBand />
+        <FeaturedListings />
+        <PartnerStrip />
         <MarketSkyline />
         <MarketSnapshot />
+        <YieldCalculator />
+        <PriceDrops />
 
         <section aria-labelledby="paths-title" className="mx-auto max-w-[1200px] px-5 py-20 sm:px-8 lg:py-28">
           <Reveal>
@@ -119,13 +124,15 @@ export default function Home() {
           </div>
         </section>
 
+        <CountryGuides />
+
         <section className="mx-auto max-w-[1200px] px-5 py-24 sm:px-8 lg:py-36">
-          <Reveal>
-            <p className="font-display max-w-5xl text-3xl leading-[1.15] font-semibold text-balance sm:text-5xl lg:text-6xl">
-              A home should be judged on its <span className="text-liquid">numbers</span>, wherever it <span className="text-liquid">stands</span>.
-            </p>
-          </Reveal>
+          <p className="font-display max-w-5xl text-3xl leading-[1.15] font-semibold text-balance sm:text-5xl lg:text-6xl">
+            <Words text="A home should be judged on its numbers, wherever it stands." highlight={['numbers,', 'stands.']} />
+          </p>
         </section>
+
+        <Testimonials />
 
         <section aria-labelledby="cta-title" className="px-3 pb-3 sm:px-5 sm:pb-5">
           <div className="relative isolate overflow-hidden rounded-3xl border">
@@ -149,6 +156,7 @@ export default function Home() {
             </div>
           </div>
         </section>
+        <Newsletter />
       </main>
       <SiteFooter />
     </>

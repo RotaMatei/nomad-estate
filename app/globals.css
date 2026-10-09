@@ -314,6 +314,47 @@
   }
 }
 
+/* A line across the top of the page that fills as the page is read. Progressive: browsers without scroll-driven
+   animations simply do not show it. */
+.scroll-progress {
+  display: none;
+}
+@supports (animation-timeline: scroll()) {
+  .scroll-progress {
+    display: block;
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 60;
+    height: 3px;
+    transform-origin: left;
+    transform: scaleX(0);
+    background: linear-gradient(90deg, var(--agency-strong), var(--orchid-strong), var(--investor-strong));
+    animation: scroll-progress linear both;
+    animation-timeline: scroll(root block);
+    pointer-events: none;
+  }
+}
+@keyframes scroll-progress {
+  to { transform: scaleX(1); }
+}
+
+/* Moving between pages: the new page eases in (see app/(pages)/template.tsx; not on the first load of a visit). */
+.page-enter {
+  animation: page-enter 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Buttons give a little under the finger. */
+[data-slot='button'] {
+  transition: transform 0.15s ease-out, background-color 0.2s, color 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+[data-slot='button']:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
 /* The animated mark: the N and the orbit draw themselves, then the beacon circles (see components/site/logo.tsx). */
 .logo-animated .logo-n,
 .logo-animated .logo-orbit,

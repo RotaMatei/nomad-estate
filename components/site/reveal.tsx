@@ -85,3 +85,40 @@ export function Tilt({ children, className, max = 9 }: { children: React.ReactNo
     </div>
   );
 }
+
+/**
+ * A sentence whose words rise into place one after another when it scrolls into view. Screen readers get the
+ * sentence whole; the split words are decoration.
+ */
+export function Words({ text, highlight = [] }: { text: string; highlight?: string[] }) {
+  const ref = React.useRef<HTMLSpanElement>(null);
+  const [shown, setShown] = React.useState(false);
+  React.useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const observer = new IntersectionObserver(([entry]) => entry.isIntersecting && (setShown(true), observer.disconnect()), { rootMargin: '0px 0px -15% 0px' });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+  return (
+    <span ref={ref}>
+      <span className="sr-only">{text}</span>
+      <span aria-hidden>
+        {text.split(' ').map((word, i) => (
+          <span key={i} className="mr-[0.25em] inline-block overflow-hidden pb-[0.12em] align-bottom">
+            <span
+              style={{ transitionDelay: `${i * 55}ms` }}
+              className={cn(
+                'inline-block transition-transform duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-none',
+                shown ? 'translate-y-0' : 'translate-y-[110%] motion-reduce:translate-y-0',
+                highlight.includes(word) && 'text-liquid',
+              )}
+            >
+              {word}
+            </span>
+          </span>
+        ))}
+      </span>
+    </span>
+  );
+}
