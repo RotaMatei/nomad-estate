@@ -339,12 +339,14 @@
 }
 
 /* Moving between pages: the new page eases in (see app/(pages)/template.tsx; not on the first load of a visit). */
+/* Opacity only, on purpose. A transform on this wrapper would make it the box that `position: fixed` children are
+   measured against, and the search page is one full-screen fixed view: with a transform here it collapsed to nothing
+   and the globe started at zero height. */
 .page-enter {
-  animation: page-enter 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: page-enter 0.4s ease-out backwards;
 }
 @keyframes page-enter {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: none; }
+  from { opacity: 0; }
 }
 
 /* Buttons give a little under the finger. */
