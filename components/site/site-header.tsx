@@ -22,6 +22,8 @@ import { cn } from '@/lib/utils';
 const NAV = [
   { href: '/properties', label: 'Explore the globe' },
   { href: '/register?as=agency', label: 'For agencies' },
+  { href: '/about', label: 'About' },
+  { href: '/contact', label: 'Contact' },
 ];
 
 /**
@@ -34,7 +36,7 @@ export function SiteHeader({ variant = 'default' }: { variant?: 'default' | 'ove
   const { session, signOut } = useSession();
   const [open, setOpen] = React.useState(false);
 
-  const nav = session?.isAgency ? [...NAV.slice(0, 1), { href: '/dashboard', label: 'Dashboard' }] : NAV;
+  const nav = session?.isAgency ? [NAV[0], { href: '/dashboard', label: 'Dashboard' }, ...NAV.slice(2)] : NAV;
 
   return (
     <header

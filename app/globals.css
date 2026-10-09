@@ -3,8 +3,12 @@
 
 /*
  * Nomad Estate design tokens
- * Concept: "Earth at night" (dark) / "Day chart" (light).
- * Listings glow like city lights; the globe is the one bold element.
+ *
+ * Two audiences, two pastels: coral for agencies (the red of the old Nomad, softened) and periwinkle for investors
+ * (its blue, softened). Between red and blue on the colour wheel sits magenta, so orchid is the colour both share:
+ * it leads on the pages everyone sees, and the three together make the "liquid" gradient behind the hero.
+ * Text is ink (a near-black with a little violet in it) or white, never one of the pastels.
+ * Each pastel has a `-strong` step for the places where colour must carry meaning on its own: lines, icons, charts.
  */
 
 @custom-variant dark (&:is(.dark *));
@@ -12,81 +16,110 @@
 :root {
   --radius: 0.875rem;
 
-  /* Day chart */
-  --background: #eef2f6;
-  --foreground: #0e1a2e;
+  /* Day */
+  --background: #fbf9fc;
+  --foreground: #1e1b2e;
   --card: #ffffff;
-  --card-foreground: #0e1a2e;
+  --card-foreground: #1e1b2e;
   --popover: #ffffff;
-  --popover-foreground: #0e1a2e;
-  --primary: #f5a524;
-  --primary-foreground: #0e1a2e;
-  --secondary: #dce4ee;
-  --secondary-foreground: #0e1a2e;
-  --muted: #e3e9f0;
-  --muted-foreground: #5a6880;
-  --accent: #e3e9f0;
-  --accent-foreground: #0e1a2e;
-  --destructive: #d6453d;
-  --border: #cfd8e3;
-  --input: #c3cedb;
-  --ring: #c97a06;
+  --popover-foreground: #1e1b2e;
+  --primary: #d9b3e6;
+  --primary-foreground: #1e1b2e;
+  --secondary: #f1ebf5;
+  --secondary-foreground: #1e1b2e;
+  --muted: #f3eff6;
+  --muted-foreground: #625c76;
+  --accent: #f1ebf5;
+  --accent-foreground: #1e1b2e;
+  --destructive: #b8413f;
+  --border: #e4dcea;
+  --input: #d6cce0;
+  --ring: #8f55a8;
 
-  --beacon: #c97a06;
-  --beacon-glow: #f5a524;
-  --atmosphere: #2e86c1;
-  --positive: #1f8a5b;
-  --ocean: #c9d8e6;
-  --land: #f7f9fb;
-  --land-line: #b3c2d3;
+  /* the two audiences, and the colour between them */
+  --investor: #b3c7f3;
+  --investor-strong: #4a6fc0;
+  --agency: #f5b3ac;
+  --agency-strong: #c2534b;
+  --orchid: #d9b3e6;
+  --orchid-strong: #8f55a8;
+
+  /* listings on the globe are an agency's: coral */
+  --beacon: #c2534b;
+  --beacon-glow: #f08a80;
+  --atmosphere: #6f8fd8;
+  --positive: #23795a;
+  --ocean: #dfe6f8;
+  --land: #fdfbfd;
+  --land-line: #c5cbe6;
   --glass: rgb(255 255 255 / 0.72);
-  --glass-border: rgb(14 26 46 / 0.08);
-  --shadow-color: 215 40% 20%;
+  --glass-border: rgb(30 27 46 / 0.08);
+  --shadow-color: 262 30% 22%;
 
-  --chart-1: #c97a06;
-  --chart-2: #2e86c1;
-  --chart-3: #1f8a5b;
-  --chart-4: #7a5cc2;
-  --chart-5: #5a6880;
+  /* charts: validated for colour-blind separation and contrast on white (dataviz validator, 2026-10-09) */
+  --chart-1: #5b7fd1;
+  --chart-2: #d9695f;
+  --chart-3: #a85fc0;
+  --chart-4: #2f8f6b;
+  --chart-5: #6c6788;
 }
 
 .dark {
-  /* Earth at night */
-  --background: #0a1222;
-  --foreground: #e6ecf5;
-  --card: #111c30;
-  --card-foreground: #e6ecf5;
-  --popover: #111c30;
-  --popover-foreground: #e6ecf5;
-  --primary: #ffb547;
-  --primary-foreground: #0a1222;
-  --secondary: #1a2740;
-  --secondary-foreground: #e6ecf5;
-  --muted: #152038;
-  --muted-foreground: #8a98ae;
-  --accent: #1a2740;
-  --accent-foreground: #e6ecf5;
-  --destructive: #ff6b5e;
-  --border: rgb(230 236 245 / 0.09);
-  --input: rgb(230 236 245 / 0.14);
-  --ring: #ffb547;
+  /* Night */
+  --background: #13111e;
+  --foreground: #f1edf7;
+  --card: #1d1a2b;
+  --card-foreground: #f1edf7;
+  --popover: #1d1a2b;
+  --popover-foreground: #f1edf7;
+  --primary: #d9b3e6;
+  --primary-foreground: #1e1b2e;
+  --secondary: #2a2640;
+  --secondary-foreground: #f1edf7;
+  --muted: #221f34;
+  --muted-foreground: #a39db8;
+  --accent: #2a2640;
+  --accent-foreground: #f1edf7;
+  --destructive: #f08a80;
+  --border: rgb(241 237 247 / 0.1);
+  --input: rgb(241 237 247 / 0.16);
+  --ring: #d9b3e6;
 
-  --beacon: #ffb547;
-  --beacon-glow: #ffcf7a;
-  --atmosphere: #5ec8e5;
-  --positive: #4fd197;
-  --ocean: #070e1b;
-  --land: #16243c;
-  --land-line: #26395a;
-  --glass: rgb(17 28 48 / 0.72);
-  --glass-border: rgb(230 236 245 / 0.08);
-  --shadow-color: 220 60% 2%;
+  --investor: #b3c7f3;
+  --investor-strong: #a9bff2;
+  --agency: #f5b3ac;
+  --agency-strong: #f5a8a0;
+  --orchid: #d9b3e6;
+  --orchid-strong: #dbb6e8;
 
-  --chart-1: #ffb547;
-  --chart-2: #5ec8e5;
-  --chart-3: #4fd197;
-  --chart-4: #a98cf0;
-  --chart-5: #8a98ae;
+  --beacon: #f5a8a0;
+  --beacon-glow: #ffd0ca;
+  --atmosphere: #9db4f0;
+  --positive: #6fd3a8;
+  --ocean: #0b0a14;
+  --land: #221f36;
+  --land-line: #3a3560;
+  --glass: rgb(29 26 43 / 0.72);
+  --glass-border: rgb(241 237 247 / 0.08);
+  --shadow-color: 262 60% 3%;
+
+  /* charts: validated against the dark card surface */
+  --chart-1: #6b8ae0;
+  --chart-2: #de685d;
+  --chart-3: #ac62ce;
+  --chart-4: #32a877;
+  --chart-5: #a39db8;
+}
+
+/* Agency pages (dashboard, agency sign-up): coral leads instead of orchid. */
+.audience-agency {
+  --primary: var(--agency);
+  --ring: var(--agency-strong);
+}
+/* Investor pages: periwinkle leads. */
+.audience-investor {
+  --primary: var(--investor);
+  --ring: var(--investor-strong);
 }
 
 @theme inline {
@@ -111,6 +144,12 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-investor: var(--investor);
+  --color-investor-strong: var(--investor-strong);
+  --color-agency: var(--agency);
+  --color-agency-strong: var(--agency-strong);
+  --color-orchid: var(--orchid);
+  --color-orchid-strong: var(--orchid-strong);
   --color-beacon: var(--beacon);
   --color-beacon-glow: var(--beacon-glow);
   --color-atmosphere: var(--atmosphere);
@@ -146,6 +185,32 @@
   --animate-marquee: marquee var(--duration) infinite linear;
   --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
   --animate-beacon-pulse: beacon-pulse 2.4s ease-out infinite;
+  --animate-liquid-a: liquid-a 22s ease-in-out infinite alternate;
+  --animate-liquid-b: liquid-b 28s ease-in-out infinite alternate;
+  --animate-liquid-c: liquid-c 34s ease-in-out infinite alternate;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-rise: rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+
+  @keyframes liquid-a {
+    from { transform: translate3d(-8%, -6%, 0) scale(1); }
+    to { transform: translate3d(14%, 10%, 0) scale(1.25); }
+  }
+  @keyframes liquid-b {
+    from { transform: translate3d(10%, 8%, 0) scale(1.15); }
+    to { transform: translate3d(-12%, -10%, 0) scale(0.95); }
+  }
+  @keyframes liquid-c {
+    from { transform: translate3d(0, 12%, 0) scale(0.9); }
+    to { transform: translate3d(6%, -14%, 0) scale(1.2); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(0.6em); }
+    to { opacity: 1; transform: none; }
+  }
 
   @keyframes marquee {
     from { transform: translateX(0); }
@@ -207,6 +272,37 @@
       0 1px 2px hsl(var(--shadow-color) / 0.08),
       0 12px 32px -8px hsl(var(--shadow-color) / 0.22);
   }
+  /* The liquid gradient: three soft pools of coral, orchid and periwinkle drifting behind content. */
+  .liquid {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    isolation: isolate;
+  }
+  .liquid > i {
+    position: absolute;
+    width: 60%;
+    aspect-ratio: 1;
+    border-radius: 9999px;
+    filter: blur(70px);
+    opacity: 0.75;
+    will-change: transform;
+  }
+  .liquid > i:nth-child(1) { left: -12%; top: -22%; background: var(--agency); animation: var(--animate-liquid-a); }
+  .liquid > i:nth-child(2) { left: 26%; top: 6%; background: var(--orchid); animation: var(--animate-liquid-b); }
+  .liquid > i:nth-child(3) { right: -16%; top: -12%; background: var(--investor); animation: var(--animate-liquid-c); }
+  .dark .liquid > i { opacity: 0.3; }
+  /* Text painted with the same three colours, for one or two words of a headline. */
+  .text-liquid {
+    background: linear-gradient(100deg, var(--agency-strong), var(--orchid-strong) 50%, var(--investor-strong));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
   .text-balance {
     text-wrap: balance;
   }
@@ -216,6 +312,42 @@
   .scrollbar-none::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* The animated mark: the N and the orbit draw themselves, then the beacon circles (see components/site/logo.tsx). */
+.logo-animated .logo-n,
+.logo-animated .logo-orbit,
+.logo-animated .logo-orbit-front {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: logo-draw 0.9s cubic-bezier(0.6, 0, 0.2, 1) forwards;
+}
+.logo-animated .logo-orbit { animation-duration: 1.1s; }
+.logo-animated .logo-orbit-front { animation-delay: 0.05s; animation-duration: 0.5s; }
+.logo-animated .logo-n { animation-delay: 0.25s; }
+@keyframes logo-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+/* The loading screen of a first visit: the mark draws itself on the page colour, then the curtain lifts.
+   Pure CSS, so it can never get stuck; shown once per browser tab (the script in app/layout.tsx marks later loads). */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: var(--background);
+  animation: intro-out 0.55s cubic-bezier(0.7, 0, 0.3, 1) 1.25s forwards;
+}
+.intro-word {
+  animation: rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.45s both;
+}
+html[data-seen] .intro {
+  display: none;
+}
+@keyframes intro-out {
+  to { opacity: 0; transform: translateY(-3%); visibility: hidden; }
 }
 
 /* Theme-switch view transition (Magic UI animated theme toggler) */

@@ -4,6 +4,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import './globals.css';
 import Providers from '@/app/providers';
 import { ErrorBoundary } from '@/components/site/error-boundary';
+import { LogoMark } from '@/components/site/logo';
 
 export const metadata: Metadata = {
   title: {
@@ -17,8 +18,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#eef2f6' },
-    { media: '(prefers-color-scheme: dark)', color: '#0a1222' },
+    { media: '(prefers-color-scheme: light)', color: '#fbf9fc' },
+    { media: '(prefers-color-scheme: dark)', color: '#13111e' },
   ],
   width: 'device-width',
   initialScale: 1,
@@ -27,7 +28,23 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* the loading screen plays once per tab: later page loads are marked before anything is painted */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "try{if(sessionStorage.getItem('nomad:seen')||matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.dataset.seen='1';else sessionStorage.setItem('nomad:seen','1')}catch(e){}",
+          }}
+        />
+      </head>
       <body>
+        <div className="intro" aria-hidden="true">
+          <div className="flex flex-col items-center gap-5">
+            <LogoMark animated className="h-20" />
+            <span className="intro-word font-display text-lg font-semibold">
+              Nomad <span className="font-normal text-muted-foreground">Estate</span>
+            </span>
+          </div>
+        </div>
         <ErrorBoundary>
           <Providers>{children}</Providers>
         </ErrorBoundary>

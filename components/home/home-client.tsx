@@ -22,7 +22,7 @@ import { usePropertySearch } from '@/lib/properties/queries';
 import { cn } from '@/lib/utils';
 
 /** The catalogue is fetched once and shared (TanStack Query cache) by the hero globe, featured markets and /properties. */
-const useCatalogue = () => usePropertySearch(DEFAULT_FILTERS, { enabled: useAfterFirstPaint(), list: false });
+export const useCatalogue = () => usePropertySearch(DEFAULT_FILTERS, { enabled: useAfterFirstPaint(), list: false });
 
 export function HomeHero() {
   const router = useRouter();
@@ -53,6 +53,7 @@ export function HomeHero() {
 
   return (
     <section className="relative isolate flex min-h-[100svh] flex-col overflow-hidden">
+
       {/* The box has a fixed height on purpose: the globe is drawn in perspective from a camera whose distance follows
           the height of the box, so a fixed height keeps the still frame and the live globe identical on every screen. */}
       {/* The one bold element: the globe (a still frame first, live once the page is quiet), bleeding off the right edge on desktop and the bottom on phones. */}
@@ -70,18 +71,31 @@ export function HomeHero() {
         />
       </div>
 
+      {/* The liquid gradient: coral, orchid and periwinkle drifting behind the headline. It fades out before the
+          globe (to the right on wide screens, downwards on phones), so the globe keeps the plain page behind it.
+          It comes after the globe's box in the markup: scripts/globe-posters.mjs finds that box as the first child. */}
+      <div
+        className="liquid -z-20 [mask-image:linear-gradient(to_bottom,black_35%,transparent_62%)] lg:[mask-image:linear-gradient(to_right,black_30%,transparent_58%)]"
+        aria-hidden
+      >
+        <i />
+        <i />
+        <i />
+      </div>
+
       <div className="mx-auto flex w-full max-w-[1200px] flex-1 flex-col justify-start px-5 pt-28 pb-10 sm:px-8 lg:justify-center lg:pt-24">
         <div className="max-w-[34rem]">
+          {/* the headline is in place from the first paint; what follows it rises in */}
           <h1 className="font-display text-4xl leading-[1.05] font-semibold text-balance sm:text-5xl lg:text-6xl">
-            Invest in property anywhere on Earth
+            Invest in property <span className="text-liquid">anywhere on Earth</span>
           </h1>
-          <p className="mt-5 max-w-md text-lg text-muted-foreground">
+          <p className="animate-rise mt-5 max-w-md text-lg text-foreground/70 [animation-delay:120ms]">
             Every listing sits on one live globe. Compare price, rental yield and investment score across countries, then contact the agency directly.
           </p>
 
           <form
             role="search"
-            className={cn('glass shadow-float mt-8 flex h-14 items-center gap-2 rounded-full pr-2 pl-5', describing ? 'max-w-lg' : 'max-w-md')}
+            className={cn('glass shadow-float animate-rise mt-8 flex h-14 items-center gap-2 rounded-full pr-2 pl-5 [animation-delay:240ms]', describing ? 'max-w-lg' : 'max-w-md')}
             onSubmit={(e) => {
               e.preventDefault();
               void search();
@@ -107,7 +121,7 @@ export function HomeHero() {
             </Button>
           </form>
 
-          <p className="mt-4 text-sm text-muted-foreground">
+          <p className="animate-rise mt-4 text-sm text-foreground/60 [animation-delay:360ms]">
             {describing && <>Try “two-bedroom flat in Lisbon under 400k near the beach”. </>}
             Or{' '}
             <Link href="/properties" className="font-medium text-foreground underline underline-offset-4 hover:text-beacon">
@@ -141,17 +155,17 @@ export function HomeStatsBand() {
     ['partners', 'partner agencies'],
   ];
   return (
-    <section aria-label="Nomad Estate in numbers" className="border-y bg-card">
+    <section aria-label="Nomad Estate in numbers" className="bg-card">
       <dl className="mx-auto grid max-w-[1200px] grid-cols-3 divide-x px-2 sm:px-8">
         {stats.map(([key, label]) => (
           <div key={key} className="flex flex-col-reverse px-3 py-8 sm:px-8 sm:py-10">
             <dt className="mt-1 text-sm text-muted-foreground">{label}</dt>
-            <dd className="font-display tabular text-3xl font-semibold sm:text-5xl">
+            <dd className="font-display tabular text-4xl font-semibold sm:text-6xl lg:text-7xl">
               {data ? (
                 // NumberTicker counts up once, the first time it scrolls into view
                 <NumberTicker value={Number(data[key]) || 0} className="text-foreground dark:text-foreground" />
               ) : (
-                <Skeleton className="h-9 w-20 sm:h-12 sm:w-28" />
+                <Skeleton className="h-10 w-20 sm:h-[60px] sm:w-28 lg:h-[72px]" />
               )}
             </dd>
           </div>

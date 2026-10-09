@@ -4,5 +4,10 @@ import { DashboardView } from '@/components/dashboard/dashboard-view';
 export const metadata: Metadata = { title: 'Agency dashboard' };
 
 export default function DashboardPage() {
-  return <DashboardView />;
+  // the agency's side of the site: coral leads here
+  return (
+    <div className="audience-agency">
+      <DashboardView />
+    </div>
+  );
 }
