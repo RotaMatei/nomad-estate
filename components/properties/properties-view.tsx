@@ -17,7 +17,7 @@ import { countActiveFilters, useSearchFilters, useSelection } from '@/lib/proper
 import { useListingsByIds, usePropertySearch } from '@/lib/properties/queries';
 import { cn } from '@/lib/utils';
 
-const RAIL_WIDTH = 392;
+const RAIL_WIDTH = 424;
 const SNAP_PEEK = '132px';
 const SNAPS: (string | number)[] = [SNAP_PEEK, 0.55, 0.92];
 const NO_IDS: string[] = [];
@@ -194,7 +194,7 @@ export function PropertiesView() {
         />
 
         {pendingArea && (
-          <div className="pointer-events-none absolute inset-x-0 top-[176px] z-20 flex justify-center lg:top-[148px] lg:pl-[412px]">
+          <div className="pointer-events-none absolute inset-x-0 top-[176px] z-20 flex justify-center lg:top-[148px] lg:pl-[444px]">
             <Button
               variant="secondary"
               className="glass shadow-float pointer-events-auto h-9 rounded-full px-4"

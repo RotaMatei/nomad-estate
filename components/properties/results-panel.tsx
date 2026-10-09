@@ -13,7 +13,8 @@ import { formatPrice, formatYield } from '@/lib/properties/format';
 import type { Listing } from '@/lib/properties/types';
 import { cn } from '@/lib/utils';
 
-const ROW = 116;
+// one listing: a 144px card and the gap under it
+const ROW = 156;
 
 interface ResultsPanelProps {
   listings: Listing[];
@@ -70,7 +71,7 @@ export function ResultsPanel({
     estimateSize: () => ROW,
     overscan: 6,
     // a size to plan with before the list is measured, so the first rows are in the server-rendered HTML
-    initialRect: { width: 392, height: 720 },
+    initialRect: { width: 424, height: 720 },
     getItemKey: (i) => listings[i].id,
   });
 
@@ -131,8 +132,8 @@ export function ResultsPanel({
         {isLoading ? (
           <ul aria-hidden>
             {Array.from({ length: 6 }, (_, i) => (
-              <li key={i} className="flex gap-3 p-2" style={{ height: ROW }}>
-                <Skeleton className="size-[100px] shrink-0 rounded-lg" />
+              <li key={i} className="flex gap-4 p-2.5" style={{ height: ROW }}>
+                <Skeleton className="size-[124px] shrink-0 rounded-lg" />
                 <div className="flex-1 space-y-2.5 py-1">
                   <Skeleton className="h-4 w-4/5" />
                   <Skeleton className="h-3 w-1/2" />
@@ -192,27 +193,30 @@ export function ResultsPanel({
                       onHover(l.id);
                     }}
                     className={cn(
-                      'flex h-[108px] w-full gap-3 rounded-lg p-2 text-left transition-colors focus-visible:outline-offset-[-2px]',
+                      'group flex h-[144px] w-full gap-4 rounded-xl p-2.5 text-left transition-colors focus-visible:outline-offset-[-2px]',
                       active ? 'bg-accent' : 'hover:bg-accent/60',
                       l.id === selectedId && 'ring-1 ring-beacon',
                     )}
                   >
-                    {/* the first rows are on screen at once: their photos should not wait to be scrolled into view */}
-                    <ListingImage listing={l} sizes="92px" className="size-[92px] shrink-0 rounded-md" priority={row.index < 3} />
-                    <span className="flex min-w-0 flex-1 flex-col">
-                      <span className="truncate text-sm font-medium">{l.title}</span>
-                      <ListingPlace listing={l} className="text-xs" />
-                      <span className="mt-auto flex items-end justify-between gap-2">
-                        <span className="min-w-0">
-                          <span className="tabular block text-base leading-tight font-semibold">{formatPrice(l.price)}</span>
-                          <ListingFacts listing={l} className="mt-1 text-xs" />
-                        </span>
-                        <span className="flex shrink-0 items-center gap-2">
-                          <span className="text-right leading-tight">
-                            <span className="tabular block text-sm font-semibold text-positive">{formatYield(l.yieldPct)}</span>
-                            <span className="block text-[11px] text-muted-foreground">yield</span>
-                          </span>
-                          <ScoreRing score={l.score} />
+                    {/* The score sits on the photo, so the text column holds only words and the two figures that
+                        matter most. The first rows are on screen at once: their photos do not wait to be scrolled to. */}
+                    <span className="relative shrink-0">
+                      <ListingImage
+                        listing={l}
+                        sizes="124px"
+                        className="h-[124px] w-[124px] rounded-lg [&_img]:transition-transform [&_img]:duration-500 group-hover:[&_img]:scale-105"
+                        priority={row.index < 3}
+                      />
+                      <ScoreRing score={l.score} className="glass absolute -right-2 -bottom-2 rounded-full shadow-float" />
+                    </span>
+                    <span className="flex min-w-0 flex-1 flex-col py-0.5">
+                      <span className="line-clamp-2 text-[0.9375rem] leading-snug font-medium">{l.title}</span>
+                      <ListingPlace listing={l} className="mt-1 text-xs" />
+                      <ListingFacts listing={l} className="mt-1.5 text-xs" />
+                      <span className="mt-auto flex items-baseline justify-between gap-3">
+                        <span className="tabular text-lg leading-none font-semibold">{formatPrice(l.price)}</span>
+                        <span className="tabular shrink-0 text-sm font-semibold text-positive">
+                          {formatYield(l.yieldPct)} <span className="text-xs font-normal text-muted-foreground">yield</span>
                         </span>
                       </span>
                     </span>
