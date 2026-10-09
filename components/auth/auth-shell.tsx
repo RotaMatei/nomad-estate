@@ -31,9 +31,9 @@ function Contours() {
       <Topography
         key={dark ? 'dark' : 'light'}
         lightMode={!dark}
-        lowColor={dark ? '#13111e' : '#fbf9fc'}
+        lowColor={dark ? '#130f26' : '#fbf9fc'}
         midColor={dark ? '#26395a' : '#b3c2d3'}
-        highColor={dark ? '#d9b3e6' : '#8f55a8'}
+        highColor={dark ? '#dcb8ea' : '#8f55a8'}
         speed={reduced ? 0 : 0.12}
         morphSpeed={reduced ? 0 : 0.03}
         bands={3}

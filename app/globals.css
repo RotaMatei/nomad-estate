@@ -44,6 +44,12 @@
   --orchid: #d9b3e6;
   --orchid-strong: #8f55a8;
 
+  /* the liquid gradient by day: the three pastels themselves */
+  --liquid-1: var(--agency);
+  --liquid-2: var(--orchid);
+  --liquid-3: var(--investor);
+  --liquid-opacity: 0.75;
+
   /* listings on the globe are an agency's: coral */
   --beacon: #c2534b;
   --beacon-glow: #f08a80;
@@ -65,50 +71,57 @@
 }
 
 .dark {
-  /* Night */
-  --background: #13111e;
-  --foreground: #f1edf7;
-  --card: #1d1a2b;
-  --card-foreground: #f1edf7;
-  --popover: #1d1a2b;
-  --popover-foreground: #f1edf7;
-  --primary: #d9b3e6;
+  /* Night: a deep indigo-plum rather than a neutral black, so the three brand colours read as lit, not washed out.
+     Surfaces step up in lightness and keep the violet cast; borders are tinted orchid. */
+  --background: #130f26;
+  --foreground: #f3eefb;
+  --card: #1f1838;
+  --card-foreground: #f3eefb;
+  --popover: #231b40;
+  --popover-foreground: #f3eefb;
+  --primary: #dcb8ea;
   --primary-foreground: #1e1b2e;
-  --secondary: #2a2640;
-  --secondary-foreground: #f1edf7;
-  --muted: #221f34;
-  --muted-foreground: #a39db8;
-  --accent: #2a2640;
-  --accent-foreground: #f1edf7;
-  --destructive: #f08a80;
-  --border: rgb(241 237 247 / 0.1);
-  --input: rgb(241 237 247 / 0.16);
-  --ring: #d9b3e6;
+  --secondary: #2c2350;
+  --secondary-foreground: #f3eefb;
+  --muted: #241c44;
+  --muted-foreground: #b4aad0;
+  --accent: #30265a;
+  --accent-foreground: #f3eefb;
+  --destructive: #f59a90;
+  --border: rgb(220 184 234 / 0.14);
+  --input: rgb(220 184 234 / 0.22);
+  --ring: #dcb8ea;
 
   --investor: #b3c7f3;
   --investor-strong: #a9bff2;
   --agency: #f5b3ac;
   --agency-strong: #f5a8a0;
-  --orchid: #d9b3e6;
-  --orchid-strong: #dbb6e8;
+  --orchid: #dcb8ea;
+  --orchid-strong: #dfbdec;
+
+  /* the liquid gradient at night: the same three hues, deep and saturated, so they glow instead of greying */
+  --liquid-1: #b0464f;
+  --liquid-2: #7f3fa6;
+  --liquid-3: #3b55b8;
+  --liquid-opacity: 0.6;
 
   --beacon: #f5a8a0;
   --beacon-glow: #ffd0ca;
   --atmosphere: #9db4f0;
   --positive: #6fd3a8;
-  --ocean: #0b0a14;
-  --land: #221f36;
-  --land-line: #3a3560;
-  --glass: rgb(29 26 43 / 0.72);
-  --glass-border: rgb(241 237 247 / 0.08);
-  --shadow-color: 262 60% 3%;
+  --ocean: #0e0a20;
+  --land: #2a2152;
+  --land-line: #473c7c;
+  --glass: rgb(31 24 56 / 0.74);
+  --glass-border: rgb(220 184 234 / 0.14);
+  --shadow-color: 258 70% 4%;
 
   /* charts: validated against the dark card surface */
   --chart-1: #6b8ae0;
   --chart-2: #de685d;
   --chart-3: #ac62ce;
   --chart-4: #32a877;
-  --chart-5: #a39db8;
+  --chart-5: #b4aad0;
 }
 
 /* Agency pages (dashboard, agency sign-up): coral leads instead of orchid. */
@@ -286,13 +299,12 @@
     aspect-ratio: 1;
     border-radius: 9999px;
     filter: blur(70px);
-    opacity: 0.75;
+    opacity: var(--liquid-opacity);
     will-change: transform;
   }
-  .liquid > i:nth-child(1) { left: -12%; top: -22%; background: var(--agency); animation: var(--animate-liquid-a); }
-  .liquid > i:nth-child(2) { left: 26%; top: 6%; background: var(--orchid); animation: var(--animate-liquid-b); }
-  .liquid > i:nth-child(3) { right: -16%; top: -12%; background: var(--investor); animation: var(--animate-liquid-c); }
-  .dark .liquid > i { opacity: 0.3; }
+  .liquid > i:nth-child(1) { left: -12%; top: -22%; background: var(--liquid-1); animation: var(--animate-liquid-a); }
+  .liquid > i:nth-child(2) { left: 26%; top: 6%; background: var(--liquid-2); animation: var(--animate-liquid-b); }
+  .liquid > i:nth-child(3) { right: -16%; top: -12%; background: var(--liquid-3); animation: var(--animate-liquid-c); }
   /* Text painted with the same three colours, for one or two words of a headline. */
   .text-liquid {
     background: linear-gradient(100deg, var(--agency-strong), var(--orchid-strong) 50%, var(--investor-strong));

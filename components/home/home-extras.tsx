@@ -45,7 +45,11 @@ export function PlacesMarquee() {
   }, [countries, pins]);
   // the band keeps its height while the list loads, so nothing below it moves
   return (
-    <div className="border-y bg-foreground py-4 text-background" aria-hidden={listed.length === 0}>
+    // by day an ink band; at night a band of the three brand colours, since a white one would glare
+    <div
+      className="border-y bg-foreground py-4 text-background dark:border-transparent dark:text-white dark:[background:linear-gradient(90deg,var(--liquid-1),var(--liquid-2),var(--liquid-3))]"
+      aria-hidden={listed.length === 0}
+    >
       <div className="h-8">
         {listed.length > 0 && (
           <Marquee className="p-0 [--duration:45s] [--gap:3rem]" repeat={3}>
