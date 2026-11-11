@@ -100,7 +100,7 @@ export function MarketSkyline() {
 
   return (
     <section aria-labelledby="skyline-title" className="relative overflow-hidden">
-      <div className="mx-auto grid max-w-[1200px] items-center gap-10 px-5 py-20 sm:px-8 lg:grid-cols-[1fr_1.1fr] lg:py-28">
+      <div className="mx-auto grid max-w-(--page) items-center gap-10 px-5 py-20 sm:px-8 lg:grid-cols-[1fr_1.1fr] lg:py-28">
         <div>
           <p className="eyebrow text-sm font-medium tracking-[0.18em] text-muted-foreground uppercase">01 / Where the listings are</p>
           <h2 id="skyline-title" className="font-display mt-4 text-3xl font-semibold text-balance sm:text-4xl">
@@ -193,7 +193,7 @@ export function MarketSnapshot() {
   if (isError || (!isLoading && !isPending && pins.length === 0)) return null;
   return (
     <section aria-labelledby="snapshot-title" className="border-y bg-secondary/50">
-      <div className="mx-auto max-w-[1200px] px-5 py-20 sm:px-8 lg:py-28">
+      <div className="mx-auto max-w-(--page) px-5 py-20 sm:px-8 lg:py-28">
         <Reveal>
           <p className="eyebrow text-sm font-medium tracking-[0.18em] text-muted-foreground uppercase">02 / The numbers</p>
           <h2 id="snapshot-title" className="font-display mt-4 max-w-2xl text-3xl font-semibold text-balance sm:text-4xl">

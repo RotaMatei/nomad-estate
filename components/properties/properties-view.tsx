@@ -165,7 +165,7 @@ export function PropertiesView() {
   );
 
   return (
-    <div className="fixed inset-0 overflow-hidden">
+    <div data-fixed-view className="fixed inset-0 overflow-hidden">
       <SiteHeader variant="overlay" />
 
       <main className="absolute inset-0">

@@ -45,7 +45,7 @@ export function PropertyDetailsView({ id }: { id: string }) {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto min-h-[70vh] w-full max-w-[1200px] px-5 pt-6 pb-20 sm:px-8">
+      <main className="mx-auto min-h-[70vh] w-full max-w-(--page) px-5 pt-6 pb-20 sm:px-8">
         <Button asChild variant="ghost" size="sm" className="-ml-2 mb-4 rounded-full text-muted-foreground">
           <Link href="/properties">
             <ArrowLeft aria-hidden /> Back to the globe

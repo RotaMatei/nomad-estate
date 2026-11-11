@@ -85,7 +85,7 @@ export function HomeHero() {
 
       <HeroChips />
 
-      <div className="mx-auto flex w-full max-w-[1200px] flex-1 flex-col justify-start px-5 pt-28 pb-10 sm:px-8 lg:justify-center lg:pt-24">
+      <div className="mx-auto flex w-full max-w-(--page) flex-1 flex-col justify-start px-5 pt-28 pb-10 sm:px-8 lg:justify-center lg:pt-24">
         <div className="scroll-exit max-w-[34rem]">
           {/* the headline is in place from the first paint; what follows it rises in */}
           <h1 className="font-display text-4xl leading-[1.05] font-semibold text-balance sm:text-5xl lg:text-6xl">
@@ -182,7 +182,7 @@ export function HomeStatsBand() {
   ];
   return (
     <section aria-label="Nomad Estate in numbers" className="graticule bg-card">
-      <dl className="mx-auto grid max-w-[1200px] grid-cols-3 divide-x px-2 sm:px-8">
+      <dl className="mx-auto grid max-w-(--page) grid-cols-3 divide-x px-2 sm:px-8">
         {stats.map(([key, label]) => (
           <div key={key} className="flex flex-col-reverse px-3 py-8 sm:px-8 sm:py-10">
             <dt className="mt-1 text-sm text-muted-foreground">{label}</dt>
@@ -222,7 +222,7 @@ export function FeaturedMarkets() {
   if (isError || (!isLoading && !isPending && markets.length === 0)) return null;
 
   return (
-    <section aria-labelledby="markets-title" className="mx-auto max-w-[1200px] px-5 py-20 sm:px-8 lg:py-28">
+    <section aria-labelledby="markets-title" className="mx-auto max-w-(--page) px-5 py-20 sm:px-8 lg:py-28">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h2 id="markets-title" className="font-display text-3xl font-semibold sm:text-4xl">

@@ -39,7 +39,7 @@ export default function Home() {
         <YieldCalculator />
         <PriceDrops />
 
-        <section aria-labelledby="paths-title" className="mx-auto max-w-[1200px] px-5 py-20 sm:px-8 lg:py-28">
+        <section aria-labelledby="paths-title" className="mx-auto max-w-(--page) px-5 py-20 sm:px-8 lg:py-28">
           <Reveal>
             <p className="eyebrow text-sm font-medium tracking-[0.18em] text-muted-foreground uppercase">03 / Two sides of a deal</p>
             <h2 id="paths-title" className="font-display mt-4 max-w-xl text-3xl font-semibold text-balance sm:text-4xl">
@@ -100,7 +100,7 @@ export default function Home() {
         </section>
 
         <section aria-labelledby="how-title" className="graticule border-y bg-card">
-          <div className="mx-auto max-w-[1200px] px-5 py-20 sm:px-8 lg:py-28">
+          <div className="mx-auto max-w-(--page) px-5 py-20 sm:px-8 lg:py-28">
             <Reveal>
               <p className="eyebrow text-sm font-medium tracking-[0.18em] text-muted-foreground uppercase">04 / How it works</p>
               <h2 id="how-title" className="font-display mt-4 text-3xl font-semibold sm:text-4xl">
@@ -127,7 +127,7 @@ export default function Home() {
 
         <CountryGuides />
 
-        <section className="mx-auto max-w-[1200px] px-5 py-24 sm:px-8 lg:py-36">
+        <section className="mx-auto max-w-(--page) px-5 py-24 sm:px-8 lg:py-36">
           <p className="font-display max-w-5xl text-3xl leading-[1.15] font-semibold text-balance sm:text-5xl lg:text-6xl">
             <Words text="A home should be judged on its numbers, wherever it stands." highlight={['numbers,', 'stands.']} />
           </p>
@@ -146,7 +146,7 @@ export default function Home() {
             <div className="absolute top-14 right-[14%] hidden lg:block">
               <House3D scroll size={132} />
             </div>
-            <div className="mx-auto flex max-w-[1200px] flex-col items-start gap-8 px-6 py-20 sm:px-10 lg:flex-row lg:items-end lg:justify-between lg:py-28 lg:pt-56">
+            <div className="mx-auto flex max-w-(--page) flex-col items-start gap-8 px-6 py-20 sm:px-10 lg:flex-row lg:items-end lg:justify-between lg:py-28 lg:pt-56">
               <h2 id="cta-title" className="font-display max-w-2xl text-4xl leading-[1.05] font-semibold text-balance sm:text-6xl">
                 The globe is open. Take a look around.
               </h2>

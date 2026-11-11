@@ -72,7 +72,7 @@ export function FeaturedListings() {
 
   return (
     <section aria-labelledby="featured-title" className="overflow-hidden py-20 lg:py-28">
-      <div className="mx-auto flex max-w-[1200px] flex-wrap items-end justify-between gap-6 px-5 sm:px-8">
+      <div className="mx-auto flex max-w-(--page) flex-wrap items-end justify-between gap-6 px-5 sm:px-8">
         <Reveal>
           <Eyebrow>Hand-picked by the numbers</Eyebrow>
           <h2 id="featured-title" className="font-display mt-4 max-w-xl text-3xl font-semibold text-balance sm:text-4xl">
@@ -90,7 +90,7 @@ export function FeaturedListings() {
       </div>
       <ul
         ref={track}
-        className="scrollbar-none mt-10 flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth px-5 pb-6 sm:px-8 lg:px-[max(2rem,calc((100vw-1200px)/2+2rem))]"
+        className="scrollbar-none mt-10 flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth px-5 pb-6 sm:px-8 lg:px-[max(2rem,calc((100vw-var(--page))/2+2rem))]"
       >
         {isLoading || isPending || top.length === 0
           ? Array.from({ length: 4 }, (_, i) => (
@@ -161,7 +161,7 @@ export function YieldCalculator() {
 
   return (
     <section aria-labelledby="calculator-title" className="border-y bg-card">
-      <div className="mx-auto grid max-w-[1200px] gap-12 px-5 py-20 sm:px-8 lg:grid-cols-[1fr_1.25fr] lg:py-28">
+      <div className="mx-auto grid max-w-(--page) gap-12 px-5 py-20 sm:px-8 lg:grid-cols-[1fr_1.25fr] lg:py-28">
         <Reveal>
           <Eyebrow>What does my budget buy?</Eyebrow>
           <h2 id="calculator-title" className="font-display mt-4 text-3xl font-semibold text-balance sm:text-4xl">
@@ -256,7 +256,7 @@ export function PriceDrops() {
   const byId = new Map(listings.map((l) => [l.id, l]));
 
   return (
-    <section aria-labelledby="drops-title" className="mx-auto max-w-[1200px] px-5 py-20 sm:px-8 lg:py-28">
+    <section aria-labelledby="drops-title" className="mx-auto max-w-(--page) px-5 py-20 sm:px-8 lg:py-28">
       <Reveal>
         <Eyebrow>Price movement</Eyebrow>
         <h2 id="drops-title" className="font-display mt-4 max-w-xl text-3xl font-semibold text-balance sm:text-4xl">
@@ -297,7 +297,7 @@ export function CountryGuides() {
   if (!on || guides.length === 0) return null;
   return (
     <section aria-labelledby="guides-title" className="border-y bg-secondary/50">
-      <div className="mx-auto max-w-[1200px] px-5 py-20 sm:px-8 lg:py-28">
+      <div className="mx-auto max-w-(--page) px-5 py-20 sm:px-8 lg:py-28">
         <Reveal>
           <Eyebrow>Before you buy</Eyebrow>
           <h2 id="guides-title" className="font-display mt-4 max-w-2xl text-3xl font-semibold text-balance sm:text-4xl">
@@ -365,7 +365,7 @@ export function Testimonials() {
     return () => clearInterval(timer);
   }, [held]);
   return (
-    <section aria-labelledby="voices-title" className="mx-auto max-w-[1200px] px-5 py-20 sm:px-8 lg:py-28">
+    <section aria-labelledby="voices-title" className="mx-auto max-w-(--page) px-5 py-20 sm:px-8 lg:py-28">
       <Reveal>
         <Eyebrow>In their words</Eyebrow>
         <h2 id="voices-title" className="sr-only">
@@ -431,7 +431,7 @@ export function Newsletter() {
   }, [countries, pins]);
   return (
     <section aria-labelledby="newsletter-title" className="border-t bg-card">
-      <div className="mx-auto grid max-w-[1200px] gap-8 px-5 py-16 sm:px-8 lg:grid-cols-[1fr_1.1fr] lg:items-center">
+      <div className="mx-auto grid max-w-(--page) gap-8 px-5 py-16 sm:px-8 lg:grid-cols-[1fr_1.1fr] lg:items-center">
         <Reveal>
           <h2 id="newsletter-title" className="font-display text-2xl font-semibold text-balance sm:text-3xl">
             New listings in the country you care about, once a week

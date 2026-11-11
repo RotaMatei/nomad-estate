@@ -29,7 +29,7 @@ const LINKS = [
 export function SiteFooter() {
   return (
     <footer className="graticule border-t bg-card">
-      <div className="mx-auto grid max-w-[1200px] gap-10 px-5 py-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] sm:px-8">
+      <div className="mx-auto grid max-w-(--page) gap-10 px-5 py-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] sm:px-8">
         <div>
           <Logo />
           <p className="mt-4 max-w-xs text-sm text-muted-foreground">
@@ -52,7 +52,7 @@ export function SiteFooter() {
         ))}
       </div>
       <div className="border-t">
-        <p className="mx-auto max-w-[1200px] px-5 py-5 text-xs text-muted-foreground sm:px-8">
+        <p className="mx-auto max-w-(--page) px-5 py-5 text-xs text-muted-foreground sm:px-8">
           © {new Date().getFullYear()} Nomad Estate. Map data © OpenStreetMap contributors.
         </p>
       </div>

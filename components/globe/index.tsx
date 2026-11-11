@@ -31,6 +31,10 @@ interface Props extends PropertyGlobeProps {
  * It is deliberately not a `<picture>` with one `<img>` per theme: with one of the two hidden, that markup froze
  * Chromium's renderer on some loads (the image requests never completed and the page stopped responding).
  */
+// The pixel densities of the normal and the `-hd` still of each size: the same two candidates that `poster.css` offers
+// through `image-set`, so the hint and the page ask for the same file (these numbers come from scripts/globe-posters.mjs).
+const DENSITY = { mobile: [2, 3], desktop: [1.5, 3] } as const;
+
 function Poster({ hidden }: { hidden: boolean }) {
   return (
     <>
@@ -42,6 +46,7 @@ function Poster({ hidden }: { hidden: boolean }) {
             as="image"
             type="image/webp"
             href={`/globe/${theme}-${size}.webp`}
+            imageSrcSet={`/globe/${theme}-${size}.webp ${DENSITY[size][0]}x, /globe/${theme}-${size}-hd.webp ${DENSITY[size][1]}x`}
             media={`(${size === 'mobile' ? 'max-width: 639.98px' : 'min-width: 640px'}) and (prefers-color-scheme: ${theme})`}
             fetchPriority="high"
           />

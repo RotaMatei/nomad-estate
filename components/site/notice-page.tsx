@@ -9,7 +9,7 @@ export function NoticePage({ code, title, body }: { code: string; title: string;
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto flex min-h-[70vh] w-full max-w-[1200px] flex-col justify-center px-5 py-20 sm:px-8">
+      <main className="mx-auto flex min-h-[70vh] w-full max-w-(--page) flex-col justify-center px-5 py-20 sm:px-8">
         <div className="flex items-end gap-8">
           <p className="font-display tabular text-7xl font-semibold text-beacon sm:text-8xl" aria-hidden>
             {code}

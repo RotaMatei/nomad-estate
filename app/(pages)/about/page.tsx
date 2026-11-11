@@ -59,7 +59,7 @@ export default function AboutPage() {
             <i />
             <i />
           </div>
-          <div className="mx-auto max-w-[1200px] px-5 pt-40 pb-24 sm:px-8 lg:pt-48 lg:pb-32">
+          <div className="mx-auto max-w-(--page) px-5 pt-40 pb-24 sm:px-8 lg:pt-48 lg:pb-32">
             <p className="eyebrow text-sm font-medium tracking-[0.18em] uppercase">About Nomad Estate</p>
             <h1 className="font-display mt-5 max-w-4xl text-4xl leading-[1.05] font-semibold text-balance sm:text-6xl">
               Property is local. Looking for it should not be.
@@ -71,7 +71,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section aria-labelledby="principles-title" className="mx-auto max-w-[1200px] px-5 py-20 sm:px-8 lg:py-28">
+        <section aria-labelledby="principles-title" className="mx-auto max-w-(--page) px-5 py-20 sm:px-8 lg:py-28">
           <h2 id="principles-title" className="font-display max-w-2xl text-3xl font-semibold text-balance sm:text-4xl">
             Four things we hold to
           </h2>
@@ -96,7 +96,7 @@ export default function AboutPage() {
         </section>
 
         <section aria-labelledby="story-title" className="border-y bg-card">
-          <div className="mx-auto grid max-w-[1200px] gap-12 px-5 py-20 sm:px-8 lg:grid-cols-[1fr_1.2fr] lg:py-28">
+          <div className="mx-auto grid max-w-(--page) gap-12 px-5 py-20 sm:px-8 lg:grid-cols-[1fr_1.2fr] lg:py-28">
             <div>
               <h2 id="story-title" className="font-display text-3xl font-semibold text-balance sm:text-4xl">
                 The short history
@@ -117,7 +117,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section aria-labelledby="team-title" className="mx-auto max-w-[1200px] px-5 py-20 sm:px-8 lg:py-28">
+        <section aria-labelledby="team-title" className="mx-auto max-w-(--page) px-5 py-20 sm:px-8 lg:py-28">
           <h2 id="team-title" className="font-display text-3xl font-semibold sm:text-4xl">
             The team
           </h2>
@@ -137,7 +137,7 @@ export default function AboutPage() {
         </section>
 
         <section aria-labelledby="company-title" className="border-t bg-card">
-          <div className="mx-auto grid max-w-[1200px] gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[1fr_2fr]">
+          <div className="mx-auto grid max-w-(--page) gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[1fr_2fr]">
             <h2 id="company-title" className="font-display text-2xl font-semibold">
               Company details
             </h2>

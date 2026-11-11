@@ -25,7 +25,7 @@ export function ProfileView() {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto min-h-[70vh] w-full max-w-[1200px] px-5 pt-8 pb-20 sm:px-8">
+      <main className="mx-auto min-h-[70vh] w-full max-w-(--page) px-5 pt-8 pb-20 sm:px-8">
         {!session ? (
           <Empty className="py-24">
             <EmptyHeader>

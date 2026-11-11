@@ -11,7 +11,8 @@
 //     "to": "[aria-labelledby=cta-title]",   scroll this element to the top of the screen (minus "offset", default 90)
 //     "el": ".house",                  capture only this element instead of the screen
 //     "hover": "a[href^='/details/']", hover this element first
-//     "wait": 1600 }                   milliseconds to wait before the capture
+//     "wait": 1600,                    milliseconds to wait before the capture
+//     "timeout": 20000 }               milliseconds the screenshot may take (the live globe needs more under SwiftShader)
 // Needs a build made against the fixture API, because NEXT_PUBLIC_* values are fixed at build time:
 //   NEXT_PUBLIC_API_URL=http://localhost:4010 NEXT_PUBLIC_API_FLAVOR=nest npm run build
 // Starts the fixture API (unless one already answers on :4010) and `next start`, and stops what it started.
@@ -108,8 +109,8 @@ try {
       if (shot.hover) await page.locator(shot.hover).first().hover();
       await page.waitForTimeout(shot.wait ?? 1600);
       const file = path.join(OUT, `${shot.name}.png`);
-      if (shot.el) await page.locator(shot.el).first().screenshot({ path: file, timeout: 20000 });
-      else await page.screenshot({ path: file, timeout: 20000 });
+      if (shot.el) await page.locator(shot.el).first().screenshot({ path: file, timeout: shot.timeout ?? 20000 });
+      else await page.screenshot({ path: file, timeout: shot.timeout ?? 20000 });
       console.log(`captured ${shot.name}`);
     } catch (e) {
       failed += 1;

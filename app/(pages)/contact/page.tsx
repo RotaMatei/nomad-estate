@@ -28,7 +28,7 @@ export default function ContactPage() {
           <i />
           <i />
         </div>
-        <div className="mx-auto grid max-w-[1200px] gap-x-16 gap-y-14 px-5 pt-40 pb-28 sm:px-8 lg:grid-cols-[1fr_1.1fr] lg:pt-48 lg:pb-40">
+        <div className="mx-auto grid max-w-(--page) gap-x-16 gap-y-14 px-5 pt-40 pb-28 sm:px-8 lg:grid-cols-[1fr_1.1fr] lg:pt-48 lg:pb-40">
           <div>
             <p className="eyebrow text-sm font-medium tracking-[0.18em] uppercase">Contact</p>
             <h1 className="font-display mt-5 text-4xl leading-[1.05] font-semibold text-balance sm:text-6xl">Talk to a person</h1>
