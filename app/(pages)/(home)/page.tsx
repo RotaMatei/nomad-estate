@@ -3,7 +3,8 @@ import { HomeHero, HomeStatsBand } from '@/components/home/home-client';
 import { MarketSkyline, MarketSnapshot, PlacesMarquee } from '@/components/home/home-extras';
 import { CountryGuides, FeaturedListings, Newsletter, PartnerStrip, PriceDrops, Testimonials, YieldCalculator } from '@/components/home/home-more';
 import { QuietLink as Link } from '@/components/site/quiet-link';
-import { Reveal, Tilt, Words } from '@/components/site/reveal';
+import { House3D } from '@/components/site/house-3d';
+import { Magnetic, Reveal, Tilt, Words } from '@/components/site/reveal';
 import { SiteFooter } from '@/components/site/site-footer';
 import { SiteHeader } from '@/components/site/site-header';
 import { Button } from '@/components/ui/button';
@@ -141,17 +142,25 @@ export default function Home() {
               <i />
               <i />
             </div>
-            <div className="mx-auto flex max-w-[1200px] flex-col items-start gap-8 px-6 py-20 sm:px-10 lg:flex-row lg:items-end lg:justify-between lg:py-28">
+            {/* the house turns as the page scrolls past it */}
+            <div className="absolute top-14 right-[14%] hidden lg:block">
+              <House3D scroll size={132} />
+            </div>
+            <div className="mx-auto flex max-w-[1200px] flex-col items-start gap-8 px-6 py-20 sm:px-10 lg:flex-row lg:items-end lg:justify-between lg:py-28 lg:pt-56">
               <h2 id="cta-title" className="font-display max-w-2xl text-4xl leading-[1.05] font-semibold text-balance sm:text-6xl">
                 The globe is open. Take a look around.
               </h2>
               <div className="flex flex-wrap gap-3">
-                <Button asChild className="h-12 rounded-full bg-foreground px-6 text-background hover:bg-foreground/85">
-                  <Link href="/properties">Explore the globe</Link>
-                </Button>
-                <Button asChild variant="outline" className="glass h-12 rounded-full px-6">
-                  <Link href="/contact">Talk to us</Link>
-                </Button>
+                <Magnetic>
+                  <Button asChild className="h-12 rounded-full bg-foreground px-6 text-background hover:bg-foreground/85">
+                    <Link href="/properties">Explore the globe</Link>
+                  </Button>
+                </Magnetic>
+                <Magnetic>
+                  <Button asChild variant="outline" className="glass h-12 rounded-full px-6">
+                    <Link href="/contact">Talk to us</Link>
+                  </Button>
+                </Magnetic>
               </div>
             </div>
           </div>

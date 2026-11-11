@@ -20,6 +20,7 @@ import { PARTNERS, TESTIMONIALS } from '@/lib/company';
 import { DEFAULT_FILTERS, flagEmoji } from '@/lib/properties/filters';
 import { formatPrice, formatYield } from '@/lib/properties/format';
 import { useListingsByIds, usePropertySearch } from '@/lib/properties/queries';
+import { usePhotoFlight } from '@/lib/photo-flight';
 import type { Listing } from '@/lib/properties/types';
 import { cn } from '@/lib/utils';
 
@@ -27,9 +28,11 @@ const Eyebrow = ({ children }: { children: React.ReactNode }) => <p className="t
 
 /** A listing as a tall card: the photo zooms and the card lifts under the pointer. */
 function ListingCard({ listing, badge, className }: { listing: Listing; badge?: React.ReactNode; className?: string }) {
+  const fly = usePhotoFlight();
   return (
     <Link
       href={`/details/${listing.id}`}
+      onClick={fly(listing.id)}
       className={cn(
         'group flex h-full flex-col overflow-hidden rounded-2xl border bg-card transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1.5 hover:shadow-float',
         className,

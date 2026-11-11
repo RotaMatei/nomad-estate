@@ -86,7 +86,7 @@ export function HomeHero() {
       <HeroChips />
 
       <div className="mx-auto flex w-full max-w-[1200px] flex-1 flex-col justify-start px-5 pt-28 pb-10 sm:px-8 lg:justify-center lg:pt-24">
-        <div className="max-w-[34rem]">
+        <div className="scroll-exit max-w-[34rem]">
           {/* the headline is in place from the first paint; what follows it rises in */}
           <h1 className="font-display text-4xl leading-[1.05] font-semibold text-balance sm:text-5xl lg:text-6xl">
             Invest in property <span className="text-liquid">anywhere on Earth</span>

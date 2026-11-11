@@ -86,6 +86,26 @@ export function Tilt({ children, className, max = 9 }: { children: React.ReactNo
   );
 }
 
+/** Pulls its content a few pixels towards the pointer, like a magnet. Mouse only, and not under reduced motion. */
+export function Magnetic({ children, className, strength = 0.3 }: { children: React.ReactNode; className?: string; strength?: number }) {
+  const inner = React.useRef<HTMLSpanElement>(null);
+  const move = (e: React.PointerEvent<HTMLSpanElement>) => {
+    if (!inner.current || e.pointerType !== 'mouse' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const box = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - box.left - box.width / 2) * strength;
+    const y = (e.clientY - box.top - box.height / 2) * strength;
+    inner.current.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+  };
+  return (
+    // the outer box stays put and takes the pointer, so moving the inner one cannot make it flicker
+    <span onPointerMove={move} onPointerLeave={() => inner.current && (inner.current.style.transform = '')} className={cn('inline-block', className)}>
+      <span ref={inner} className="inline-block transition-transform duration-300 ease-out">
+        {children}
+      </span>
+    </span>
+  );
+}
+
 /**
  * A sentence whose words rise into place one after another when it scrolls into view. Screen readers get the
  * sentence whole; the split words are decoration.

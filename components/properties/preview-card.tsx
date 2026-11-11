@@ -7,11 +7,13 @@ import { ListingFacts, ListingImage, ListingPlace, SaveButton, ScoreRing } from 
 import { Button } from '@/components/ui/button';
 import { formatCoords, formatPrice, formatYield } from '@/lib/properties/format';
 import type { Listing } from '@/lib/properties/types';
+import { usePhotoFlight } from '@/lib/photo-flight';
 import { cn } from '@/lib/utils';
 
 /** Opens when a pin or a result is selected; the map flies to the same listing. */
 export function PreviewCard({ listing, onClose, className }: { listing: Listing; onClose: () => void; className?: string }) {
   const coords = formatCoords(listing.lat, listing.lng);
+  const fly = usePhotoFlight();
   return (
     <motion.article
       key={listing.id}
@@ -65,7 +67,9 @@ export function PreviewCard({ listing, onClose, className }: { listing: Listing;
 
         <div className="flex gap-2 pt-1">
           <Button asChild className="flex-1 rounded-full">
-            <Link href={`/details/${listing.id}`}>View property</Link>
+            <Link href={`/details/${listing.id}`} onClick={fly(listing.id)}>
+              View property
+            </Link>
           </Button>
           <SaveButton listing={listing} withLabel />
         </div>

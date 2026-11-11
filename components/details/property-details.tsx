@@ -14,6 +14,7 @@ import { PriceHistory } from './price-history';
 import { AskCountry } from './ask-country';
 import { ListingFacts, ListingImage, ListingPlace, SaveButton, ScoreRing } from '@/components/properties/listing-parts';
 import { SiteFooter } from '@/components/site/site-footer';
+import { Reveal } from '@/components/site/reveal';
 import { SiteHeader } from '@/components/site/site-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -28,6 +29,7 @@ import { useSession } from '@/hooks/use-session';
 import { canOptimise } from '@/lib/image-hosts.mjs';
 import { errorStatus } from '@/lib/auth/session';
 import { CONTACT_METHODS, CONTACT_METHOD_LABEL, humanize, sendInquiry, usePropertyDetails, type PropertyDetails } from '@/lib/properties/details';
+import { flownPhoto, photoArrived, usePhotoFlight } from '@/lib/photo-flight';
 import { DEFAULT_FILTERS } from '@/lib/properties/filters';
 import { formatArea, formatCoords, formatPrice, formatYield } from '@/lib/properties/format';
 import { BENEFIT_LABEL, GOAL_LABEL, PROPERTY_TYPE_LABEL } from '@/lib/properties/labels';
@@ -36,6 +38,9 @@ import { usePropertySearch } from '@/lib/properties/queries';
 export function PropertyDetailsView({ id }: { id: string }) {
   const { data, isLoading, isError, error, refetch } = usePropertyDetails(id);
   const notFound = errorStatus(error) === 404;
+  // reached from a card: its photo is shown at once, and the browser flies it here from the card
+  const photo = flownPhoto(id);
+  React.useLayoutEffect(photoArrived, []);
 
   return (
     <>
@@ -49,7 +54,11 @@ export function PropertyDetailsView({ id }: { id: string }) {
 
         {isLoading ? (
           <div aria-busy="true" aria-label="Loading property" className="space-y-6">
-            <Skeleton className="aspect-[16/8] w-full rounded-xl" />
+            {photo ? (
+              <div className="flown-photo aspect-[4/3] w-full rounded-xl sm:aspect-[16/8]" style={{ backgroundImage: `url("${photo}")` }} />
+            ) : (
+              <Skeleton className="aspect-[16/8] w-full rounded-xl" />
+            )}
             <Skeleton className="h-10 w-2/3" />
             <Skeleton className="h-40 w-full rounded-xl" />
           </div>
@@ -213,6 +222,7 @@ function Gallery({ details }: { details: PropertyDetails }) {
   const [open, setOpen] = React.useState(false);
   const [index, setIndex] = React.useState(0);
   const [api, setApi] = React.useState<CarouselApi>();
+  const photo = flownPhoto(listing.id);
   React.useEffect(() => {
     if (!api) return;
     const onSelect = () => setIndex(api.selectedScrollSnap());
@@ -241,7 +251,14 @@ function Gallery({ details }: { details: PropertyDetails }) {
 
   return (
     <div className="relative">
-      <Carousel setApi={setApi} opts={{ loop: pictures.length > 1 }} aria-label="Property photos" className="overflow-hidden rounded-xl bg-muted">
+      {/* the photo the visitor clicked stays behind the gallery until the full-size one has loaded over it */}
+      <Carousel
+        setApi={setApi}
+        opts={{ loop: pictures.length > 1 }}
+        aria-label="Property photos"
+        className="flown-photo overflow-hidden rounded-xl bg-muted"
+        style={photo ? { backgroundImage: `url("${photo}")` } : undefined}
+      >
         <CarouselContent className="ml-0 [&>*]:pl-0">{slides(false)}</CarouselContent>
         {pictures.length > 1 && (
           <>
@@ -466,6 +483,7 @@ function Similar({ details }: { details: PropertyDetails }) {
         .slice(0, 3),
     [listings, listing.id, listing.countryId],
   );
+  const fly = usePhotoFlight();
   if (similar.length === 0) return null;
 
   return (
@@ -474,10 +492,18 @@ function Similar({ details }: { details: PropertyDetails }) {
         More in {listing.countryName ?? 'this country'}
       </h2>
       <ul className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {similar.map((l) => (
-          <li key={l.id}>
-            <Link href={`/details/${l.id}`} className="group block overflow-hidden rounded-lg border bg-card transition-shadow hover:shadow-float">
-              <ListingImage listing={l} sizes="(max-width: 640px) 100vw, 380px" className="aspect-[16/10] w-full" />
+        {similar.map((l, i) => (
+          <Reveal as="li" key={l.id} delay={i * 0.08}>
+            <Link
+              href={`/details/${l.id}`}
+              onClick={fly(l.id)}
+              className="group block overflow-hidden rounded-lg border bg-card transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-float"
+            >
+              <ListingImage
+                listing={l}
+                sizes="(max-width: 640px) 100vw, 380px"
+                className="aspect-[16/10] w-full [&_img]:transition-transform [&_img]:duration-700 [&_img]:ease-out group-hover:[&_img]:scale-[1.06]"
+              />
               <div className="p-4">
                 <h3 className="truncate font-medium group-hover:underline">{l.title}</h3>
                 <ListingPlace listing={l} className="text-sm" />
@@ -487,7 +513,7 @@ function Similar({ details }: { details: PropertyDetails }) {
                 </div>
               </div>
             </Link>
-          </li>
+          </Reveal>
         ))}
       </ul>
     </section>
