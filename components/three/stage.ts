@@ -72,8 +72,8 @@ export function createStage(canvas: HTMLCanvasElement, frame: Frame): Stage {
     camera,
     setNight(night) {
       key.color.set(night ? 0x9db4f0 : 0xfff4ea);
-      key.intensity = night ? 1.3 : 3;
-      scene.environmentIntensity = night ? 0.3 : 0.8;
+      key.intensity = night ? 1.7 : 3;
+      scene.environmentIntensity = night ? 0.5 : 0.8;
     },
     resize() {
       const { clientWidth: w, clientHeight: h } = canvas;

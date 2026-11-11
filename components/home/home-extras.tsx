@@ -6,6 +6,7 @@ import { useCatalogue } from './home-client';
 import { Marquee } from '@/components/magicui/marquee';
 import { QuietLink as Link } from '@/components/site/quiet-link';
 import { Reveal } from '@/components/site/reveal';
+import { SkylineScene } from '@/components/three/skyline-scene';
 import { Skeleton } from '@/components/ui/skeleton';
 import { flagEmoji } from '@/lib/properties/filters';
 import { formatYield } from '@/lib/properties/format';
@@ -81,6 +82,8 @@ export function MarketSkyline() {
   const { pins, countries, isLoading, isPending } = useCatalogue();
   const [ref, near] = useNear<HTMLDivElement>();
   const [active, setActive] = React.useState<number | null>(null);
+  // true once the 3D skyline has drawn its first frame: the CSS one below it then steps aside
+  const [sceneReady, setSceneReady] = React.useState(false);
 
   const markets = React.useMemo(() => {
     const names = new Map(countries.map((c) => [c.id, c] as const));
@@ -96,6 +99,7 @@ export function MarketSkyline() {
     return [...by.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name)).slice(0, 9);
   }, [pins, countries]);
   const most = Math.max(1, ...markets.map((m) => m.count));
+  const towers = React.useMemo(() => markets.map((m) => ({ id: m.id, count: m.count })), [markets]);
   const loading = isLoading || isPending;
 
   return (
@@ -144,8 +148,9 @@ export function MarketSkyline() {
 
         {/* the picture repeats the list, so it is hidden from assistive technology */}
         <div ref={ref} aria-hidden className="relative mx-auto h-[420px] w-full max-w-[520px] [perspective:1400px]">
+          <SkylineScene towers={towers} active={active} onActive={setActive} onReady={setSceneReady} />
           <div
-            className="preserve-3d absolute top-[60%] left-1/2 grid grid-cols-3 gap-7"
+            className={cn('preserve-3d absolute top-[60%] left-1/2 grid grid-cols-3 gap-7 transition-opacity duration-500', sceneReady && 'pointer-events-none opacity-0')}
             style={{ transform: 'translate(-50%, -50%) rotateX(58deg) rotateZ(-42deg)', width: FLOOR * 3 + 56, transformOrigin: 'center' }}
           >
             {markets.map((m, i) => {
