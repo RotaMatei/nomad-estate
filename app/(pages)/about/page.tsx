@@ -60,7 +60,7 @@ export default function AboutPage() {
             <i />
           </div>
           <div className="mx-auto max-w-[1200px] px-5 pt-40 pb-24 sm:px-8 lg:pt-48 lg:pb-32">
-            <p className="text-sm font-medium tracking-[0.18em] uppercase">About Nomad Estate</p>
+            <p className="eyebrow text-sm font-medium tracking-[0.18em] uppercase">About Nomad Estate</p>
             <h1 className="font-display mt-5 max-w-4xl text-4xl leading-[1.05] font-semibold text-balance sm:text-6xl">
               Property is local. Looking for it should not be.
             </h1>

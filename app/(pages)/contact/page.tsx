@@ -30,7 +30,7 @@ export default function ContactPage() {
         </div>
         <div className="mx-auto grid max-w-[1200px] gap-x-16 gap-y-14 px-5 pt-40 pb-28 sm:px-8 lg:grid-cols-[1fr_1.1fr] lg:pt-48 lg:pb-40">
           <div>
-            <p className="text-sm font-medium tracking-[0.18em] uppercase">Contact</p>
+            <p className="eyebrow text-sm font-medium tracking-[0.18em] uppercase">Contact</p>
             <h1 className="font-display mt-5 text-4xl leading-[1.05] font-semibold text-balance sm:text-6xl">Talk to a person</h1>
             <p className="mt-6 max-w-md text-lg text-foreground/75">
               Questions about a listing go to its agency, from the listing’s page. For everything else, we are here.

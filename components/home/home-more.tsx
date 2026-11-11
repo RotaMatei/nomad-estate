@@ -24,7 +24,7 @@ import { usePhotoFlight } from '@/lib/photo-flight';
 import type { Listing } from '@/lib/properties/types';
 import { cn } from '@/lib/utils';
 
-const Eyebrow = ({ children }: { children: React.ReactNode }) => <p className="text-sm font-medium tracking-[0.18em] text-muted-foreground uppercase">{children}</p>;
+const Eyebrow = ({ children }: { children: React.ReactNode }) => <p className="eyebrow text-sm font-medium tracking-[0.18em] text-muted-foreground uppercase">{children}</p>;
 
 /** A listing as a tall card: the photo zooms and the card lifts under the pointer. */
 function ListingCard({ listing, badge, className }: { listing: Listing; badge?: React.ReactNode; className?: string }) {
@@ -34,7 +34,7 @@ function ListingCard({ listing, badge, className }: { listing: Listing; badge?: 
       href={`/details/${listing.id}`}
       onClick={fly(listing.id)}
       className={cn(
-        'group flex h-full flex-col overflow-hidden rounded-2xl border bg-card transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1.5 hover:shadow-float',
+        'group flex h-full flex-col overflow-hidden rounded-2xl border bg-card transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1.5 hover:shadow-lift',
         className,
       )}
     >
@@ -205,7 +205,7 @@ export function YieldCalculator() {
               <li key={row.id} className="animate-rise" style={{ animationDelay: `${i * 70}ms` }}>
                 <Link
                   href={`/properties?countries=${row.id}&maxPrice=${budget}`}
-                  className="group grid grid-cols-[auto_1fr_auto] items-center gap-5 rounded-2xl border bg-background p-5 transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-float sm:p-6"
+                  className="group grid grid-cols-[auto_1fr_auto] items-center gap-5 rounded-2xl border bg-background p-5 transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-lift sm:p-6"
                 >
                   <span className="font-display text-liquid tabular text-4xl font-semibold">0{i + 1}</span>
                   <div className="min-w-0">
@@ -312,7 +312,7 @@ export function CountryGuides() {
             <Reveal as="li" key={c.id} delay={i * 0.06}>
               <Link
                 href={`/properties?countries=${c.id}`}
-                className="group flex h-full flex-col rounded-2xl border bg-card p-5 transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-float"
+                className="group flex h-full flex-col rounded-2xl border bg-card p-5 transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-lift"
               >
                 <BookOpen className="size-5 text-orchid-strong transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-110" aria-hidden />
                 <p className="mt-6 text-lg font-semibold">{c.name}</p>

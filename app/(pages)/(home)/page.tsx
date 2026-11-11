@@ -41,14 +41,14 @@ export default function Home() {
 
         <section aria-labelledby="paths-title" className="mx-auto max-w-[1200px] px-5 py-20 sm:px-8 lg:py-28">
           <Reveal>
-            <p className="text-sm font-medium tracking-[0.18em] text-muted-foreground uppercase">03 / Two sides of a deal</p>
+            <p className="eyebrow text-sm font-medium tracking-[0.18em] text-muted-foreground uppercase">03 / Two sides of a deal</p>
             <h2 id="paths-title" className="font-display mt-4 max-w-xl text-3xl font-semibold text-balance sm:text-4xl">
               Built for the people on both sides of a deal
             </h2>
           </Reveal>
           <div className="mt-10 grid gap-5 lg:grid-cols-2">
             <Reveal>
-              <Tilt className="audience-investor relative flex h-full flex-col overflow-hidden rounded-2xl bg-investor p-7 text-[#1e1b2e] sm:p-9">
+              <Tilt className="audience-investor panel-tint [--tint:var(--investor-strong)] relative flex h-full flex-col overflow-hidden rounded-2xl bg-investor p-7 text-[#1e1b2e] sm:p-9">
                 {/* a house floating above the card: the third dimension is the hover */}
                 <TrendingUp className="absolute -top-6 -right-6 size-44 opacity-15" strokeWidth={1} aria-hidden style={{ transform: 'translateZ(50px)' }} />
                 <span className="flex size-12 items-center justify-center rounded-full bg-white/60" style={{ transform: 'translateZ(36px)' }}>
@@ -73,7 +73,7 @@ export default function Home() {
               </Tilt>
             </Reveal>
             <Reveal delay={0.1}>
-              <Tilt className="audience-agency relative flex h-full flex-col overflow-hidden rounded-2xl bg-agency p-7 text-[#1e1b2e] sm:p-9">
+              <Tilt className="audience-agency panel-tint [--tint:var(--agency-strong)] relative flex h-full flex-col overflow-hidden rounded-2xl bg-agency p-7 text-[#1e1b2e] sm:p-9">
                 <Building2 className="absolute -top-6 -right-6 size-44 opacity-15" strokeWidth={1} aria-hidden style={{ transform: 'translateZ(50px)' }} />
                 <span className="flex size-12 items-center justify-center rounded-full bg-white/60" style={{ transform: 'translateZ(36px)' }}>
                   <Building2 className="size-5" aria-hidden />
@@ -99,10 +99,10 @@ export default function Home() {
           </div>
         </section>
 
-        <section aria-labelledby="how-title" className="border-y bg-card">
+        <section aria-labelledby="how-title" className="graticule border-y bg-card">
           <div className="mx-auto max-w-[1200px] px-5 py-20 sm:px-8 lg:py-28">
             <Reveal>
-              <p className="text-sm font-medium tracking-[0.18em] text-muted-foreground uppercase">04 / How it works</p>
+              <p className="eyebrow text-sm font-medium tracking-[0.18em] text-muted-foreground uppercase">04 / How it works</p>
               <h2 id="how-title" className="font-display mt-4 text-3xl font-semibold sm:text-4xl">
                 From the whole planet to one front door
               </h2>

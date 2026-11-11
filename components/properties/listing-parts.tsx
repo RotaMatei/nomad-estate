@@ -16,7 +16,8 @@ import { cn } from '@/lib/utils';
 /** Photos on known hosts are resized by the Next.js optimiser; data URIs and unknown hosts are shown as they are. */
 export function ListingImage({ listing, sizes, className, priority }: { listing: Listing; sizes: string; className?: string; priority?: boolean }) {
   return (
-    <div className={cn('relative overflow-hidden bg-muted', className)}>
+    // the ring is a pseudo-element over the photo, so a pale photo never bleeds into a pale card
+    <div className={cn('relative overflow-hidden bg-muted after:pointer-events-none after:absolute after:inset-0 after:shadow-[inset_0_0_0_1px_var(--photo-ring)]', className)}>
       {listing.image ? (
         <Image src={listing.image} alt="" fill sizes={sizes} unoptimized={!canOptimise(listing.image)} priority={priority} className="object-cover" />
       ) : (

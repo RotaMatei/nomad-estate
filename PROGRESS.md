@@ -13,7 +13,7 @@
   folders `D:\Desktop\NomadEstate\<repo>\PROGRESS.md` when the computer is reachable.
 - **Heartbeat / lock:** if `Last heartbeat` below is less than 45 minutes old, another session is
   actively working — the scheduled run must exit without changes.
-- **Last heartbeat:** 2026-11-11 10:58 Europe/Bucharest (brief written for the realistic, 4K-crisp UI and 3D pass: `docs/HANDOFF-realistic-4k.md`; not started)
+- **Last heartbeat:** 2026-11-11 17:45 Europe/Bucharest (working through `docs/HANDOFF-realistic-4k.md`: Package 0 done, Package 1 started)
 
 ## Decisions (agreed with owner, 2026-10-04)
 

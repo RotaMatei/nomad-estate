@@ -62,6 +62,24 @@
   --glass-border: rgb(30 27 46 / 0.08);
   --shadow-color: 262 30% 22%;
 
+  /* Materials. One soft light falls from above: every raised surface catches it on its top edge (--edge-light),
+     keeps a little shade on its bottom edge (--edge-shade) and pools it at the top (--sheen). */
+  --edge-light: rgb(255 255 255 / 0.9);
+  --edge-shade: rgb(30 27 46 / 0.05);
+  --sheen: rgb(255 255 255 / 0.5);
+  --photo-ring: rgb(30 27 46 / 0.06);
+  --grid-line: rgb(30 27 46 / 0.05);
+  --grain-opacity: 0.04;
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  2.2 0 0 0 -0.95'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+
+  /* Four heights above the page, the same light for all: resting card, raised card, floating glass, dialog. */
+  --elevation-1: 0 1px 1px hsl(var(--shadow-color) / 0.05), 0 4px 8px -2px hsl(var(--shadow-color) / 0.08), 0 14px 28px -10px hsl(var(--shadow-color) / 0.14);
+  --elevation-2: 0 1px 1px hsl(var(--shadow-color) / 0.05), 0 4px 8px -2px hsl(var(--shadow-color) / 0.08), 0 24px 44px -14px hsl(var(--shadow-color) / 0.2);
+  --elevation-3: 0 1px 2px hsl(var(--shadow-color) / 0.06), 0 6px 12px -4px hsl(var(--shadow-color) / 0.1), 0 18px 36px -12px hsl(var(--shadow-color) / 0.18),
+    0 40px 64px -32px hsl(var(--shadow-color) / 0.2);
+  --elevation-4: 0 1.5px 3px hsl(var(--shadow-color) / 0.06), 0 9px 18px -6px hsl(var(--shadow-color) / 0.1), 0 27px 54px -18px hsl(var(--shadow-color) / 0.18),
+    0 60px 96px -48px hsl(var(--shadow-color) / 0.2);
+
   /* charts: validated for colour-blind separation and contrast on white (dataviz validator, 2026-10-09) */
   --chart-1: #5b7fd1;
   --chart-2: #d9695f;
@@ -115,6 +133,15 @@
   --glass: rgb(31 24 56 / 0.74);
   --glass-border: rgb(220 184 234 / 0.14);
   --shadow-color: 258 70% 4%;
+
+  /* materials at night: edges catch less light, grain turns from dark specks to light ones */
+  --edge-light: rgb(255 255 255 / 0.08);
+  --edge-shade: rgb(0 0 0 / 0.3);
+  --sheen: rgb(255 255 255 / 0.04);
+  --photo-ring: rgb(255 255 255 / 0.08);
+  --grid-line: rgb(220 184 234 / 0.07);
+  --grain-opacity: 0.06;
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  2.2 0 0 0 -0.95'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 
   /* charts: validated against the dark card surface */
   --chart-1: #6b8ae0;
@@ -254,6 +281,111 @@
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-ring;
   }
+  /* Film grain over everything, so no surface is perfectly uniform: one tile, painted once, never in the way.
+     Dark specks by day, light ones at night (--grain). */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    pointer-events: none;
+    background-image: var(--grain);
+    background-size: 200px 200px;
+    opacity: var(--grain-opacity);
+  }
+}
+
+/* Materials. In `components`, so a utility on an element (a shadow, a background) still wins over them.
+   Tailwind builds every shadow from the same five layers; these rules set the inset layer (--tw-inset-shadow) and the
+   drop layer (--tw-shadow) and list all five, so a shadow utility or a focus ring replaces only its own layer. */
+@layer components {
+  /* Paper: every card, and every bordered panel on the card colour. A little light pools at the top, the top edge
+     catches it, and the panel rests on the page at the lowest height. */
+  [data-slot='card'],
+  :where(.rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl).border.bg-card {
+    background-image: linear-gradient(to bottom, var(--sheen), transparent 40%);
+    --tw-inset-shadow: inset 0 1px 0 var(--edge-light);
+    --tw-shadow: var(--elevation-1);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+
+  /* Buttons are soft plastic: lit from the top, shaded below. Ghost and link buttons are not objects, so they stay flat. */
+  [data-slot='button']:where([data-variant='default'], [data-variant='secondary'], [data-variant='outline'], [data-variant='destructive']) {
+    background-image: linear-gradient(to bottom, rgb(255 255 255 / 0.28), transparent 55%, rgb(0 0 0 / 0.04));
+    --tw-inset-shadow: inset 0 1px 0 rgb(255 255 255 / 0.55), inset 0 -1px 0 rgb(30 27 46 / 0.1);
+    --tw-shadow: 0 1px 2px hsl(var(--shadow-color) / 0.14), 0 3px 8px -2px hsl(var(--shadow-color) / 0.12);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+  /* pressed: the button sinks, its shadow goes */
+  [data-slot='button']:where([data-variant='default'], [data-variant='secondary'], [data-variant='outline'], [data-variant='destructive']):active:not(:disabled) {
+    --tw-inset-shadow: inset 0 2px 3px rgb(0 0 0 / 0.14);
+    --tw-shadow: 0 0 #0000;
+  }
+  .dark [data-slot='button']:where([data-variant='default'], [data-variant='secondary'], [data-variant='outline'], [data-variant='destructive']) {
+    --tw-inset-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3), inset 0 -1px 0 rgb(0 0 0 / 0.25);
+  }
+
+  /* Fields are cut into the surface: a little shade along the top inside edge. Not the bare search box inside the hero
+     pill (shadow-none). Inside a form the field's data-slot is "form-control", so the elements are matched by kind. */
+  :where(input[data-slot='input'], input[data-slot='form-control'], textarea, button[role='combobox']):not(.shadow-none, [type='checkbox'], [type='radio']) {
+    --tw-inset-shadow: inset 0 1px 2px hsl(var(--shadow-color) / 0.07);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+
+  /* The two audience panels: light from the top left, a coloured shadow below in the panel's own colour (--tint). */
+  .panel-tint {
+    background-image: radial-gradient(120% 90% at 0% 0%, rgb(255 255 255 / 0.5), transparent 55%), radial-gradient(90% 70% at 100% 100%, rgb(30 27 46 / 0.1), transparent 60%);
+    --tw-inset-shadow: inset 0 1px 0 rgb(255 255 255 / 0.6), inset 0 0 0 1px rgb(255 255 255 / 0.22);
+    --tw-shadow: 0 30px 60px -30px var(--tint);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+
+  /* Linework for the plain bands: a faint map graticule that fades out towards the edges. Drawn on a pseudo-element
+     behind the band's content; the band needs no new markup. */
+  .graticule {
+    position: relative;
+    isolation: isolate;
+  }
+  .graticule::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: linear-gradient(to right, var(--grid-line) 1px, transparent 1px), linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+    background-size: 96px 96px;
+    background-position: center top;
+    mask-image: radial-gradient(ellipse 75% 120% at 50% 0%, black, transparent 80%);
+  }
+
+  /* Section labels: a short rule with a coral dot at its end leads into the words. */
+  .eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 2rem;
+    height: 6px;
+    margin-right: 0.875rem;
+    vertical-align: middle;
+    background-image: radial-gradient(circle at center, var(--beacon) 0 2.5px, transparent 3px), linear-gradient(90deg, transparent, var(--orchid-strong));
+    background-size: 6px 6px, 100% 1px;
+    background-position: right center, center;
+    background-repeat: no-repeat;
+  }
+}
+
+/* Height above the page. Declared with `@utility` so that `hover:shadow-lift` and the like produce CSS, and set through
+   --tw-shadow so the edge light of the surface and the focus ring stay in the same box-shadow. */
+@utility shadow-lift {
+  --tw-shadow: var(--elevation-2);
+  box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+}
+@utility shadow-float {
+  --tw-shadow: var(--elevation-3);
+  box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+}
+@utility shadow-pop {
+  --tw-shadow: var(--elevation-4);
+  box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
 }
 
 @layer utilities {
@@ -274,16 +406,17 @@
   .tabular {
     font-variant-numeric: tabular-nums;
   }
+  /* Frosted glass: light pools at its top, the top edge catches the light and the bottom edge keeps a little shade.
+     The box-shadow lists the same layers Tailwind's shadow utilities do, so `shadow-float` on the same element
+     (or a focus ring) adds to the edges instead of replacing them. */
   .glass {
     background: var(--glass);
+    background-image: linear-gradient(to bottom, var(--sheen), transparent 60%);
     border: 1px solid var(--glass-border);
     -webkit-backdrop-filter: blur(18px) saturate(1.4);
     backdrop-filter: blur(18px) saturate(1.4);
-  }
-  .shadow-float {
-    box-shadow:
-      0 1px 2px hsl(var(--shadow-color) / 0.08),
-      0 12px 32px -8px hsl(var(--shadow-color) / 0.22);
+    --tw-inset-shadow: inset 0 1px 0 var(--edge-light), inset 0 -1px 0 var(--edge-shade);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
   /* The liquid gradient: three soft pools of coral, orchid and periwinkle drifting behind content. */
   .liquid {

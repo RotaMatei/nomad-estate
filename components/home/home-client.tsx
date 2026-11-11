@@ -181,7 +181,7 @@ export function HomeStatsBand() {
     ['partners', 'partner agencies'],
   ];
   return (
-    <section aria-label="Nomad Estate in numbers" className="bg-card">
+    <section aria-label="Nomad Estate in numbers" className="graticule bg-card">
       <dl className="mx-auto grid max-w-[1200px] grid-cols-3 divide-x px-2 sm:px-8">
         {stats.map(([key, label]) => (
           <div key={key} className="flex flex-col-reverse px-3 py-8 sm:px-8 sm:py-10">

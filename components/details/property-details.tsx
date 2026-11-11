@@ -497,7 +497,7 @@ function Similar({ details }: { details: PropertyDetails }) {
             <Link
               href={`/details/${l.id}`}
               onClick={fly(l.id)}
-              className="group block overflow-hidden rounded-lg border bg-card transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-float"
+              className="group block overflow-hidden rounded-lg border bg-card transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-lift"
             >
               <ListingImage
                 listing={l}

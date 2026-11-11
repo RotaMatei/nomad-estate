@@ -28,7 +28,7 @@ const LINKS = [
 
 export function SiteFooter() {
   return (
-    <footer className="border-t bg-card">
+    <footer className="graticule border-t bg-card">
       <div className="mx-auto grid max-w-[1200px] gap-10 px-5 py-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] sm:px-8">
         <div>
           <Logo />
