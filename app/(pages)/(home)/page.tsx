@@ -3,10 +3,10 @@ import { HomeHero, HomeStatsBand } from '@/components/home/home-client';
 import { MarketSkyline, MarketSnapshot, PlacesMarquee } from '@/components/home/home-extras';
 import { CountryGuides, FeaturedListings, Newsletter, PartnerStrip, PriceDrops, Testimonials, YieldCalculator } from '@/components/home/home-more';
 import { QuietLink as Link } from '@/components/site/quiet-link';
-import { House3D } from '@/components/site/house-3d';
 import { Magnetic, Reveal, Tilt, Words } from '@/components/site/reveal';
 import { SiteFooter } from '@/components/site/site-footer';
 import { SiteHeader } from '@/components/site/site-header';
+import { HouseScene } from '@/components/three/house-scene';
 import { Button } from '@/components/ui/button';
 
 const STEPS = [
@@ -143,10 +143,8 @@ export default function Home() {
               <i />
             </div>
             {/* the house turns as the page scrolls past it */}
-            <div className="absolute top-14 right-[14%] hidden lg:block">
-              <House3D scroll size={132} />
-            </div>
-            <div className="mx-auto flex max-w-(--page) flex-col items-start gap-8 px-6 py-20 sm:px-10 lg:flex-row lg:items-end lg:justify-between lg:py-28 lg:pt-56">
+            <HouseScene scroll className="absolute top-2 right-2 h-44 w-52 sm:top-4 sm:right-6 sm:h-64 sm:w-72 lg:top-2 lg:right-[6%] lg:h-[26rem] lg:w-[30rem]" />
+            <div className="mx-auto flex max-w-(--page) flex-col items-start gap-8 px-6 pt-48 pb-16 sm:px-10 sm:pt-64 lg:flex-row lg:items-end lg:justify-between lg:pt-60 lg:pb-28">
               <h2 id="cta-title" className="font-display max-w-2xl text-4xl leading-[1.05] font-semibold text-balance sm:text-6xl">
                 The globe is open. Take a look around.
               </h2>

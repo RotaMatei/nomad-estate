@@ -557,12 +557,15 @@ html[data-seen] .intro {
   to { opacity: 0; transform: translateY(-3%); visibility: hidden; }
 }
 
-/* The little 3D house (components/site/house-3d.tsx). --s is the width of the house; everything follows from it.
-   The walls are four squares pushed out from the centre, the gables are triangles on the front and back walls,
-   and the two roof slopes hang from the ridge. */
+/* The little 3D house (components/site/house-3d.tsx), the loading animation: the same house as the three.js model that
+   stands on the home page (components/three), in the same proportions (main volume 3.6 wide, 3.0 deep, walls 2.6 high,
+   the ridge 1.1 above them) and lit the same way: front brightest, left side medium, right side in shade.
+   --s is the width of the house; everything follows from it. The walls are four faces pushed out from the centre,
+   the gables are triangles on the front and back walls, and the two roof slopes hang from the ridge. */
 .house {
-  --wall: calc(var(--s) * 0.7);
-  --gable: calc(var(--s) * 0.45);
+  --wall: calc(var(--s) * 0.72);
+  --gable: calc(var(--s) * 0.31);
+  --depth: calc(var(--s) * 0.83);
   position: relative;
   width: var(--s);
   height: calc(var(--wall) + var(--gable));
@@ -587,12 +590,17 @@ html[data-seen] .intro {
 .house-body > i {
   position: absolute;
   inset: 0;
-  background: var(--investor);
+  background: linear-gradient(to bottom, #f6f0ea, #e9e0d7);
 }
-.house-front { transform: translateZ(calc(var(--s) / 2)); }
-.house-back { transform: rotateY(180deg) translateZ(calc(var(--s) / 2)); }
-.house-body > .house-left { transform: rotateY(-90deg) translateZ(calc(var(--s) / 2)); background: var(--investor-strong); }
-.house-body > .house-right { transform: rotateY(90deg) translateZ(calc(var(--s) / 2)); background: var(--investor-strong); }
+.house-front { transform: translateZ(calc(var(--depth) / 2)); }
+.house-back { transform: rotateY(180deg) translateZ(calc(var(--depth) / 2)); }
+.house-body > .house-left,
+.house-body > .house-right {
+  inset: 0 auto 0 calc((var(--s) - var(--depth)) / 2);
+  width: var(--depth);
+}
+.house-body > .house-left { transform: rotateY(-90deg) translateZ(calc(var(--s) / 2)); background: linear-gradient(to bottom, #ece4dc, #ddd3ca); }
+.house-body > .house-right { transform: rotateY(90deg) translateZ(calc(var(--s) / 2)); background: linear-gradient(to bottom, #d6cbc2, #c4b8ae); }
 /* gables */
 .house-front::before,
 .house-back::before {
@@ -603,16 +611,17 @@ html[data-seen] .intro {
   background: inherit;
   clip-path: polygon(50% 0, 0 100%, 100% 100%);
 }
-/* the door, and a lit window on the other three walls */
+/* the door, and a window on the other three walls */
 .house-front::after {
   content: '';
   position: absolute;
   bottom: 0;
-  left: 36%;
-  width: 28%;
+  left: 18%;
+  width: 25%;
   height: 52%;
-  border-radius: 999px 999px 0 0;
-  background: var(--orchid-strong);
+  border-radius: calc(var(--s) * 0.03) calc(var(--s) * 0.03) 0 0;
+  background: linear-gradient(to bottom, #a569bd, #8e55a6);
+  box-shadow: 0 0 0 calc(var(--s) * 0.012) #fbf8f4;
 }
 .house-left::after,
 .house-right::after,
@@ -623,25 +632,31 @@ html[data-seen] .intro {
   left: 32%;
   width: 36%;
   height: 36%;
-  border-radius: 12%;
-  background: var(--beacon);
+  border-radius: 6%;
+  background: linear-gradient(135deg, #cfe0f7, #9fb6d8);
+  box-shadow: 0 0 0 calc(var(--s) * 0.012) #fbf8f4;
 }
-/* roof: each slope starts at the ridge (its left edge), is laid flat, then tipped down to its side */
+/* roof: each slope starts at the ridge (its left edge), is laid flat, then tipped down to its side; standing seams run down it */
 .house-body > .house-roof-left,
 .house-body > .house-roof-right {
+  --roof-depth: calc(var(--depth) + var(--s) * 0.16);
   inset: auto;
-  top: calc(var(--gable) * -1 - var(--s) * 0.58);
+  top: calc(var(--gable) * -1 - var(--roof-depth) / 2);
   left: 50%;
-  width: calc(var(--s) * 0.76);
-  height: calc(var(--s) * 1.16);
+  width: calc(var(--s) * 0.68);
+  height: var(--roof-depth);
   transform-origin: 0 50%;
   border-radius: calc(var(--s) * 0.03);
-  background: var(--agency-strong);
-  transform: rotateZ(42deg) rotateX(90deg);
+  background:
+    repeating-linear-gradient(to bottom, rgb(255 255 255 / 0.16) 0 calc(var(--s) * 0.008), transparent calc(var(--s) * 0.008) calc(var(--s) * 0.083)),
+    linear-gradient(to right, #c4584e, #b94f46);
+  transform: rotateZ(32deg) rotateX(90deg);
 }
 .house-body > .house-roof-left {
-  background: var(--agency);
-  transform: rotateZ(138deg) rotateX(90deg);
+  background:
+    repeating-linear-gradient(to bottom, rgb(255 255 255 / 0.2) 0 calc(var(--s) * 0.008), transparent calc(var(--s) * 0.008) calc(var(--s) * 0.083)),
+    linear-gradient(to right, #dc7a70, #cf6a60);
+  transform: rotateZ(148deg) rotateX(90deg);
 }
 .house-shadow {
   position: absolute;

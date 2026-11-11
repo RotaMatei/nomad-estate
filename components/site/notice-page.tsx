@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import { House3D } from './house-3d';
 import { SiteFooter } from './site-footer';
 import { SiteHeader } from './site-header';
 import { Button } from '@/components/ui/button';
+import { HouseScene } from '@/components/three/house-scene';
 
 /** Full-page notice for dead ends (404, not-yet-built sections): says what happened and where to go next. */
 export function NoticePage({ code, title, body }: { code: string; title: string; body: string }) {
@@ -14,7 +14,7 @@ export function NoticePage({ code, title, body }: { code: string; title: string;
           <p className="font-display tabular text-7xl font-semibold text-beacon sm:text-8xl" aria-hidden>
             {code}
           </p>
-          <House3D size={64} />
+          <HouseScene className="-mb-4 h-36 w-40 sm:h-44 sm:w-52" />
         </div>
         <h1 className="font-display mt-6 max-w-2xl text-3xl font-semibold text-balance sm:text-5xl">{title}</h1>
         <p className="mt-4 max-w-xl text-lg text-muted-foreground">{body}</p>

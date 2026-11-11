@@ -1,0 +1,5 @@
+/* The still of the 3D house, shown until the live scene is ready (made by scripts/model-posters.mjs: run it again whenever the model, its light or the frame in house-runtime.ts changes). */
+.house-poster { background: center / contain no-repeat url('/models/house-light.webp'); }
+.dark .house-poster { background-image: url('/models/house-dark.webp'); }
+/* once the live scene has faded in, the still goes: both are drawn with a transparent background, so they would add up */
+.house-poster[data-settled] { background-image: none !important; }
