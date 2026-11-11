@@ -75,11 +75,53 @@ Leave alone: the MapLibre globe, the Vaul sheet fix in `components/properties/pr
    Lighthouse cannot score the home page at all right now (it finds no largest paint): compare blocking time,
    first paint and speed index instead. That, a slider without a name and one low-contrast text style on the
    home page are known problems: do not fix them silently, do not make them worse.
+8. `.shadow-float` is written as a plain class inside `@layer utilities`, so `hover:shadow-float` produces no CSS:
+   the four cards that use it (home listing cards, price drops, country guides, "More in this country") lift on
+   hover but get no shadow. Declare it with `@utility shadow-float { … }` so variants work, and check any other
+   custom class you want to use with `hover:` or `dark:` the same way (look for the rule in the built CSS under
+   `.next_build/static/chunks/*.css`).
 
-## 5. Package 1: materials (CSS only)
+## 5. Package 0: record where things stand
 
-Add the tokens, then make the primitives use them. Values below were rendered and checked in both themes; treat
-them as the starting point and tune within the stated range by looking at 2x close-ups.
+Before changing anything: build against the fixture API, capture the close-ups listed under "Done when" in each
+package (both themes), and run the Lighthouse script on `/` and `/properties`. Keep the images and the numbers:
+every later claim of "better" or "no slower" is measured against them. An example spec for `scripts/shots.mjs`
+(the fixture API on port 4010 is reused if another session already runs it; pick a free `--port` for the site):
+
+```json
+[
+  { "name": "hero", "route": "/", "dpr": 2 },
+  { "name": "card", "route": "/", "dpr": 2, "to": "[aria-labelledby=featured-title]" },
+  { "name": "panels-dark", "route": "/", "dpr": 2, "theme": "dark", "to": "[aria-labelledby=paths-title]" },
+  { "name": "skyline", "route": "/", "dpr": 2, "to": "[aria-labelledby=skyline-title]" },
+  { "name": "closing", "route": "/", "dpr": 2, "to": "[aria-labelledby=cta-title]", "offset": 150 },
+  { "name": "price-panel", "route": "/details/00000000-0000-4000-8000-000000000004", "dpr": 2, "to": "aside", "offset": 120 },
+  { "name": "sign-in", "route": "/login", "dpr": 2 },
+  { "name": "search", "route": "/properties", "dpr": 2 },
+  { "name": "not-found", "route": "/no-such-page", "dpr": 2 }
+]
+```
+
+Capture the screen or a parent, not a 3D element itself: its faces reach outside its own box.
+
+## 6. Package 1: materials (CSS only)
+
+Add the tokens, then make the primitives use them. The grain, paper, glass, tinted-panel and button values below
+were rendered and checked in both themes; the field and photo values were not. Treat all of them as the starting
+point and tune within the stated range by looking at 2x close-ups.
+
+Where the rules go, so that one edit reaches every page:
+
+- All of it in `app/globals.css`, inside `@layer components` (so Tailwind utilities on an element still win).
+- Paper: `[data-slot='card'], :where(.rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl).border.bg-card`. That
+  second selector is every bespoke panel in the app (about twenty, in home, details, dashboard, account, contact,
+  about). Panels without a shadow utility need the `box-shadow` composition from trap 5 written out in the rule.
+- Glass and floating shadow: the existing `.glass` and `.shadow-float` utilities. Rewrite `.shadow-float` to set
+  `--tw-shadow` and use the composition from trap 5, so glass that floats keeps its edge light.
+- Buttons: `[data-slot='button']:where([data-variant='default'], [data-variant='secondary'], [data-variant='outline'], [data-variant='destructive'])`.
+- Fields: `[data-slot='input'], [data-slot='textarea'], [data-slot='select-trigger']`.
+- Only the tinted panels and the photo ring need class changes in components (`app/(pages)/(home)/page.tsx`,
+  `components/properties/listing-parts.tsx`).
 
 Tokens (`:root` / `.dark`):
 
@@ -101,7 +143,7 @@ url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' he
 Elevation, four levels, all from the existing `--shadow-color` (light falls from above, shadows fall down):
 
 - Level 1, resting card: `0 1px 1px hsl(var(--shadow-color) / .05), 0 4px 8px -2px hsl(var(--shadow-color) / .08), 0 14px 28px -10px hsl(var(--shadow-color) / .14)`
-- Level 2, hovered card: level 1 with the last layer at `0 24px 44px -14px … / .2`, plus a 4px lift.
+- Level 2, hovered card: level 1 with the last layer at `0 24px 44px -14px … / .2`, with the lift the card already has.
 - Level 3, floating glass (`.shadow-float`: header, filter bar, sheets, chips): `0 1px 2px … / .06, 0 6px 12px -4px … / .1, 0 18px 36px -12px … / .18, 0 40px 64px -32px … / .2`
 - Level 4, dialogs and menus: level 3 with every blur and offset times 1.5.
 
@@ -121,15 +163,24 @@ Recipes:
 - **Photo** (`ListingImage` in `components/properties/listing-parts.tsx`): a 1px inset ring at 6% ink on top of the
   image, so a pale photo never bleeds into a pale card.
 
+- **Linework** (texture for the plain bands, pseudo-elements only, never new markup): a faint map graticule on
+  the bands that sit on the card colour (the numbers band, "How it works", the footer): 1px lines every 96px in
+  ink at 5% (orchid at 7% at night), faded out towards the edges with a radial mask on a `::before`. A short
+  gradient rule with a coral dot before each section eyebrow (the uppercase `tracking-[0.18em]` labels, seven of
+  them). Nothing else: no coordinates, no labels, no decorative icons.
+
 Level of detail every card-like thing must reach: border, top edge light, sheen, layered shadow of its level,
 inner radius equal to outer radius minus padding (concentric corners), hover that raises it one level in 300 ms,
 pressed state. If a texture is noticeable at arm's length, it is too strong: halve it.
+
+Listing photos in local checks are flat placeholder drawings from the fixture API. Real photos come from the
+agencies; do not swap in stock photos or change the fixtures to make screenshots look richer.
 
 Done when: close-ups at 2x of the header, hero search, a listing card, the tinted panels, a button in each state,
 the sign-in card and the property page's price panel show all of the above in both themes, text contrast on every
 changed surface is at least 4.5:1, and focus rings are still visible.
 
-## 6. Package 2: 4K audit
+## 7. Package 2: 4K audit
 
 Capture at 1920x1080 with `dpr: 2`, at 3840x2160 with `dpr: 1`, and at 390x844 with `dpr: 3`. Fix: anything
 blurry (bitmaps drawn larger than their pixels, including `public/globe/*.webp`, which are about 1,092 px wide:
@@ -137,7 +188,7 @@ regenerate at 2x with `scripts/globe-posters.mjs` if they look soft), `sizes` at
 pick too small a file, layouts that fall apart or look lost at 3840 wide, and canvases that ignore
 `devicePixelRatio` (cap at 2). Do not raise image quality settings or add larger files without measuring weight.
 
-## 7. Package 3: the house, in three.js
+## 8. Package 3: the house, in three.js
 
 Install `three` and `@types/three`. All three.js code lives behind `dynamic(() => import(...), { ssr: false })`
 and loads only when its section is near the screen (`useNear`). Verify in the network log that no three.js chunk
@@ -163,6 +214,12 @@ key.shadow.radius = 5;
 key.shadow.bias = -0.0004;
 key.shadow.normalBias = 0.02;
 ```
+
+Import by name (`import { WebGLRenderer, Scene, … } from 'three'`), never `import * as THREE`, so the bundler can
+drop what is unused; the snippet writes `THREE.` only to stay short. Add-ons used here:
+`three/addons/environments/RoomEnvironment.js`, `three/addons/geometries/RoundedBoxGeometry.js`,
+`three/addons/utils/BufferGeometryUtils.js`. If the installed version names a setting differently (tone mapping,
+shadow map type), follow its documentation and keep the intent: neutral tones, soft shadows.
 
 Size the canvas from a `ResizeObserver`. Draw only when something changed or an animation is running; stop when
 the canvas is off screen or the tab is hidden; dispose geometry, materials, textures and the renderer on unmount.
@@ -197,7 +254,7 @@ Done when: 2x close-ups in both themes show soft contact shadows, visible edge h
 door detail, no jagged edges, no flat unlit faces; the three.js chunk is under 200 kB gzipped and absent from
 first load; Lighthouse is within noise of the baseline.
 
-## 8. Package 4: the skyline, in three.js
+## 9. Package 4: the skyline, in three.js
 
 Same stage. A 3 by 3 block of towers on a plinth; heights from the existing `markets` data in `MarketSkyline`
 (keep the mapping). Each tower: bevelled box in one of three pastel plasters, window grid from a `CanvasTexture`
@@ -206,7 +263,11 @@ tallest. Towers grow from the ground with the existing 70 ms stagger. Keep the t
 (raycast on pointer move sets `active`; an active tower lights its windows and raises a beacon). The CSS skyline
 stays as what is shown until the scene is ready and where WebGL is missing. The picture stays `aria-hidden`.
 
-## 9. How to check your own work
+Done when: the towers read as one lit city block with the house's materials and light (same plinth, same shadow
+softness); hovering a row in the list lights its tower and hovering a tower highlights its row; the swap from the
+CSS skyline to the scene does not move the layout by a pixel; with WebGL switched off the CSS skyline still shows.
+
+## 10. How to check your own work
 
 For every package: build, capture close-ups with `scripts/shots.mjs` (light and dark, `dpr: 2`), open the images
 and answer honestly: Is there one light direction? Does every raised surface have an edge light and a shadow that
@@ -215,5 +276,20 @@ loud? Fix and capture again; expect at least three rounds per package. Then run 
 script, and test keyboard focus and reduced motion. Report what you measured, what you could not verify, and
 show the owner the before and after images.
 
+Budgets, measured against Package 0:
+
+| What | Limit |
+|---|---|
+| JavaScript on first load of any page | unchanged, within 5 kB |
+| three.js chunk | under 200 kB gzipped, requested only when a 3D section is near the screen |
+| Still frames of the 3D scenes | 60 kB each |
+| `/properties` Lighthouse performance (mobile, real throttling) | 72 or more |
+| Home page blocking time | no more than 10% above the Package 0 figure |
+| Layout shift | 0.01 or less on every page |
+| WebGL contexts alive at once on the home page | 3 (globe, skyline, house) |
+
+When all packages are done: add a session-log line to `PROGRESS.md` with what changed and the measured numbers,
+then tell the owner in plain words what looks different, what you measured, and what you could not check.
+
 Ask the owner before: adding any dependency other than `three`, changing copy or layout, fixing the known
-problems in section 4.7, or exceeding a budget.
+problems in section 4 (trap 7), or exceeding a budget.
